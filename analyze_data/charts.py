@@ -2,8 +2,8 @@
 import pandas as pd
 import numpy as np
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -21,8 +21,8 @@ from do_data.writer import Writer
 from clean_data.cleaner import Cleaner
 from analyze_data.colors import Colors
 
-import locale
-locale.setlocale(locale.LC_ALL, 'en_US')
+# import locale
+# locale.setlocale(locale.LC_ALL, 'en_US')
 
 class Charts():
     def __init__(self):
@@ -82,7 +82,9 @@ class Charts():
 
         title = str('Overview of Court Data')
 
-        total_count = locale.format_string("%d", len(df), grouping=True)
+        # total_count = locale.format_string("%d", len(df), grouping=True)
+
+        total_count = len(df)
         judge_count = str(len(df[self.judge].dropna(how='any').unique()))
         start_date = min(df[self.received_date])
         end_date = max(df[self.received_date])
@@ -90,9 +92,10 @@ class Charts():
         districts = list(df[self.district_courts].dropna(how='any').unique())
         initiations = list(df[self.initiation_events].dropna(how='any').unique())
         dispositions = list(df[self.disposition_types].dropna(how='any').unique())
-        cpi = locale.format_string("%d", len(df[self.cpi].dropna(how='any').unique()), grouping=True)
-        case_id = locale.format_string("%d", len(df[self.case_id].dropna(how='any').unique()), grouping=True)
-
+        # cpi = locale.format_string("%d", len(df[self.cpi].dropna(how='any').unique()), grouping=True)
+        cpi = len(df[self.cpi].dropna(how='any').unique())
+        # case_id = locale.format_string("%d", len(df[self.case_id].dropna(how='any').unique()), grouping=True)
+        case_id = len(df[self.case_id].dropna(how='any').unique())
         narrative = {'total_count':total_count
                 ,'start_date':start_date.strftime('%B %Y')
                 ,'end_date':end_date.strftime('%B %Y')
