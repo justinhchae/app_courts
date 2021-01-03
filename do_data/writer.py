@@ -9,6 +9,7 @@ class Writer():
         # self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
         self.path = self.folder + '/'
 
+
     def to_package(self, df, filename, compression=True, echo=True):
         """
         A helper function that writes both zipped csv and pickled files
@@ -39,8 +40,9 @@ class Writer():
             filename_csv = str(filename + csv)
             self.filename = filename_csv
 
-        path = self.path + self.filename
+        # path = self.path + self.filename
         # path = 'data/' + self.filename
+        path = os.sep.join([self.folder, filename])
 
         if compression:
 
@@ -50,8 +52,9 @@ class Writer():
             filename_zip = str(filename + zipped)
 
             self.filename = filename_zip
-            path = self.path + self.filename
+            # path = self.path + self.filename
             # path = 'data/' + self.filename
+            path = os.sep.join([self.folder, self.filename])
 
             df.to_csv(path, index=False,
                       compression=compression_opts)
@@ -92,10 +95,11 @@ class Writer():
             filename_zip = str(filename + method)
 
             self.filename = filename_zip
-            path = self.path + self.filename
+            # path = self.path + self.filename
             # path = 'data/' + self.filename
+            path = os.sep.join([self.folder, self.filename])
 
-            df.to_pickle(path, compression='infer')
+            df.to_pickle(path, compression='infer', protocol=2)
 
             if echo:
                 print('Compressed dataframe to', path)
@@ -103,8 +107,9 @@ class Writer():
 
         else:
 
-            path = self.path + self.filename
+            # path = self.path + self.filename
             # path = 'data/' + self.filename
+            path = os.sep.join([self.folder, self.filename])
 
             df.to_pickle(path)
 
@@ -113,6 +118,7 @@ class Writer():
                 print()
 
     def to_json(self, df, filename='file.json', orient='columns', echo=True):
-        self.filename = os.sep.join(['data', filename])
-        path = self.path + self.filename
+        # self.filename = os.sep.join(['data', filename])
+        # path = self.path + self.filename
+        path = os.sep.join([self.folder, filename])
         df.to_json(path, orient=orient)
