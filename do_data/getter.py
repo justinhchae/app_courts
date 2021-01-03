@@ -15,6 +15,7 @@ class Reader():
         self.maker = Maker()
 
         self.path = os.environ['PWD'] + os.sep + folder + os.sep
+        print(self.path)
 
         if display_all_cols:
             pd.set_option('display.max_columns', None)
