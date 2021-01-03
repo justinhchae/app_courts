@@ -4,7 +4,7 @@
 
 See [/data](https://github.com/justinhchae/appleseed/tree/master/courts/data).
 
-Includes as zipped csv files:
+Included as compressed csv or pandas pickle files:
 
 1. change logs for transformations
 2. modified initiation and disposition subsets of source data from SAO
