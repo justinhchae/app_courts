@@ -55,7 +55,7 @@ jupyter-core==4.6.3
 jupyterlab-pygments @ file:///tmp/build/80754af9/jupyterlab_pygments_1601490720602/work
 kiwisolver==1.3.1
 MarkupSafe @ file:///opt/concourse/worker/volumes/live/cb778296-98db-45ad-411e-6f726e102dc3/volume/markupsafe_1594371638608/work
-matplotlib==3.3.3
+matplotlib @ file:///opt/concourse/worker/volumes/live/24f995ab-f0a7-4bf7-4b0e-ea68b1f7e8f7/volume/matplotlib-base_1597876350104/work
 mistune @ file:///opt/concourse/worker/volumes/live/95802d64-d39c-491b-74ce-b9326880ca54/volume/mistune_1594373201816/work
 mkl-fft==1.2.0
 mkl-random==1.1.1
