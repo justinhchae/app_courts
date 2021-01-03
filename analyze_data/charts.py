@@ -96,16 +96,17 @@ class Charts():
         cpi = len(df[self.cpi].dropna(how='any').unique())
         # case_id = locale.format_string("%d", len(df[self.case_id].dropna(how='any').unique()), grouping=True)
         case_id = len(df[self.case_id].dropna(how='any').unique())
-        narrative = {'total_count':total_count
+
+        narrative = {'total_count': f"{total_count:,d}"
                 ,'start_date':start_date.strftime('%B %Y')
                 ,'end_date':end_date.strftime('%B %Y')
                 , 'span': span
-                , 'judge_count':judge_count
+                , 'judge_count': judge_count
                 , 'initiation_count': str(len(initiations))
                 , 'disposition_count': str(len(dispositions))
                 , 'district_count': str(len(districts))
-                , 'cpi':cpi
-                , 'case_id':case_id
+                , 'cpi': f"{cpi:,d}"
+                , 'case_id': f"{case_id:,d}"
                 }
 
         return narrative
@@ -122,7 +123,7 @@ class Charts():
 
         courts = self.geo_facilities[(self.geo_facilities['SubType'] == 'Court')]
 
-        courts = courts[['Fac_Name', 'Muni','geometry']]
+        courts = courts[[court_key, 'Muni','geometry']]
 
         geo_df = pd.merge(left=courts, right=df1
                           , how='left'

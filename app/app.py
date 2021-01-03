@@ -36,7 +36,7 @@ class App():
                       , narrative['disposition_count'], 'types of disposition events,'
                       , 'approximately ', narrative['cpi'], 'individuals (by case participant id),'
                       , 'and approximately', narrative['case_id'], 'unique cases (by case id)'
-                      , 'across the', narrative['district_count'], 'districts in Cook County.'
+                      , 'across', narrative['district_count'], 'districts in Cook County.'
                       )
 
         chart = Charts().overview_figures(self.df)
