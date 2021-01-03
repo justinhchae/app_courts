@@ -14,6 +14,8 @@ class Reader():
         self.cleaner = Cleaner()
         self.maker = Maker()
 
+        self.test = os.environ['PWD'] + os.sep + folder + os.sep
+
         if display_all_cols:
             pd.set_option('display.max_columns', None)
 
