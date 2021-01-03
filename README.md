@@ -1,4 +1,4 @@
-# appleseed/courts
+# app_courts
 
 ## Courts (Initiation and Disposition)
 
