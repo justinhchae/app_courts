@@ -21,8 +21,8 @@ from do_data.writer import Writer
 from clean_data.cleaner import Cleaner
 from analyze_data.colors import Colors
 
-# import locale
-# locale.setlocale(locale.LC_ALL, 'en_US')
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US')
 
 class Charts():
     def __init__(self):

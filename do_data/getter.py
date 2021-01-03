@@ -17,7 +17,6 @@ class Reader():
         if display_all_cols:
             pd.set_option('display.max_columns', None)
 
-
     def to_geo(self, filename, folder='map_data'):
         path = os.sep.join([self.root, folder, filename])
         df = geopandas.read_file(path)
