@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
         df = joiner.joiner(initiation, disposition)
         writer.to_package(df, filename='main', compression=True)
-        df = df.sample(n=500000, random_state=0)
+        df = df.sample(n=250000, random_state=0)
         writer.to_package(df, filename='sample')
 
     # make_data()

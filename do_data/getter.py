@@ -9,37 +9,17 @@ import geopandas
 
 class Reader():
     def __init__(self, folder='data', display_all_cols=True):
-        self.folder = folder
-        # self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
-        self.path = self.folder + '/'
-
-        if display_all_cols:
-            pd.set_option('display.max_columns', None)
+        self.root = folder
 
         self.cleaner = Cleaner()
         self.maker = Maker()
 
-        self.usecols = ['CB NO', 'ARREST DATE', 'DISTRICT', 'BEAT', 'RECEIVED IN LOCKUP', 'RELEASED FROM LOCKUP',
-                    'BOND TYPE CD', 'BOND AMT', 'BOND DATE',
-                    'CHARGE 1 STATUTE', 'CHARGE 1 DESCRIPTION', 'CHARGE 1 TYPE', 'CHARGE 1 CLASS',
-                    'RACE', 'AGE', 'CHARGE 2 DESCRIPTION']
+        if display_all_cols:
+            pd.set_option('display.max_columns', None)
 
-        self.dtype = {'CB NO': 'str',
-                      'RACE': 'category',
-                      'DISTRICT': 'category',
-                      'BEAT': 'category',
-                      'BOND TYPE CD': 'category',
-                      'CHARGE 1 TYPE': 'category',
-                      'CHARGE 1 CLASS': 'category',
-                      'BOND AMT': 'str'}
 
     def to_geo(self, filename, folder='map_data'):
-        # self.filename = filename
-        # path = os.environ['PWD'] + os.sep + self.folder + os.sep + folder + os.sep +self.filename
-        # path = self.path + folder + '/' + filename
-        top = os.sep.join(['data', folder])
-        path = os.sep.join([top, filename])
-
+        path = os.sep.join([self.root, folder, filename])
         df = geopandas.read_file(path)
 
         return df
@@ -66,10 +46,8 @@ class Reader():
             zip = '.zip'
 
             if csv in filename or zip in filename:
-                # self.filename = filename
-                # path = self.path + self.filename
-                path = os.sep.join(['data', filename])
-                # path = 'data/' + self.filename
+                path = os.sep.join([self.root, filename])
+
 
                 if echo:
                     print('Reading From:', path)
@@ -98,7 +76,6 @@ class Reader():
                     date_cols = self.cleaner.get_date_cols(df)
                     df = self.cleaner.parse_dates(df, date_cols=date_cols)
                     df = self.cleaner.parse_conversions(df, col_name='offense_category')
-                    # df = self.cleaner.parse_primary_charge(df)
                     df = self.cleaner.parse_subset(df, type='initiation')
 
                     df = self.cleaner.impute_dates(df, col1='event_date', col2='received_date', date_type='initiation')
@@ -122,7 +99,6 @@ class Reader():
                     df = self.cleaner.parse_conversions(df, col_name='offense_category')
                     df = self.cleaner.parse_conversions(df, col_name='disposition_court_name')
                     df = self.cleaner.parse_conversions(df, col_name='disposition_court_facility')
-                    # df = self.cleaner.parse_primary_charge(df)
                     df = self.cleaner.parse_subset(df, type='disposition')
                     df = self.cleaner.impute_dates(df, col1='disposition_date', col2='received_date', date_type='disposition')
                     df = self.maker.make_disposition_cats(df, 'charge_disposition')
@@ -140,11 +116,7 @@ class Reader():
                 return df
 
             if pickle in filename or bz in filename:
-                # self.filename = filename
-                # path = self.path + self.filename
-                path = os.sep.join(['data', filename])
-                # deploy modification
-                # path = 'data/' + self.filename
+                path = os.sep.join([self.root, filename])
 
                 if echo:
                     print('Reading From:', path)
@@ -165,9 +137,7 @@ class Reader():
 
     def from_pickle(self, filename=None):
         pd.set_option('display.max_columns', None)
-        path = os.sep.join(['data', filename])
-        # path = self.path + filename
-        # path = 'data/' + filename
+        path = os.sep.join([self.root, filename])
         df = pd.read_pickle(path)
 
         return df

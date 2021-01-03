@@ -5,10 +5,7 @@ import os
 
 class Writer():
     def __init__(self, folder='data'):
-        self.folder = folder
-        # self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
-        self.path = self.folder + '/'
-
+        self.root = folder
 
     def to_package(self, df, filename, compression=True, echo=True):
         """
@@ -31,30 +28,17 @@ class Writer():
         :param echo: default to true (print statements and preview head)
         :return: None, writes a csv file
         """
-        csv = '.csv'
+        csvd = '.csv'
         zipped = '.zip'
 
-        self.filename = filename
-
-        if csv not in filename:
-            filename_csv = str(filename + csv)
-            self.filename = filename_csv
-
-        # path = self.path + self.filename
-        # path = 'data/' + self.filename
-        path = os.sep.join([self.folder, filename])
+        path = os.sep.join([self.root, filename])
 
         if compression:
-
-            compression_opts = dict(method='zip',
-                                    archive_name=self.filename)
+            compression_opts = dict(method='zip', archive_name=filename)
 
             filename_zip = str(filename + zipped)
 
-            self.filename = filename_zip
-            # path = self.path + self.filename
-            # path = 'data/' + self.filename
-            path = os.sep.join([self.folder, self.filename])
+            path = os.sep.join([self.root, filename_zip])
 
             df.to_csv(path, index=False,
                       compression=compression_opts)
@@ -64,6 +48,10 @@ class Writer():
                 print()
 
         else:
+
+            filename_csvd = str(filename + csvd)
+            path = os.sep.join([self.root, filename_csvd])
+
             df.to_csv(path)
 
             if echo:
@@ -74,6 +62,7 @@ class Writer():
                   , filename='file.pickle'
                   , compression=True
                   , echo=True
+                  , protocol=2
                   ):
         """
         :param df: a pandas dataframe
@@ -81,25 +70,16 @@ class Writer():
         :param echo: default to true (print statements and preview head)
         :return: None, writes a pickled file
         """
-        pickle = '.pickle'
-        method = '.bz2'
-
-        self.filename = filename
-
-        if pickle not in filename:
-            filename_ammended = str(filename + pickle)
-            self.filename = filename_ammended
+        pickled = '.pickle'
+        bz = '.bz2'
 
         if compression:
 
-            filename_zip = str(filename + method)
+            filename_bz = str(filename + bz)
 
-            self.filename = filename_zip
-            # path = self.path + self.filename
-            # path = 'data/' + self.filename
-            path = os.sep.join([self.folder, self.filename])
+            path = os.sep.join([self.root, filename_bz])
 
-            df.to_pickle(path, compression='infer', protocol=2)
+            df.to_pickle(path, compression='infer', protocol=protocol)
 
             if echo:
                 print('Compressed dataframe to', path)
@@ -107,9 +87,8 @@ class Writer():
 
         else:
 
-            # path = self.path + self.filename
-            # path = 'data/' + self.filename
-            path = os.sep.join([self.folder, self.filename])
+            filename_pickled = str(filename + pickled)
+            path = os.sep.join([self.root, filename_pickled])
 
             df.to_pickle(path)
 
@@ -118,7 +97,10 @@ class Writer():
                 print()
 
     def to_json(self, df, filename='file.json', orient='columns', echo=True):
-        # self.filename = os.sep.join(['data', filename])
-        # path = self.path + self.filename
-        path = os.sep.join([self.folder, filename])
+
+        path = os.sep.join([self.root, filename])
         df.to_json(path, orient=orient)
+
+        if echo:
+            print('Wrote dataframe to', path)
+            print()
