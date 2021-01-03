@@ -6,7 +6,8 @@ import os
 class Writer():
     def __init__(self, folder='data'):
         self.folder = folder
-        self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
+        # self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
+        self.path = self.folder + '/'
 
     def to_package(self, df, filename, compression=True, echo=True):
         """
@@ -39,6 +40,7 @@ class Writer():
             self.filename = filename_csv
 
         path = self.path + self.filename
+        # path = 'data/' + self.filename
 
         if compression:
 
@@ -49,6 +51,7 @@ class Writer():
 
             self.filename = filename_zip
             path = self.path + self.filename
+            # path = 'data/' + self.filename
 
             df.to_csv(path, index=False,
                       compression=compression_opts)
@@ -90,6 +93,7 @@ class Writer():
 
             self.filename = filename_zip
             path = self.path + self.filename
+            # path = 'data/' + self.filename
 
             df.to_pickle(path, compression='infer')
 
@@ -100,6 +104,8 @@ class Writer():
         else:
 
             path = self.path + self.filename
+            # path = 'data/' + self.filename
+
             df.to_pickle(path)
 
             if echo:

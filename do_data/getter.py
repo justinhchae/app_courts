@@ -10,7 +10,8 @@ import geopandas
 class Reader():
     def __init__(self, folder='data', display_all_cols=True):
         self.folder = folder
-        self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
+        # self.path = os.environ['PWD'] + os.sep + self.folder + os.sep
+        self.path = self.folder + '/'
 
         if display_all_cols:
             pd.set_option('display.max_columns', None)
@@ -35,7 +36,8 @@ class Reader():
     def to_geo(self, filename, folder='map_data'):
 
         self.filename = filename
-        path = os.environ['PWD'] + os.sep + self.folder + os.sep + folder + os.sep +self.filename
+        # path = os.environ['PWD'] + os.sep + self.folder + os.sep + folder + os.sep +self.filename
+        path = self.path + folder + '/' + filename
 
         df = geopandas.read_file(path)
 
@@ -65,6 +67,7 @@ class Reader():
             if csv in filename or zip in filename:
                 self.filename = filename
                 path = self.path + self.filename
+                # path = 'data/' + self.filename
 
                 if echo:
                     print('Reading From:', path)
@@ -137,6 +140,8 @@ class Reader():
             if pickle in filename or bz in filename:
                 self.filename = filename
                 path = self.path + self.filename
+                # deploy modification
+                # path = 'data/' + self.filename
 
                 if echo:
                     print('Reading From:', path)
@@ -157,8 +162,9 @@ class Reader():
 
     def from_pickle(self, filename=None):
         pd.set_option('display.max_columns', None)
-        self.filename = os.sep.join(['data', filename])
-        path = self.path + self.filename
+        path = os.sep.join(['data', filename])
+        # path = self.path + filename
+        # path = 'data/' + filename
         df = pd.read_pickle(path)
 
         return df
