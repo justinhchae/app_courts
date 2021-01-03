@@ -34,10 +34,11 @@ class Reader():
                       'BOND AMT': 'str'}
 
     def to_geo(self, filename, folder='map_data'):
-
-        self.filename = filename
+        # self.filename = filename
         # path = os.environ['PWD'] + os.sep + self.folder + os.sep + folder + os.sep +self.filename
-        path = self.path + folder + '/' + filename
+        # path = self.path + folder + '/' + filename
+        top = os.sep.join(['data', folder])
+        path = os.sep.join([top, filename])
 
         df = geopandas.read_file(path)
 
@@ -65,8 +66,9 @@ class Reader():
             zip = '.zip'
 
             if csv in filename or zip in filename:
-                self.filename = filename
-                path = self.path + self.filename
+                # self.filename = filename
+                # path = self.path + self.filename
+                path = os.sep.join(['data', filename])
                 # path = 'data/' + self.filename
 
                 if echo:
@@ -138,8 +140,9 @@ class Reader():
                 return df
 
             if pickle in filename or bz in filename:
-                self.filename = filename
-                path = self.path + self.filename
+                # self.filename = filename
+                # path = self.path + self.filename
+                path = os.sep.join(['data', filename])
                 # deploy modification
                 # path = 'data/' + self.filename
 

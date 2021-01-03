@@ -30,7 +30,7 @@ if __name__ == '__main__':
         writer.to_package(initiation, 'initiation_modified')
         writer.to_package(disposition, 'disposition_modified')
 
-    read_source()
+    # read_source()
 
     def make_data():
         initiation = reader.to_df('initiation_modified.bz2'
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                           )
         app.run_app(df)
 
-    # run_app()
+    run_app()
 
     # eda.s3(df)
 
