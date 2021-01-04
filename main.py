@@ -43,7 +43,7 @@ if __name__ == '__main__':
         df = df.sample(n=250000, random_state=0)
         writer.to_package(df, filename='sample', compression=True)
 
-    make_data()
+    # make_data()
 
     def run_app():
         df = reader.to_df('main.bz2'
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                           )
         app.run_app(df)
 
-    # run_app()
+    run_app()
 
     # eda.s3(df)
 
