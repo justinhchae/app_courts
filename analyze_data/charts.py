@@ -51,6 +51,7 @@ class Charts():
 
         # https://loumeza.com/cook-county-branch-court-locations/
 
+        self.fac_name = 'Fac_Name'
         self.key_facname = { '26Th Street' : 'Criminal Courts (26th/California)'
                            , 'Markham Courthouse' : 'Markham Courthouse (6th District)'
                            , 'Skokie Courthouse': 'Skokie Courthouse (2nd District)'
@@ -78,11 +79,12 @@ class Charts():
         self.geo_districts = self.reader.to_geo('districts.geojson')
         self.geo_facilities = self.reader.to_geo('facilities.geojson')
 
+        self.fig = None
+        self.transparent = 'rgba(0,0,0,0)'
+
     def overview(self, df):
 
         title = str('Overview of Court Data')
-
-        # total_count = locale.format_string("%d", len(df), grouping=True)
 
         total_count = len(df)
         judge_count = str(len(df[self.judge].dropna(how='any').unique()))
@@ -113,90 +115,57 @@ class Charts():
 
     def overview_figures(self, df):
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
+        center = 0.5
 
-        court_key = 'Fac_Name'
-        df[court_key] = df[self.court_fac].map(self.key_facname, na_action='ignore')
-
-        df1 = df[[court_key, self.case_id]].groupby([court_key], as_index=False)[self.case_id].agg('count')
-        count_col = str(self.case_id + '_count')
-        df1.rename(columns={self.case_id: count_col}, inplace=True)
-
-        courts = self.geo_facilities[(self.geo_facilities['SubType'] == 'Court')]
-
-        courts = courts[[court_key, 'Muni','geometry']]
-
-        geo_df = pd.merge(left=courts, right=df1
-                          , how='left'
-                          , left_on=court_key
-                          , right_on=court_key
-                          ).dropna(subset=[count_col])
-
-
-        geojson = geo_df.__geo_interface__
-
-        geo_df['lon'] = geo_df.geometry.x
-        geo_df['lat'] = geo_df.geometry.y
-
-        center = geo_df[(geo_df[court_key] =='Circuit Court Branch 43/44')].geometry
-
-        fig = make_subplots(
+        self.fig = make_subplots(
             rows=2, cols=2
             , column_widths=[0.6, 0.4]
             , row_heights=[0.4, 0.6]
             , specs=[[{"type": "scatter"}, {"type": "bar"}],
                      [{"type": "scatter", 'colspan':2}, None]]
-            , subplot_titles=("Length of Pending Cases", "Top 15 Judges by Case Load", "Count of Disposition Hearings by Charge Class")
+            , subplot_titles=("Length of Pending Cases"
+                              , "Top 15 Judges by Case Load"
+                              , "Count of Disposition Hearings by Charge Class")
         )
+        
+        self._ts_pending_case_len(df, row=1, col=1)
+        self._ts_charge_class(df, row=2, col=1)
+        self._bar_judge(df)
 
-        df3 = df[[self.primary_flag_init, self.received_date, self.pending_date]]
-        df3 = df3[(df3[self.pending_date].notnull() & df3[self.primary_flag_init] == True)].copy()
-        df3 = df3.drop(columns=[self.primary_flag_init])
+        self.fig.update_yaxes(showticklabels=False)
 
-        counts = df3.value_counts()
+        self.fig.update_layout(title=dict(text="Visual Data Summary of Court Data", x=center)
+                          , showlegend=False, paper_bgcolor=self.transparent, plot_bgcolor=self.transparent )
 
-        df3 = counts.to_frame().reset_index()
-        df3.rename(columns={0: 'count'}, inplace=True)
+        return self.fig
+
+    def _ts_pending_case_len(self, df, row, col):
+        df = df[[self.primary_flag_init, self.received_date, self.pending_date]]
+        df = df[(df[self.pending_date].notnull() & df[self.primary_flag_init] == True)].copy()
+        df = df.drop(columns=[self.primary_flag_init])
+
+        counts = df.value_counts()
+
+        df = counts.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
         # https://pbpython.com/pandas-grouper-agg.html
-        df3 = df3.groupby([self.pending_date, pd.Grouper(key=self.received_date, freq='M')])['count'].sum()
+        df = df.groupby([self.pending_date, pd.Grouper(key=self.received_date, freq='M')])['count'].sum()
 
-        df3 = df3.to_frame().reset_index()
+        df = df.to_frame().reset_index()
 
-        fig.add_trace(
+        self.fig.add_trace(
             go.Scatter(
-                       x=df3[self.received_date]
-                       , y=df3['count']
-                       , name='Primary Charge'
-                       # , mode='markers'
-                       # # , name=str('Class ' + name)
-                       # # ,
-                       ),
-            row=1, col=1
+                x=df[self.received_date]
+                , y=df['count']
+                , name='Primary Charge'
+                # , mode='markers'
+                # # , name=str('Class ' + name)
+                # # ,
+            ),
+            row=row, col=col
         )
 
-        # fig.update_geos(fitbounds='locations'
-        #                 , scope='usa'
-        #                 , lakecolor='LightBlue'
-        #                 , center=dict(lon=int(center.x), lat=int(center.y))
-        #                 )
-
-
-        col = 'judge'
-        n = 15
-        stats = df.stb.freq([col], cum_cols=False)[:n]
-        # print(stats)
-
-        fig.add_trace(
-            go.Bar( x=stats['count'][:n]
-                   , y=stats[col][:n]
-                   , orientation='h'
-                   , name=self.judge
-                   ),
-            row=1, col=2
-        )
-
-        # fig.update_xaxes(ticklabelposition="outside right",
-        #                  row=1, col=2)
-
+    def _ts_charge_class(self, df, row, col):
         cols = [self.disp_date, self.disp_class]
 
         counts = df[cols].value_counts()
@@ -223,23 +192,62 @@ class Charts():
 
         df2 = df2.groupby(self.disp_class)
         for name, group in df2:
-            fig.add_trace(
+            self.fig.add_trace(
                 go.Scatter(x=group[self.disp_date]
                            , y=group['count']
                            , name=str('Class ' + name)
                            ,
                            ),
-                row=2, col=1
+                row=row, col=col
             )
-        fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
-                         , row=2, col=1)
-        fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
-                         , row=2, col=1)
 
-        fig.update_yaxes(showticklabels=False)
+        self.fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
+                              , row=2, col=1)
+        self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
+                              , row=2, col=1)
 
-        fig.update_layout(title=dict(text="Visual Data Summary of Court Data", x=0.5)
-                          , showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)' )
+    def _bar_judge(self, df):
+        col = 'judge'
+        n = 15
+        stats = df.stb.freq([col], cum_cols=False)[:n]
+        # print(stats)
 
-        return fig
+        self.fig.add_trace(
+            go.Bar(x=stats['count'][:n]
+                   , y=stats[col][:n]
+                   , orientation='h'
+                   , name=self.judge
+                   ),
+            row=1, col=2
+        )
 
+    def _geo_map(self, df):
+
+        df[self.fac_name] = df[self.court_fac].map(self.key_facname, na_action='ignore')
+
+        df1 = df[[self.fac_name, self.case_id]].groupby([self.fac_name], as_index=False)[self.case_id].agg('count')
+        count_col = str(self.case_id + '_count')
+        df1.rename(columns={self.case_id: count_col}, inplace=True)
+
+        courts = self.geo_facilities[(self.geo_facilities['SubType'] == 'Court')]
+
+        courts = courts[[self.fac_name, 'Muni', 'geometry']]
+
+        geo_df = pd.merge(left=courts, right=df1
+                          , how='left'
+                          , left_on=self.fac_name
+                          , right_on=self.fac_name
+                          ).dropna(subset=[self.fac_name])
+
+        geojson = geo_df.__geo_interface__
+
+        geo_df['lon'] = geo_df.geometry.x
+        geo_df['lat'] = geo_df.geometry.y
+
+        center = geo_df[(geo_df[self.fac_name] == 'Circuit Court Branch 43/44')].geometry
+
+        self.fig.update_geos(fitbounds='locations'
+                        , scope='usa'
+                        , lakecolor='LightBlue'
+                        , center=dict(lon=int(center.x), lat=int(center.y))
+                        )
