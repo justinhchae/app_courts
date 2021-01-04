@@ -90,7 +90,7 @@ class Writer():
             filename_pickled = str(filename + pickled)
             path = os.sep.join([self.root, filename_pickled])
 
-            df.to_pickle(path)
+            df.to_pickle(path, protocol=5)
 
             if echo:
                 print('Wrote dataframe to', path)

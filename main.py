@@ -41,12 +41,12 @@ if __name__ == '__main__':
         df = joiner.joiner(initiation, disposition)
         writer.to_package(df, filename='main', compression=True)
         df = df.sample(n=250000, random_state=0)
-        writer.to_package(df, filename='sample')
+        writer.to_pickle(df, filename='sample', compression=False)
 
     # make_data()
 
     def run_app():
-        df = reader.to_df('main.bz2'
+        df = reader.to_df('sample.pickle'
                           , preview=False
                           , echo=False
                           , classify=False
