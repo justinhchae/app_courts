@@ -35,11 +35,16 @@ class Judge():
         self.disp_date = 'disposition_date'
         self.disp_class = 'disposition_charged_class'
         self.case_len = 'case_length'
-
         self.pending_date = 'disposition_date_days_pending'
         self.primary_flag_init = 'primary_charge_flag_init'
 
+        self.ordered_charges = ['M', 'X', '1', '2', '3', '4', 'A', 'B', 'C', 'O', 'P', 'Z']
+        self.ordered_charges.reverse()
+
         self.cleaner = Cleaner()
+        self.fig = None
+
+        self.transparent = 'rgba(0,0,0,0)'
 
     def overview(self, df, col):
         title = str('Overview of Court Data by ' + col.title())
@@ -57,126 +62,122 @@ class Judge():
     def detail(self, df, col):
 
         df = df[(df[self.judge]==col)].copy()
+        center = 0.5
 
-        df1 = df[[self.disp_date, self.case_len]]
-        df1 = df1[(df1[self.disp_date].notnull())].copy()
-        df1 = df1[(df1[self.case_len] > 0 )].copy()
-
-        counts = df1.value_counts()
-
-        df1 = counts.to_frame().reset_index()
-        df1.rename(columns={0: 'count'}, inplace=True)
-
-        # print(df1)
-        # https://pbpython.com/pandas-grouper-agg.html
-        df1 = df1.groupby([self.case_len, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
-        df1 = df1.to_frame().reset_index()
-        df1 = df1.sort_values(self.disp_date)
-        # print(df1)
-
-        df2 = df[[self.disp_date, self.disp_class]].value_counts()
-        df2 = df2.to_frame().reset_index()
-        df2.rename(columns={0: 'count'}, inplace=True)
-        # https://pbpython.com/pandas-grouper-agg.html
-        df2 = df2.groupby([self.disp_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
-
-        df2 = df2.to_frame().reset_index()
-
-
-
-        n = 15
-        stats = df[[self.judge, self.disp_class]].stb.freq([self.disp_class], cum_cols=False)[:n]
-
-        ordered_charges = ['M', 'X', '1', '2', '3', '4', 'A', 'B', 'C', 'O', 'P', 'Z']
-        ordered_charges.reverse()
-
-        # print(stats)
-
-        stats[self.disp_class] = stats[self.disp_class].astype('category')
-        subset_charges = list(stats[self.disp_class].unique())
-        ordered_subset = [i for i in ordered_charges if i in subset_charges]
-
-        stats[self.disp_class] = stats[self.disp_class].cat.as_ordered()
-        stats[self.disp_class] = stats[self.disp_class].cat.reorder_categories(ordered_subset, ordered=True)
-
-
-        # stats['colors'] = stats[self.disp_class].cat.codes
-        # color_scale = Colors().make_scales()
-        # print(color_scale)
-        # color_cats = df2['colors'].unique()
-        # color_cats.sort()
-        # # print(color_cats)
-        # color_map = dict(zip(color_cats, color_scale))
-        #
-        # df2['colors'] = df2['colors'].map(color_map)
-
-        # print(stats)
-
-
-
-        fig = make_subplots(
+        self.fig = make_subplots(
             rows=2, cols=2
             , column_widths=[0.6, 0.4]
             , row_heights=[0.4, 0.6]
             , specs=[[{"type": "scatter"}, {"type": "bar"}],
                      [{"type": "scatter", 'colspan': 2}, None]]
             , subplot_titles=(
-            "Case Length (Days)", "Disposition Hearings by Charge Class", "Hearings by Charge Class")
+                "Case Length", "Disposition Hearings by Charge Class", "Hearings by Charge Class")
         )
 
-        fig.add_trace(
+        self._ts_case_len(df, row=1, col=1)
+        self._ts_charge_class(df, row=2, col=1)
+        self._bar_charge_class(df, row=1, col=2)
+
+        self.fig.update_yaxes(showticklabels=False)
+        self.fig.update_layout(title=dict(text="Court Data by Judge", x=center)
+                          , showlegend=False
+                          , paper_bgcolor=None
+                          , plot_bgcolor=None
+                          )
+        #
+
+        return self.fig
+
+    def _ts_case_len(self, df, row, col):
+        """
+        https://pbpython.com/pandas-grouper-agg.html
+        """
+        df = df[[self.disp_date, self.case_len]]
+        df = df[(df[self.disp_date].notnull())].copy()
+        df = df[(df[self.case_len] > 0 )].copy()
+
+        counts = df.value_counts()
+
+        df = counts.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
+
+        df = df.groupby([self.case_len, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
+        df = df.to_frame().reset_index()
+        df = df.sort_values(self.disp_date)
+
+        self.fig.add_trace(
             go.Scatter(
-                x=df1[self.disp_date]
-                , y=df1[self.case_len]
+                x=df[self.disp_date]
+                , y=df[self.case_len]
                 , name='Days'
                 # , mode='markers'
                 # # , name=str('Class ' + name)
                 # # ,
             ),
-            row=1, col=1
+            row=row, col=col
         )
 
-        df2 = df2.groupby(self.disp_class)
-        for name, group in df2:
-            fig.add_trace(
+        self.fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
+                              , row=row, col=col)
+        self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
+                              , row=row, col=col)
+
+    def _ts_charge_class(self, df, row, col):
+        """
+        :param df:
+        :return:
+
+        references: https://pbpython.com/pandas-grouper-agg.html
+        """
+        df = df[[self.disp_date, self.disp_class]].value_counts()
+        df = df.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
+
+        df = df.groupby([self.disp_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
+
+        df = df.to_frame().reset_index()
+
+        test = df.groupby(self.disp_class, as_index=False).agg({'count': sum})
+        print(test[self.disp_class].dtype)
+
+        df = df.groupby(self.disp_class)
+        
+        for name, group in df:
+            self.fig.add_trace(
                 go.Scatter(x=group[self.disp_date]
                            , y=group['count']
                            , name=str('Class ' + name)
                            ,
                            ),
-                row=2, col=1
+                row=row, col=col
             )
 
-        color = list(stats[self.disp_class].cat.codes)
+        self.fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
+                              , row=row, col=col)
+        self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
+                              , row=row, col=col)
+
+    def _bar_charge_class(self, df, row, col):
+        n = 15
+        df = df[[self.judge, self.disp_class]].stb.freq([self.disp_class], cum_cols=False)[:n]
+
+        df[self.disp_class] = df[self.disp_class].astype('category')
+        subset_charges = list(df[self.disp_class].unique())
+        ordered_subset = [i for i in self.ordered_charges if i in subset_charges]
+
+        df[self.disp_class] = df[self.disp_class].cat.as_ordered()
+        df[self.disp_class] = df[self.disp_class].cat.reorder_categories(ordered_subset, ordered=True)
+
+        color = list(df[self.disp_class].cat.codes)
         color.sort()
 
-        fig.add_trace(
-            go.Bar(x=stats[self.disp_class]
-                   , y=stats['count']
+        self.fig.add_trace(
+            go.Bar(x=df[self.disp_class]
+                   , y=df['count']
                    , marker=dict(color=color)
-
                    , name="Class"
                    ),
-            row=1, col=2
+            row=row, col=col
         )
-
-        fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
-                         , row=2, col=1)
-        fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
-                         , row=1, col=1)
-        fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
-                         , row=2, col=1)
-        fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
-                         , row=1, col=1)
-
-        fig.update_yaxes(showticklabels=False)
-
-        fig.update_layout(title=dict(text="Court Data by Judge", x=0.5)
-                          , showlegend=False
-                          # , paper_bgcolor='rgba(0,0,0,0)'
-                          # , plot_bgcolor='rgba(0,0,0,0)'
-                          )
-
-        return fig
 
 

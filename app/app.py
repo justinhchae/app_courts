@@ -46,21 +46,7 @@ class App():
     def frame_objects(self):
 
         self.object_overview()
-
-        if self.st.sidebar.checkbox(label="Show Analysis by Judge"
-                                 , value=False
-                                 , key=self.judge):
-
-            self.st.plotly_chart(Judge().overview(df=self.df, col=self.judge))
-
-            sidebar_picklist = self.df[self.judge].dropna(how='any').unique()
-
-            sidebar_selection = self.st.sidebar.selectbox('Select a Judge', sidebar_picklist)
-
-            if sidebar_selection:
-                # self.st.markdown('Section Text or Title...')
-                self.st.write(sidebar_selection)
-                self.st.plotly_chart(Judge().detail(df=self.df, col=sidebar_selection))
+        self.by_judge()
 
 
             # self.st.write(picks)
@@ -70,6 +56,23 @@ class App():
         #         , key='event'):
         #     self.st.write(self.df['event'].dropna(how='any').unique())
 
+    def by_judge(self):
+        if self.st.sidebar.checkbox(label="Show Analysis by Judge"
+                                 , value=False
+                                 , key=self.judge):
+
+            self.st.markdown('Judge Narrative - High Level')
+
+            self.st.plotly_chart(Judge().overview(df=self.df, col=self.judge))
+
+            sidebar_picklist = self.df[self.judge].dropna(how='any').unique()
+
+            sidebar_selection = self.st.sidebar.selectbox('Select a Judge', sidebar_picklist)
+
+            if sidebar_selection:
+                self.st.markdown('Judge Narrative - Detail Level')
+                self.st.write(sidebar_selection)
+                self.st.plotly_chart(Judge().detail(df=self.df, col=sidebar_selection))
 
     # @st.cache
     def data(self):
