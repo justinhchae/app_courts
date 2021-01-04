@@ -44,17 +44,12 @@ class App():
         self.st.plotly_chart(chart)
 
     def frame_objects(self):
-
         self.object_overview()
         self.by_judge()
+        self.by_initiation()
+        self.by_disposition()
+        self.by_court()
 
-
-            # self.st.write(picks)
-
-        # if self.st.sidebar.checkbox(label="Show Analysis by Initiation"
-        #         , value=True
-        #         , key='event'):
-        #     self.st.write(self.df['event'].dropna(how='any').unique())
 
     def by_judge(self):
         if self.st.sidebar.checkbox(label="Show Analysis by Judge"
@@ -74,6 +69,22 @@ class App():
                 self.st.write(sidebar_selection)
                 self.st.plotly_chart(Judge().detail(df=self.df, col=sidebar_selection))
 
+    def by_initiation(self):
+        #TODO
+        # if self.st.sidebar.checkbox(label="Show Analysis by Initiation"
+        #         , value=True
+        #         , key='event'):
+        #     self.st.write(self.df['event'].dropna(how='any').unique())
+        pass
+
+    def by_disposition(self):
+        # TODO
+        pass
+
+    def by_court(self):
+        # TODO
+        pass
+
     # @st.cache
     def data(self):
 
@@ -89,7 +100,6 @@ class App():
         # self.df = df
         # self.df = df.sample(1000, random_state=0)
         data_fixer()
-
 
     def data_disclaimer(self):
         self.st.markdown('"This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago.  The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site.  The data provided at this site is subject to change at any time.  It is understood that the data provided at this site is being used at one’s own risk."')
