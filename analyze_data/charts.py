@@ -38,6 +38,7 @@ class Charts():
         self.case_id = 'case_id'
         self.disp_date = 'disposition_date'
         self.disp_class = 'disposition_charged_class'
+        self.charged_class = 'class'
 
         self.pending_date = 'disposition_date_days_pending'
         self.primary_flag_init = 'primary_charge_flag_init'
@@ -166,17 +167,17 @@ class Charts():
         )
 
     def _ts_charge_class(self, df, row, col):
-        cols = [self.disp_date, self.disp_class]
+        cols = [self.disp_date, self.charged_class]
 
         counts = df[cols].value_counts()
 
         df2 = counts.to_frame().reset_index()
         df2.rename(columns={0: 'count'}, inplace=True)
         # https://pbpython.com/pandas-grouper-agg.html
-        df2 = df2.groupby([self.disp_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
+        df2 = df2.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
 
         df2 = df2.to_frame().reset_index()
-        df2 = self.cleaner.classer(df=df2, col_name=self.disp_class)
+        df2 = self.cleaner.classer(df=df2, col_name=self.charged_class)
         # df2 = df2.set_index(self.disp_date)
         # print(df2)
 
@@ -190,7 +191,7 @@ class Charts():
         #
         # df2['colors'] = df2['colors'].map(color_map)
 
-        df2 = df2.groupby(self.disp_class)
+        df2 = df2.groupby(self.charged_class)
         for name, group in df2:
             self.fig.add_trace(
                 go.Scatter(x=group[self.disp_date]

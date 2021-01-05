@@ -73,8 +73,8 @@ class Cleaner():
             df[col_name] = df[col_name].str.strip()
             df[col_name] = df[col_name].str.title()
             # df = df[df[col_name] != 'Traffic']
-            df = df[~(df[col_name] == 'Traffic')].copy()
-            print('------ Dropped Records with Traffic Court Category')
+            # df = df[~(df[col_name] == 'Traffic')].copy()
+            # print('------ Dropped Records with Traffic Court Category')
             # df[col_name] = df[col_name].fillna(value='Court Not Specified')
 
             df[col_name] = df[col_name].astype('category')
@@ -83,6 +83,13 @@ class Cleaner():
             df[col_name] = df[col_name].str.strip()
             df[col_name] = df[col_name].str.title()
             # df[col_name] = df[col_name].fillna(value='None')
+            df[col_name] = df[col_name].astype('category')
+
+        if col_name == 'gender':
+            key = {'Unknown Gender': 'Unknown'}
+            df[col_name] = df[col_name].str.strip()
+            df[col_name] = df[col_name].str.title()
+            df[col_name] = df[col_name].map(key)
             df[col_name] = df[col_name].astype('category')
 
         if col_name == 'judge':
@@ -113,6 +120,9 @@ class Cleaner():
 
         if isinstance(col_name, list):
             for col in col_name:
+                if not isinstance(df[col], str):
+                    df[col] = df[col].astype(str)
+
                 df[col] = df[col].str.strip()
                 # df[col] = df[col].fillna(value='None')
                 df[col] = df[col].astype('category')
@@ -164,37 +174,37 @@ class Cleaner():
                 , 'offense_category'
                 , 'primary_charge_flag'
                 , 'charge_id'
-                # , 'charge_version_id'
-                # , 'charge_offense_title'
-                # , 'charge_count'
-                # , 'chapter'
-                # , 'act'
-                # , 'section'
+                , 'charge_version_id'
+                , 'charge_offense_title'
+                , 'charge_count'
+                , 'chapter'
+                , 'act'
+                , 'section'
                 , 'class'
                 , 'aoic'
                 , 'event'
                 , 'event_date'
-                # , 'finding_no_probable_cause'
+                , 'finding_no_probable_cause'
                 , 'arraignment_date'
-                # , 'bond_date_initial'
-                # , 'bond_date_current'
-                # , 'bond_type_initial'
-                # , 'bond_type_current'
-                # , 'bond_amount_initial'
-                # , 'bond_amount_current'
-                # , 'bond_electronic_monitor_flag_initial'
-                # , 'bond_electroinic_monitor_flag_current'
+                , 'bond_date_initial'
+                , 'bond_date_current'
+                , 'bond_type_initial'
+                , 'bond_type_current'
+                , 'bond_amount_initial'
+                , 'bond_amount_current'
+                , 'bond_electronic_monitor_flag_initial'
+                , 'bond_electroinic_monitor_flag_current'
                 , 'age_at_incident'
                 , 'race'
-                # , 'gender'
+                , 'gender'
                 , 'incident_city'
-                # , 'incident_begin_date'
-                # , 'incident_end_date'
-                # , 'law_enforcement_agency'
-                # , 'law_enforcement_unit'
+                , 'incident_begin_date'
+                , 'incident_end_date'
+                , 'law_enforcement_agency'
+                , 'law_enforcement_unit'
                 , 'arrest_date'
                 , 'felony_review_date'
-                # , 'felony_review_result'
+                , 'felony_review_result'
                 , 'updated_offense_category'
             ]
 
@@ -206,32 +216,32 @@ class Cleaner():
                 , 'offense_category'
                 , 'primary_charge_flag'
                 , 'charge_id'
-                # , 'charge_version_id'
-                # , 'disposition_charged_offense_title'
-                # , 'charge_count'
+                , 'charge_version_id'
+                , 'disposition_charged_offense_title'
+                , 'charge_count'
                 , 'disposition_date'
-                # , 'disposition_charged_chapter'
-                # , 'disposition_charged_act'
-                # , 'disposition_charged_section'
+                , 'disposition_charged_chapter'
+                , 'disposition_charged_act'
+                , 'disposition_charged_section'
                 , 'disposition_charged_class'
                 , 'disposition_charged_aoic'
                 , 'charge_disposition'
-                # , 'charge_disposition_reason'
+                , 'charge_disposition_reason'
                 , 'judge'
                 , 'disposition_court_name'
                 , 'disposition_court_facility'
-                # , 'age_at_incident'
-                # , 'race'
-                # , 'gender'
+                , 'age_at_incident'
+                , 'race'
+                , 'gender'
                 , 'incident_city'
-                # , 'incident_begin_date'
-                # , 'incident_end_date'
-                # , 'law_enforcement_agency'
-                # , 'law_enforcement_unit'
-                # , 'arrest_date'
-                # , 'felony_review_date'
-                # , 'felony_review_result'
-                # , 'arraignment_date'
+                , 'incident_begin_date'
+                , 'incident_end_date'
+                , 'law_enforcement_agency'
+                , 'law_enforcement_unit'
+                , 'arrest_date'
+                , 'felony_review_date'
+                , 'felony_review_result'
+                , 'arraignment_date'
                 , 'updated_offense_category'
             ]
 
@@ -317,5 +327,7 @@ class Cleaner():
 
         return df
 
-
+    def parse_ids(self, df, cols):
+        df[cols] = df[cols].astype('str')
+        return df
 

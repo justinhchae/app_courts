@@ -29,14 +29,14 @@ class App():
 
         narrative = Charts().overview(self.df)
         self.st.write('There are a total of',  narrative['total_count']
-                      , ' court records that have both an Initiation Event and a Disposition Hearing record. '
+                      , ' court records based on Initiation and Disposition Court data. '
                       , 'The data spans', narrative['span'], 'years from', narrative['start_date'], 'to', narrative['end_date'] +'.'
                       , 'Court records include data for', narrative['judge_count'], 'judges,'
                       , narrative['initiation_count'], 'types of initiation events,'
                       , narrative['disposition_count'], 'types of disposition events,'
                       , 'approximately ', narrative['cpi'], 'individuals (by case participant id),'
                       , 'and approximately', narrative['case_id'], 'unique cases (by case id)'
-                      , 'across', narrative['district_count'], 'districts in Cook County.'
+                      , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
 
         chart = Charts().overview_figures(self.df)

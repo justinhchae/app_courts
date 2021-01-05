@@ -6,12 +6,19 @@ from do_data.writer import Writer
 
 class Maker():
     def __init__(self):
-        self.timedelta = np.timedelta64(1, 'D')
+        self.days = np.timedelta64(1, 'D')
         self.writer = Writer()
+        self.join_cols = ['case_id'
+                        , 'case_participant_id'
+                        , 'received_date'
+                        , 'offense_category'
+                        , 'charge_id'
+                        , 'charge_version_id'
+                        , 'charge_count']
 
     def make_caselen(self, df, col1=None, col2=None):
 
-        df['case_length'] = (df[col2] - df[col1]) / self.timedelta
+        df['case_length'] = (df[col2] - df[col1]) / self.days
 
         return df
 
@@ -67,12 +74,19 @@ class Maker():
 
         return df
 
-    def make_disposition_pending(self, df, source=None, target=None):
+    def make_disposition_pending(self, df1, df2, source=None, target=None):
         new_col = str(target +'_days_pending')
         today = pd.Timestamp.now()
 
+        cols = self.join_cols
+
+        df2_cols = cols.copy()
+        df2_cols.append(target)
+
+        df = pd.merge(left=df1, right=df2[df2_cols], how='left', left_on=cols, right_on=cols)
+
         def diff(x):
-            s = (today - df[x]) / self.timedelta
+            s = (today - df[x]) / self.days
             return s
 
         df[new_col] = np.where(df[target].isna(), diff(source), np.nan)
@@ -85,16 +99,28 @@ class Maker():
 
         print('------ Calculated Days Pending for', target)
 
+        df.drop(columns=[target], inplace=True)
+
+
+
         return df
 
-    def make_class_diff(self, df, col1=None, col2=None, diff_name='class_diff'):
+    def make_class_diff(self, df1, df2, col1, col2, diff_name='charged_class_difference'):
+
+        cols = self.join_cols
+
+        df2_cols = cols.copy()
+        df2_cols.append(col2)
+
+        df = pd.merge(left=df1, right=df2[df2_cols], how='left', left_on=cols, right_on=cols)
+
         temp1 = str(col1 + '_cat_val')
         temp2 = str(col2 + '_cat_val')
 
         df[temp1] = df[col1].cat.codes
         df[temp2] = df[col2].cat.codes
 
-        df[diff_name] = np.where(df[col2].notnull(), df[temp2] - df[temp1], np.nan)
+        df[diff_name] = np.where(df[col2].notnull(), df[temp1] - df[temp2], np.nan)
 
         change_log = df[[col1, temp1, col2, temp2, diff_name]].copy()
 
@@ -102,9 +128,11 @@ class Maker():
 
         self.writer.to_csv(change_log, filename)
 
-        print('------ Calculated Charged Class Differential for', str(col1 + ' and ' + col2))
+        print('------ Calculated Charged Class Differential from', str(col2 + ' to ' + col1))
 
         df = df.drop(columns=[temp1, temp2])
+        new_col2 = str('initial_charged_' + col2)
+        df.rename(columns={col2:new_col2}, inplace=True)
 
         return df
 
