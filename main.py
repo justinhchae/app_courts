@@ -27,8 +27,7 @@ if __name__ == '__main__':
                                    , preview=False
                                    , classify=True
                                    )
-        # TODO
-        # migrate date caculations and write to tables here
+        
         writer.to_package(initiation, 'initiation_modified')
         writer.to_package(disposition, 'disposition_modified')
 
