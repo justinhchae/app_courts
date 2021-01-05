@@ -27,7 +27,9 @@ if __name__ == '__main__':
                                    , preview=False
                                    , classify=True
                                    )
-        
+
+        # test refactor with branch
+
         writer.to_package(initiation, 'initiation_modified')
         writer.to_package(disposition, 'disposition_modified')
 
