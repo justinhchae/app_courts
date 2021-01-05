@@ -31,10 +31,10 @@ class Writer():
         csvd = '.csv'
         zipped = '.zip'
 
-        path = os.sep.join([self.root, filename])
-
         if compression:
-            compression_opts = dict(method='zip', archive_name=filename)
+
+            archive_name = str(filename + csvd)
+            compression_opts = dict(method='zip', archive_name=archive_name)
 
             filename_zip = str(filename + zipped)
 
