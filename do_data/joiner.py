@@ -31,9 +31,11 @@ class Joiner():
                     , 'incident_end_date', 'law_enforcement_agency', 'law_enforcement_unit'
                     , 'arrest_date', 'felony_review_date', 'felony_review_result']
 
+        # print(df1['law_enforcement_unit'].cat.categories)
+        # print(df2['law_enforcement_unit'].dtype)
+
         df1 = df1.drop(columns=df1_cols)
         df2 = df2.drop(columns=df2_cols)
-
 
         df = pd.merge(left=df1, right=df2, how='left', left_on=cols, right_on=cols
                       , suffixes=('_init', '_disp')
@@ -54,7 +56,18 @@ class Joiner():
 
         df = df.drop(columns=['updated_offense_category_disp', 'updated_offense_category_init'])
 
-        print('Merged DataFrames to:', len(df))
+        #FIXME supress categorical transformation with nan categories [law_enforcement_unit] and [charge_disposition_reason]
+        # Likely bug in cleaner when forcing type to str
+        # TEMP WORK AROUND
+
+        bad_cols = ['law_enforcement_unit', 'charge_disposition_reason']
+
+        df['law_enforcement_unit'] = np.where(df['law_enforcement_unit']=='nan', np.nan, df['law_enforcement_unit'])
+        df['law_enforcement_unit'] = df['law_enforcement_unit'].astype('category')
+
+        df['charge_disposition_reason'] = np.where(df['charge_disposition_reason'] == 'nan', np.nan, df['charge_disposition_reason'])
+        df['charge_disposition_reason'] = df['charge_disposition_reason'].astype('category')
+
 
         return df
 

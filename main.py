@@ -16,9 +16,9 @@ if __name__ == '__main__':
     app = App()
     # eda = EDA()
 
-    def read_source(open_source=False):
+    def read_source(from_source=False):
 
-        if open_source:
+        if from_source:
             initiation = reader.to_df('Initiation.zip'
                                       , clean_initiation=True
                                       , preview=False
@@ -52,10 +52,10 @@ if __name__ == '__main__':
 
             main = joiner.initiation_disposition(initiation, disposition)
             writer.to_package(main, 'main')
-            sample = main.sample(n=500000, random_state=0)
+            sample = main.sample(n=250000, random_state=0)
             writer.to_package(sample, 'sample')
 
-    # read_source(open_source=False)
+    # read_source(from_source=False)
 
     def run_app():
         df = reader.to_df('main.bz2'
