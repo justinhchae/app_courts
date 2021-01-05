@@ -60,13 +60,21 @@ class Joiner():
         # Likely bug in cleaner when forcing type to str
         # TEMP WORK AROUND
 
-        bad_cols = ['law_enforcement_unit', 'charge_disposition_reason']
+        bad_cols = ['law_enforcement_unit', 'charge_disposition_reason', 'bond_type_initial', 'bond_type_current']
 
         df['law_enforcement_unit'] = np.where(df['law_enforcement_unit']=='nan', np.nan, df['law_enforcement_unit'])
         df['law_enforcement_unit'] = df['law_enforcement_unit'].astype('category')
 
         df['charge_disposition_reason'] = np.where(df['charge_disposition_reason'] == 'nan', np.nan, df['charge_disposition_reason'])
         df['charge_disposition_reason'] = df['charge_disposition_reason'].astype('category')
+
+        df['bond_type_initial'] = np.where(df['bond_type_initial'] == 'nan', np.nan,
+                                                   df['bond_type_initial'])
+        df['bond_type_initial'] = df['bond_type_initial'].astype('category')
+
+        df['bond_type_current'] = np.where(df['bond_type_current'] == 'nan', np.nan,
+                                           df['bond_type_current'])
+        df['bond_type_current'] = df['bond_type_current'].astype('category')
 
 
         return df
