@@ -34,6 +34,7 @@ class Judge():
         self.case_id = 'case_id'
         self.disp_date = 'disposition_date'
         self.disp_class = 'disposition_charged_class'
+        self.charged_class = 'class'
         self.case_len = 'case_length'
         self.pending_date = 'disposition_date_days_pending'
         self.primary_flag_init = 'primary_charge_flag_init'
@@ -129,18 +130,18 @@ class Judge():
 
         references: https://pbpython.com/pandas-grouper-agg.html
         """
-        df = df[[self.disp_date, self.disp_class]].value_counts()
+        df = df[[self.disp_date, self.charged_class]].value_counts()
         df = df.to_frame().reset_index()
         df.rename(columns={0: 'count'}, inplace=True)
 
-        df = df.groupby([self.disp_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
+        df = df.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
 
         df = df.to_frame().reset_index()
 
-        test = df.groupby(self.disp_class, as_index=False).agg({'count': sum})
-        print(test[self.disp_class].dtype)
+        test = df.groupby(self.charged_class, as_index=False).agg({'count': sum})
+        # print(test[self.charged_class].dtype)
 
-        df = df.groupby(self.disp_class)
+        df = df.groupby(self.charged_class)
         
         for name, group in df:
             self.fig.add_trace(
@@ -159,20 +160,20 @@ class Judge():
 
     def _bar_charge_class(self, df, row, col):
         n = 15
-        df = df[[self.judge, self.disp_class]].stb.freq([self.disp_class], cum_cols=False)[:n]
+        df = df[[self.judge, self.charged_class]].stb.freq([self.charged_class], cum_cols=False)[:n]
 
-        df[self.disp_class] = df[self.disp_class].astype('category')
-        subset_charges = list(df[self.disp_class].unique())
+        df[self.charged_class] = df[self.charged_class].astype('category')
+        subset_charges = list(df[self.charged_class].unique())
         ordered_subset = [i for i in self.ordered_charges if i in subset_charges]
 
-        df[self.disp_class] = df[self.disp_class].cat.as_ordered()
-        df[self.disp_class] = df[self.disp_class].cat.reorder_categories(ordered_subset, ordered=True)
+        df[self.charged_class] = df[self.charged_class].cat.as_ordered()
+        df[self.charged_class] = df[self.charged_class].cat.reorder_categories(ordered_subset, ordered=True)
 
-        color = list(df[self.disp_class].cat.codes)
+        color = list(df[self.charged_class].cat.codes)
         color.sort()
 
         self.fig.add_trace(
-            go.Bar(x=df[self.disp_class]
+            go.Bar(x=df[self.charged_class]
                    , y=df['count']
                    , marker=dict(color=color)
                    , name="Class"
