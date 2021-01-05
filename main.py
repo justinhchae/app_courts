@@ -64,6 +64,7 @@ if __name__ == '__main__':
                           , classify=False
                           )
         app.run_app(df)
+        #TODO manage large data table, loading entire set creats slow app
 
     run_app()
 
