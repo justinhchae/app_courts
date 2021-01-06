@@ -126,9 +126,8 @@ if __name__ == '__main__':
         df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].map(key)
         df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].astype('bool')
 
-        print(df['bond_electroinic_monitor_flag_current'].unique())
-
-        get_mem(df)
+        # print(df['bond_electroinic_monitor_flag_current'].unique())
+        # get_mem(df)
 
         app.run_app(df)
         #TODO manage large data table, loading entire set creats slow app
