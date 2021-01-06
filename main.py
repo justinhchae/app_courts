@@ -79,6 +79,8 @@ if __name__ == '__main__':
             # with disp court fac: 195.907546043396
             # after disp charged title: 190.4935998916626
             # resolve bool flag: 178.70780563354492
+            # after more bools: 172.33464527130127
+            # convert more bools: 165.96156883239746
 
             # int16 is -32768 to +32767
             print(total_mem)
@@ -88,7 +90,16 @@ if __name__ == '__main__':
                 , 'bond_amount_current', 'age_at_incident'
                 , 'disposition_date_days_pending', 'case_length', 'charged_class_difference']
 
-        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].astype('category')
+        key = {'nan': np.nan,
+               1.: True}
+
+        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].map(key)
+        df['bond_electronic_monitor_flag_initial'] = df['bond_electronic_monitor_flag_initial'].map(key)
+        df['bond_electroinic_monitor_flag_current'] = df['bond_electroinic_monitor_flag_current'].map(key)
+
+        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].astype('bool')
+        df['bond_electronic_monitor_flag_initial'] = df['bond_electronic_monitor_flag_initial'].astype('bool')
+        df['bond_electroinic_monitor_flag_current'] = df['bond_electroinic_monitor_flag_current'].astype('bool')
 
         df[cols] = df[cols].astype('float32')
 
@@ -115,9 +126,9 @@ if __name__ == '__main__':
         df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].map(key)
         df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].astype('bool')
 
-        # print(df['case_participant_id'].value_counts().size)
+        print(df['bond_electroinic_monitor_flag_current'].unique())
 
-        # get_mem(df)
+        get_mem(df)
 
         app.run_app(df)
         #TODO manage large data table, loading entire set creats slow app
