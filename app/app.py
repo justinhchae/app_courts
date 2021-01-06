@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
+import time
+
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 
@@ -19,7 +21,7 @@ class App():
     def run_app(self, df=None):
         if df is not None:
             self.df = df
-            self.data()
+            # self.data()
         self.frame()
         self.frame_objects()
         self.data_disclaimer()
@@ -34,7 +36,11 @@ class App():
 
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
+            s = time.time()
             cached_dict = {'figure1': Charts().overview_figures(self.df)}
+            e = time.time()
+            # print('Get Subplot from Function', e - s)
+
             return cached_dict
 
         cached = get_cached()
@@ -51,8 +57,10 @@ class App():
                       , 'and approximately', narrative['case_id'], 'unique cases (by case id)'
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
-
+        s = time.time()
         self.st.plotly_chart(cached['figure1'])
+        e = time.time()
+        # print('Get Subplot From Cache', e - s)
 
     def frame_objects(self):
         self.object_overview()
@@ -65,7 +73,10 @@ class App():
 
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
+            s = time.time()
             cached_dict = {'figure1': Judge().overview(df=self.df, col=self.judge)}
+            e = time.time()
+            # print('Get Overview Figure From Function', e - s)
             return cached_dict
 
         cached = get_cached()
@@ -76,7 +87,10 @@ class App():
 
             self.st.markdown('Judge Narrative - High Level')
 
+            s = time.time()
             self.st.plotly_chart(cached['figure1'])
+            e = time.time()
+            # print('Get Overview Figure from Cache', e - s)
 
             sidebar_picklist = self.df[self.judge].dropna(how='any').unique()
 
@@ -87,9 +101,15 @@ class App():
                 self.st.write(sidebar_selection)
 
                 if sidebar_selection in cached:
+                    s = time.time()
                     self.st.plotly_chart(cached[sidebar_selection])
+                    e = time.time()
+                    # print('Get Sidebar Selection from Cache', e - s)
                 else:
+                    s = time.time()
                     figure = Judge().detail(df=self.df, col=sidebar_selection)
+                    e = time.time()
+                    # print('Get Sidebar Selection from Function', e - s)
                     self.st.plotly_chart(figure)
                     cached.update({sidebar_selection:figure})
 
@@ -123,7 +143,10 @@ class App():
 
             self.df[col_list] = self.df[col_list].astype('object')
 
+        s = time.time()
         data_fixer()
+        e = time.time()
+        # print('Fix Data', e - s)
 
     def data_disclaimer(self):
         self.st.markdown('"This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago.  The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site.  The data provided at this site is subject to change at any time.  It is understood that the data provided at this site is being used at one’s own risk."')
