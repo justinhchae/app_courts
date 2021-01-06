@@ -4,21 +4,27 @@ import pandas as pd
 
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
+
 class App():
     def __init__(self):
         self.st = st
         self.df = None
-        self.df_sample = None
-
+        self.n_samples = None
         self.judge = 'judge'
 
     def run_app(self, df=None):
         if df is not None:
             self.df = df
-            self.data()
+            self.sample_size()
+
         self.frame()
         self.frame_objects()
         self.data_disclaimer()
+
+    @st.cache
+    def sample_size(self):
+        n_samples = len(self.df) // 2
+        self.n_samples = n_samples
 
     def frame(self):
         self.st.title('Analyze Cook County Court Data')
@@ -39,16 +45,16 @@ class App():
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
 
-        chart = Charts().overview_figures(self.df)
+        chart = Charts().overview_figures(self.df, self.n_samples)
 
         self.st.plotly_chart(chart)
 
     def frame_objects(self):
         self.object_overview()
-        self.by_judge()
-        self.by_initiation()
-        self.by_disposition()
-        self.by_court()
+        # self.by_judge()
+        # self.by_initiation()
+        # self.by_disposition()
+        # self.by_court()
 
 
     def by_judge(self):
@@ -87,6 +93,10 @@ class App():
 
     # @st.cache
     def data(self):
+        """
+        Converts all categorical columns to object types.
+        Only use if writing dataframe to page. Otherwise avoid usage due to memory problems when converting from cat to obj.
+        """
 
         def data_fixer():
             col_types = self.df.dtypes.to_frame()
