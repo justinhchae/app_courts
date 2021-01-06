@@ -4,6 +4,7 @@ import pandas as pd
 
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
+
 class App():
     def __init__(self):
         self.st = st
@@ -11,6 +12,9 @@ class App():
         self.df_sample = None
 
         self.judge = 'judge'
+        """
+        https://discuss.streamlit.io/t/how-to-render-chart-faster/6237
+        """
 
     def run_app(self, df=None):
         if df is not None:
@@ -25,9 +29,20 @@ class App():
         self.st.markdown('An Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
         self.st.markdown('[Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
 
+
     def object_overview(self):
 
-        narrative = Charts().overview(self.df)
+        @st.cache(hash_funcs={dict: lambda _: None})
+        def get_cached():
+            print('got figs overview')
+            cached_dict = {'figure1': Charts().overview_figures(self.df)
+                        ,'narrative1': Charts().overview(self.df)}
+            return cached_dict
+
+        cached = get_cached()
+
+        narrative = cached['narrative1']
+
         self.st.write('There are a total of',  narrative['total_count']
                       , ' court records based on Initiation and Disposition Court data. '
                       , 'The data spans', narrative['span'], 'years from', narrative['start_date'], 'to', narrative['end_date'] +'.'
@@ -39,9 +54,7 @@ class App():
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
 
-        chart = Charts().overview_figures(self.df)
-
-        self.st.plotly_chart(chart)
+        self.st.plotly_chart(cached['figure1'])
 
     def frame_objects(self):
         self.object_overview()
@@ -52,13 +65,21 @@ class App():
 
 
     def by_judge(self):
+
+        @st.cache(hash_funcs={dict: lambda _: None})
+        def get_cached():
+            cached_dict = {'figure1': Judge().overview(df=self.df, col=self.judge)}
+            return cached_dict
+
+        cached = get_cached()
+
         if self.st.sidebar.checkbox(label="Show Analysis by Judge"
                                  , value=False
                                  , key=self.judge):
 
             self.st.markdown('Judge Narrative - High Level')
 
-            self.st.plotly_chart(Judge().overview(df=self.df, col=self.judge))
+            self.st.plotly_chart(cached['figure1'])
 
             sidebar_picklist = self.df[self.judge].dropna(how='any').unique()
 
@@ -67,7 +88,13 @@ class App():
             if sidebar_selection:
                 self.st.markdown('Judge Narrative - Detail Level')
                 self.st.write(sidebar_selection)
-                self.st.plotly_chart(Judge().detail(df=self.df, col=sidebar_selection))
+
+                if sidebar_selection in cached:
+                    self.st.plotly_chart(cached[sidebar_selection])
+                else:
+                    figure = Judge().detail(df=self.df, col=sidebar_selection)
+                    self.st.plotly_chart(figure)
+                    cached.update({sidebar_selection:figure})
 
     def by_initiation(self):
         #TODO
@@ -85,10 +112,12 @@ class App():
         # TODO
         pass
 
-    # @st.cache
+    @st.cache
     def data(self):
 
+        @st.cache
         def data_fixer():
+
             col_types = self.df.dtypes.to_frame()
             col_types = col_types.rename_axis('col_name').reset_index().rename(columns={0: 'dtype'})
 
@@ -97,8 +126,6 @@ class App():
 
             self.df[col_list] = self.df[col_list].astype('object')
 
-        # self.df = df
-        # self.df = df.sample(1000, random_state=0)
         data_fixer()
 
     def data_disclaimer(self):
