@@ -2,7 +2,7 @@
 
 ## Courts (Initiation and Disposition)
 
-See [/data](https://github.com/justinhchae/appleseed/tree/master/courts/data).
+See [/data](https://github.com/justinhchae/app_courts/tree/main/data).
 
 Included as compressed csv or pandas pickle files:
 

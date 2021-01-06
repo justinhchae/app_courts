@@ -1,5 +1,6 @@
 
 import pandas as pd
+# import modin as md
 import numpy as np
 
 # import matplotlib.pyplot as plt
@@ -133,10 +134,10 @@ class Charts():
                               , "Top 15 Judges by Case Load"
                               , "Disposition Hearings by Charge Class")
         )
-        
+
         self._ts_pending_case_len(df, row=1, col=1)
         self._ts_charge_class(df, row=2, col=1)
-        self._bar_judge(df)
+        self._bar_judge(df, row=1, col=2)
 
         self.fig.update_yaxes(showticklabels=False)
 
@@ -209,8 +210,8 @@ class Charts():
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
 
-    def _bar_judge(self, df):
-        col = 'judge'
+    def _bar_judge(self, df, row, col):
+
         n = 15
         df = df.stb.freq([col], cum_cols=False)[:n]
         # print(stats)
@@ -221,7 +222,7 @@ class Charts():
                    , orientation='h'
                    , name=self.judge
                    ),
-            row=1, col=2
+            row=row, col=col
         )
 
     def _geo_map(self, df):

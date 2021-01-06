@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
+import time
+
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 
@@ -11,6 +13,9 @@ class App():
         self.df = None
         self.n_samples = None
         self.judge = 'judge'
+        """
+        https://discuss.streamlit.io/t/how-to-render-chart-faster/6237
+        """
 
     def run_app(self, df=None):
         if df is not None:
@@ -31,9 +36,23 @@ class App():
         self.st.markdown('An Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
         self.st.markdown('[Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
 
+
     def object_overview(self):
 
-        narrative = Charts().overview(self.df)
+        @st.cache(hash_funcs={dict: lambda _: None})
+        def get_cached():
+            s = time.time()
+            cached_dict = {'f1': Charts().overview_figures(self.df)
+                           ,'n1': Charts().overview(self.df)}
+            e = time.time()
+            # print('Get Subplot or narrative from Function', e - s)
+
+            return cached_dict
+
+        cached = get_cached()
+
+        narrative = cached['n1']
+
         self.st.write('There are a total of',  narrative['total_count']
                       , ' court records based on Initiation and Disposition Court data. '
                       , 'The data spans', narrative['span'], 'years from', narrative['start_date'], 'to', narrative['end_date'] +'.'
@@ -56,15 +75,28 @@ class App():
         # self.by_disposition()
         # self.by_court()
 
-
     def by_judge(self):
+
+        @st.cache(hash_funcs={dict: lambda _: None})
+        def get_cached():
+            s = time.time()
+            cached_dict = {'figure1': Judge().overview(df=self.df, col=self.judge)}
+            e = time.time()
+            # print('Get Overview Figure From Function', e - s)
+            return cached_dict
+
+        cached = get_cached()
+
         if self.st.sidebar.checkbox(label="Show Analysis by Judge"
                                  , value=False
                                  , key=self.judge):
 
             self.st.markdown('Judge Narrative - High Level')
 
-            self.st.plotly_chart(Judge().overview(df=self.df, col=self.judge))
+            s = time.time()
+            self.st.plotly_chart(cached['figure1'])
+            e = time.time()
+            # print('Get Overview Figure from Cache', e - s)
 
             sidebar_picklist = self.df[self.judge].dropna(how='any').unique()
 
@@ -73,7 +105,19 @@ class App():
             if sidebar_selection:
                 self.st.markdown('Judge Narrative - Detail Level')
                 self.st.write(sidebar_selection)
-                self.st.plotly_chart(Judge().detail(df=self.df, col=sidebar_selection))
+
+                if sidebar_selection in cached:
+                    s = time.time()
+                    self.st.plotly_chart(cached[sidebar_selection])
+                    e = time.time()
+                    # print('Get Sidebar Selection from Cache', e - s)
+                else:
+                    s = time.time()
+                    figure = Judge().detail(df=self.df, col=sidebar_selection)
+                    e = time.time()
+                    # print('Get Sidebar Selection from Function', e - s)
+                    self.st.plotly_chart(figure)
+                    cached.update({sidebar_selection:figure})
 
     def by_initiation(self):
         #TODO
@@ -91,14 +135,16 @@ class App():
         # TODO
         pass
 
-    # @st.cache
+    @st.cache
     def data(self):
         """
         Converts all categorical columns to object types.
         Only use if writing dataframe to page. Otherwise avoid usage due to memory problems when converting from cat to obj.
         """
 
+        @st.cache
         def data_fixer():
+
             col_types = self.df.dtypes.to_frame()
             col_types = col_types.rename_axis('col_name').reset_index().rename(columns={0: 'dtype'})
 
@@ -107,13 +153,10 @@ class App():
 
             self.df[col_list] = self.df[col_list].astype('object')
 
-        # self.df = df
-        # self.df = df.sample(1000, random_state=0)
+        s = time.time()
         data_fixer()
+        e = time.time()
+        # print('Fix Data', e - s)
 
     def data_disclaimer(self):
         self.st.markdown('"This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago.  The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site.  The data provided at this site is subject to change at any time.  It is understood that the data provided at this site is being used at one’s own risk."')
-
-
-
-
