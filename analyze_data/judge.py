@@ -162,12 +162,14 @@ class Judge():
         n = 15
         df = df[[self.judge, self.charged_class]].stb.freq([self.charged_class], cum_cols=False)[:n]
 
-        df[self.charged_class] = df[self.charged_class].astype('category')
-        subset_charges = list(df[self.charged_class].unique())
-        ordered_subset = [i for i in self.ordered_charges if i in subset_charges]
+        # print(df[self.charged_class].dtypes)
 
-        df[self.charged_class] = df[self.charged_class].cat.as_ordered()
-        df[self.charged_class] = df[self.charged_class].cat.reorder_categories(ordered_subset, ordered=True)
+        # df[self.charged_class] = df[self.charged_class].astype('category')
+        # subset_charges = list(df[self.charged_class].unique())
+        # ordered_subset = [i for i in self.ordered_charges if i in subset_charges]
+        #
+        # df[self.charged_class] = df[self.charged_class].cat.as_ordered()
+        # df[self.charged_class] = df[self.charged_class].cat.reorder_categories(ordered_subset, ordered=True)
 
         color = list(df[self.charged_class].cat.codes)
         color.sort()
