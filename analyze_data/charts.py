@@ -72,6 +72,8 @@ class Charts():
                            , '727 E. 111Th Street (Area 2)' : 'Circuit Court Branch 35/38'
                             }
 
+
+
         self.timedelta = np.timedelta64(1, 'Y')
 
         self.reader = Reader()
@@ -83,6 +85,8 @@ class Charts():
 
         self.fig = None
         self.transparent = 'rgba(0,0,0,0)'
+
+        self.n_samples = None
 
     def overview(self, df):
 
@@ -115,7 +119,8 @@ class Charts():
 
         return narrative
 
-    def overview_figures(self, df):
+    def overview_figures(self, df, n_samples):
+        self.n_samples = n_samples
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
         center = 0.5
 
@@ -124,12 +129,12 @@ class Charts():
             , column_widths=[0.6, 0.4]
             , row_heights=[0.4, 0.6]
             , specs=[[{"type": "scatter"}, {"type": "bar"}],
-                     [{"type": "scatter", 'colspan':2}, None]]
+                     [{"type": "scatter"}, None]]
             , subplot_titles=("Length of Pending Cases"
                               , "Top 15 Judges by Case Load"
-                              , "Count of Disposition Hearings by Charge Class")
+                              , "Disposition Hearings by Charge Class")
         )
-        
+
         self._ts_pending_case_len(df, row=1, col=1)
         self._ts_charge_class(df, row=2, col=1)
         self._bar_judge(df, row=1, col=2)
@@ -142,18 +147,16 @@ class Charts():
         return self.fig
 
     def _ts_pending_case_len(self, df, row, col):
+        df = df.sample(self.n_samples, random_state=0)
+
         df = df[[self.primary_flag_init, self.received_date, self.pending_date]]
         df = df[(df[self.pending_date].notnull() & df[self.primary_flag_init] == True)].copy()
         df = df.drop(columns=[self.primary_flag_init])
 
-        counts = df.value_counts()
+        df = df.value_counts().to_frame('count').reset_index()
 
-        df = counts.to_frame().reset_index()
-        df.rename(columns={0: 'count'}, inplace=True)
         # https://pbpython.com/pandas-grouper-agg.html
-        df = df.groupby([self.pending_date, pd.Grouper(key=self.received_date, freq='M')])['count'].sum()
-
-        df = df.to_frame().reset_index()
+        df = df.groupby([self.pending_date, pd.Grouper(key=self.received_date, freq='M')])['count'].sum().to_frame().reset_index()
 
         self.fig.add_trace(
             go.Scatter(
@@ -168,17 +171,17 @@ class Charts():
         )
 
     def _ts_charge_class(self, df, row, col):
+
+        df = df.sample(self.n_samples, random_state=0)
+
         cols = [self.disp_date, self.charged_class]
 
-        df = df[cols].value_counts()
+        df = df[cols].value_counts().to_frame('count').reset_index()
 
-        df = df.to_frame().reset_index()
-        df.rename(columns={0: 'count'}, inplace=True)
         # https://pbpython.com/pandas-grouper-agg.html
-        df = df.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
+        df = df.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum().to_frame().reset_index()
 
-        df = df.to_frame().reset_index()
-        df = self.cleaner.classer(df=df, col_name=self.charged_class)
+        df = self.cleaner.classer(df=df, col_name=self.charged_class).groupby(self.charged_class)
         # df2 = df2.set_index(self.disp_date)
         # print(df2)
 
@@ -192,7 +195,6 @@ class Charts():
         #
         # df2['colors'] = df2['colors'].map(color_map)
 
-        df = df.groupby(self.charged_class)
         for name, group in df:
             self.fig.add_trace(
                 go.Scatter(x=group[self.disp_date]
@@ -204,19 +206,19 @@ class Charts():
             )
 
         self.fig.update_yaxes(title_text=None, showgrid=False, zeroline=False
-                              , row=2, col=1)
+                              , row=row, col=col)
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
-                              , row=2, col=1)
+                              , row=row, col=col)
 
     def _bar_judge(self, df, row, col):
 
         n = 15
-        df = df.stb.freq([self.judge], cum_cols=False)[:n]
+        df = df.stb.freq([col], cum_cols=False)[:n]
         # print(stats)
 
         self.fig.add_trace(
             go.Bar(x=df['count'][:n]
-                   , y=df[self.judge][:n]
+                   , y=df[col][:n]
                    , orientation='h'
                    , name=self.judge
                    ),

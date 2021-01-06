@@ -11,8 +11,7 @@ class App():
     def __init__(self):
         self.st = st
         self.df = None
-        self.df_sample = None
-
+        self.n_samples = None
         self.judge = 'judge'
         """
         https://discuss.streamlit.io/t/how-to-render-chart-faster/6237
@@ -21,10 +20,16 @@ class App():
     def run_app(self, df=None):
         if df is not None:
             self.df = df
-            # self.data()
+            self.sample_size()
+
         self.frame()
         self.frame_objects()
         self.data_disclaimer()
+
+    @st.cache
+    def sample_size(self):
+        n_samples = len(self.df) // 2
+        self.n_samples = n_samples
 
     def frame(self):
         self.st.title('Analyze Cook County Court Data')
@@ -58,17 +63,17 @@ class App():
                       , 'and approximately', narrative['case_id'], 'unique cases (by case id)'
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
-        s = time.time()
-        self.st.plotly_chart(cached['f1'])
-        e = time.time()
-        # print('Get Subplot From Cache', e - s)
+
+        chart = Charts().overview_figures(self.df, self.n_samples)
+
+        self.st.plotly_chart(chart)
 
     def frame_objects(self):
         self.object_overview()
-        self.by_judge()
-        self.by_initiation()
-        self.by_disposition()
-        self.by_court()
+        # self.by_judge()
+        # self.by_initiation()
+        # self.by_disposition()
+        # self.by_court()
 
     def by_judge(self):
 
@@ -132,6 +137,10 @@ class App():
 
     @st.cache
     def data(self):
+        """
+        Converts all categorical columns to object types.
+        Only use if writing dataframe to page. Otherwise avoid usage due to memory problems when converting from cat to obj.
+        """
 
         @st.cache
         def data_fixer():
@@ -151,7 +160,3 @@ class App():
 
     def data_disclaimer(self):
         self.st.markdown('"This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago.  The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site.  The data provided at this site is subject to change at any time.  It is understood that the data provided at this site is being used at one’s own risk."')
-
-
-
-

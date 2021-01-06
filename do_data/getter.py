@@ -7,6 +7,11 @@ from clean_data.maker import Maker
 from do_data.joiner import Joiner
 import geopandas
 
+# import ray
+# ray.init()
+# import modin.pandas as md
+
+# test branch
 
 class Reader():
     def __init__(self, folder='data', display_all_cols=True):
@@ -151,6 +156,8 @@ class Reader():
                     print('------ Displaying DataFrame Head')
                     print(df.head(2))
                     print()
+
+                # df = md.DataFrame(df)
 
                 return df
 
