@@ -64,7 +64,7 @@ class App():
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
 
-        chart = Charts().overview_figures(self.df, self.n_samples)
+        chart = Charts().overview_figures(self.df)
 
         self.st.plotly_chart(chart)
 

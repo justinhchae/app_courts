@@ -119,7 +119,7 @@ class Charts():
 
         return narrative
 
-    def overview_figures(self, df, n_samples):
+    def overview_figures(self, df, n_samples =500000):
         self.n_samples = n_samples
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
         center = 0.5
@@ -213,12 +213,11 @@ class Charts():
     def _bar_judge(self, df, row, col):
 
         n = 15
-        df = df.stb.freq([col], cum_cols=False)[:n]
-        # print(stats)
+        df = df.stb.freq([self.judge], cum_cols=False)[:n]
 
         self.fig.add_trace(
             go.Bar(x=df['count'][:n]
-                   , y=df[col][:n]
+                   , y=df[self.judge][:n]
                    , orientation='h'
                    , name=self.judge
                    ),
