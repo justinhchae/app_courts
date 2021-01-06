@@ -65,72 +65,7 @@ if __name__ == '__main__':
                           , classify=False
                           )
 
-        # FIXME: move memory patches to cleaning routines
-
-        def get_mem(df):
-            total_mem = df.memory_usage().sum() / (1024**2)
-            # origin total: 272.2295866012573
-            # with float32: 246.7372808456421
-            # change one col to category: 265.85659408569336
-            # + with float 32: 244.00604629516602
-            # offense cat as cat: 237.63601398468018
-            # after in16: 232.17337703704834
-            # categorize charge data: 202.27989768981934
-            # with disp court fac: 195.907546043396
-            # after disp charged title: 190.4935998916626
-            # resolve bool flag: 178.70780563354492
-            # after more bools: 172.33464527130127
-            # convert more bools: 165.96156883239746
-
-            # int16 is -32768 to +32767
-            print(total_mem)
-
-
-        cols = [ 'bond_amount_initial'
-                , 'bond_amount_current', 'age_at_incident'
-                , 'disposition_date_days_pending', 'case_length', 'charged_class_difference']
-
-        key = {'nan': np.nan,
-               1.: True}
-
-        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].map(key)
-        df['bond_electronic_monitor_flag_initial'] = df['bond_electronic_monitor_flag_initial'].map(key)
-        df['bond_electroinic_monitor_flag_current'] = df['bond_electroinic_monitor_flag_current'].map(key)
-
-        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].astype('bool')
-        df['bond_electronic_monitor_flag_initial'] = df['bond_electronic_monitor_flag_initial'].astype('bool')
-        df['bond_electroinic_monitor_flag_current'] = df['bond_electroinic_monitor_flag_current'].astype('bool')
-
-        df[cols] = df[cols].astype('float32')
-
-        cols = ['received_date', 'event_date', 'arraignment_date', 'bond_date_initial'
-                ,'bond_date_current', 'incident_begin_date', 'incident_end_date'
-                ,'felony_review_date', 'disposition_date']
-
-        # df[cols] = df[cols].astype('datetime64[D]')
-
-        df['offense_category'] = df['offense_category'].astype('category')
-        df['charge_count'] = df['charge_count'].astype('int16')
-
-        cols = ['chapter', 'act', 'section', 'class', 'aoic'
-              , 'disposition_court_facility', 'disposition_charged_offense_title'
-              , 'charge_offense_title'
-              ]
-
-        df[cols] = df[cols].astype('category')
-
-        key = {'False': False,
-               'True': True,
-               'nan': np.nan}
-
-        df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].map(key)
-        df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].astype('bool')
-
-        # print(df['bond_electroinic_monitor_flag_current'].unique())
-        # get_mem(df)
-
         app.run_app(df)
-        #TODO manage large data table, loading entire set creats slow app
 
     run_app()
 

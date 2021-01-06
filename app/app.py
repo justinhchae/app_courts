@@ -37,15 +37,16 @@ class App():
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
             s = time.time()
-            cached_dict = {'figure1': Charts().overview_figures(self.df)}
+            cached_dict = {'f1': Charts().overview_figures(self.df)
+                           ,'n1': Charts().overview(self.df)}
             e = time.time()
-            # print('Get Subplot from Function', e - s)
+            # print('Get Subplot or narrative from Function', e - s)
 
             return cached_dict
 
         cached = get_cached()
 
-        narrative = Charts().overview(self.df)
+        narrative = cached['n1']
 
         self.st.write('There are a total of',  narrative['total_count']
                       , ' court records based on Initiation and Disposition Court data. '
@@ -58,7 +59,7 @@ class App():
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
         s = time.time()
-        self.st.plotly_chart(cached['figure1'])
+        self.st.plotly_chart(cached['f1'])
         e = time.time()
         # print('Get Subplot From Cache', e - s)
 
