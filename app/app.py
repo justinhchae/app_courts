@@ -112,7 +112,7 @@ class App():
         # TODO
         pass
 
-    @st.cache
+    
     def data(self):
 
         @st.cache
