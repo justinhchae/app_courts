@@ -26,7 +26,6 @@ class App():
         self.frame_objects()
         self.data_disclaimer()
 
-    @st.cache
     def sample_size(self):
         n_samples = len(self.df) // 2
         self.n_samples = n_samples
@@ -42,7 +41,7 @@ class App():
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
             s = time.time()
-            cached_dict = {'f1': Charts().overview_figures(self.df)
+            cached_dict = {'f1': Charts().overview_figures(self.df, self.n_samples)
                            ,'n1': Charts().overview(self.df)}
             e = time.time()
             # print('Get Subplot or narrative from Function', e - s)
@@ -64,9 +63,7 @@ class App():
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
 
-        chart = Charts().overview_figures(self.df)
-
-        self.st.plotly_chart(chart)
+        self.st.plotly_chart(cached['f1'])
 
     def frame_objects(self):
         self.object_overview()

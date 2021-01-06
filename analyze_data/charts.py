@@ -119,7 +119,7 @@ class Charts():
 
         return narrative
 
-    def overview_figures(self, df, n_samples =500000):
+    def overview_figures(self, df, n_samples = 500000):
         self.n_samples = n_samples
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
         center = 0.5
