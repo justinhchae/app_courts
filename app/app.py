@@ -35,13 +35,12 @@ class App():
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
             print('got figs overview')
-            cached_dict = {'figure1': Charts().overview_figures(self.df)
-                        ,'narrative1': Charts().overview(self.df)}
+            cached_dict = {'figure1': Charts().overview_figures(self.df)}
             return cached_dict
 
         cached = get_cached()
 
-        narrative = cached['narrative1']
+        narrative = Charts().overview(self.df)
 
         self.st.write('There are a total of',  narrative['total_count']
                       , ' court records based on Initiation and Disposition Court data. '
@@ -62,7 +61,6 @@ class App():
         self.by_initiation()
         self.by_disposition()
         self.by_court()
-
 
     def by_judge(self):
 
@@ -112,7 +110,7 @@ class App():
         # TODO
         pass
 
-    
+    @st.cache
     def data(self):
 
         @st.cache
