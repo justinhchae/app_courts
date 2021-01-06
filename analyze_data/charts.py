@@ -132,7 +132,7 @@ class Charts():
                      [{"type": "scatter"}, None]]
             , subplot_titles=("Length of Pending Cases"
                               , "Top 15 Judges by Case Load"
-                              , "Disposition Hearings by Charge Class")
+                              , "Disposition Hearing Volume")
         )
 
         self._ts_pending_case_len(df, row=1, col=1)
