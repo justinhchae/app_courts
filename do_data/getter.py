@@ -1,4 +1,7 @@
 import pandas as pd
+# import ray
+# ray.init()
+# import modin.pandas as pd
 import os
 import re
 
@@ -6,8 +9,6 @@ from clean_data.cleaner import Cleaner
 from clean_data.maker import Maker
 from do_data.joiner import Joiner
 import geopandas
-
-
 
 
 class Reader():
