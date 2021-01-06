@@ -131,7 +131,7 @@ class Charts():
         
         self._ts_pending_case_len(df, row=1, col=1)
         self._ts_charge_class(df, row=2, col=1)
-        self._bar_judge(df)
+        self._bar_judge(df, row=1, col=2)
 
         self.fig.update_yaxes(showticklabels=False)
 
@@ -169,15 +169,15 @@ class Charts():
     def _ts_charge_class(self, df, row, col):
         cols = [self.disp_date, self.charged_class]
 
-        counts = df[cols].value_counts()
+        df = df[cols].value_counts()
 
-        df2 = counts.to_frame().reset_index()
-        df2.rename(columns={0: 'count'}, inplace=True)
+        df = df.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
         # https://pbpython.com/pandas-grouper-agg.html
-        df2 = df2.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
+        df = df.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
 
-        df2 = df2.to_frame().reset_index()
-        df2 = self.cleaner.classer(df=df2, col_name=self.charged_class)
+        df = df.to_frame().reset_index()
+        df = self.cleaner.classer(df=df, col_name=self.charged_class)
         # df2 = df2.set_index(self.disp_date)
         # print(df2)
 
@@ -191,8 +191,8 @@ class Charts():
         #
         # df2['colors'] = df2['colors'].map(color_map)
 
-        df2 = df2.groupby(self.charged_class)
-        for name, group in df2:
+        df = df.groupby(self.charged_class)
+        for name, group in df:
             self.fig.add_trace(
                 go.Scatter(x=group[self.disp_date]
                            , y=group['count']
@@ -207,19 +207,19 @@ class Charts():
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=2, col=1)
 
-    def _bar_judge(self, df):
-        col = 'judge'
+    def _bar_judge(self, df, row, col):
+
         n = 15
-        stats = df.stb.freq([col], cum_cols=False)[:n]
+        df = df.stb.freq([self.judge], cum_cols=False)[:n]
         # print(stats)
 
         self.fig.add_trace(
-            go.Bar(x=stats['count'][:n]
-                   , y=stats[col][:n]
+            go.Bar(x=df['count'][:n]
+                   , y=df[self.judge][:n]
                    , orientation='h'
                    , name=self.judge
                    ),
-            row=1, col=2
+            row=row, col=col
         )
 
     def _geo_map(self, df):

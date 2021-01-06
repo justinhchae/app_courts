@@ -7,8 +7,6 @@ from clean_data.maker import Maker
 
 from app.app import App
 
-import numpy as np
-
 if __name__ == '__main__':
     reader = Reader()
     writer = Writer()

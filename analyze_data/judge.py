@@ -50,8 +50,8 @@ class Judge():
     def overview(self, df, col):
         title = str('Overview of Court Data by ' + col.title())
 
-        summary_stats = df.stb.freq([col], cum_cols=False)
-        graph = px.bar(summary_stats
+        df = df.stb.freq([col], cum_cols=False)
+        graph = px.bar(df
                        , x=col
                        , y='count'
                        , title=title)
