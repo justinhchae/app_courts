@@ -1,6 +1,6 @@
 
 import pandas as pd
-import modin as md
+# import modin as md
 import numpy as np
 
 # import matplotlib.pyplot as plt
