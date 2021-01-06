@@ -34,7 +34,6 @@ class App():
 
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
-            print('got figs overview')
             cached_dict = {'figure1': Charts().overview_figures(self.df)}
             return cached_dict
 
