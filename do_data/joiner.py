@@ -139,6 +139,13 @@ class Joiner():
         # print(df['bond_electroinic_monitor_flag_current'].unique())
         # get_mem(df)
 
+        # workaround for memory problems, usecols subset
+        usecols = ['case_id', 'case_participant_id', 'primary_charge_flag_init', 'class', 'received_date', 'event'
+            , 'judge', 'disposition_court_name', 'disposition_court_facility', 'charge_disposition', 'case_length'
+            , 'disposition_date', 'disposition_date_days_pending']
+
+        df = df[usecols]
+
 
         return df
 

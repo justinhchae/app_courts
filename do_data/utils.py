@@ -22,3 +22,8 @@ def memory_usage():
         .sort_values(by='Size', ascending=False).head(10)
     memory_usage_by_variable['Size'] = memory_usage_by_variable['Size'].apply(lambda x: obj_size_fmt(x))
     return memory_usage_by_variable
+
+
+def get_mem(df):
+    total_mem = df.memory_usage().sum() / (1024 ** 2)
+    print(total_mem)

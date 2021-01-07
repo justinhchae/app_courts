@@ -28,7 +28,6 @@ class Charts():
         self.disp_date = 'disposition_date'
         self.disp_class = 'disposition_charged_class'
         self.charged_class = 'class'
-
         self.pending_date = 'disposition_date_days_pending'
         self.primary_flag_init = 'primary_charge_flag_init'
 

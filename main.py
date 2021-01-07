@@ -7,6 +7,8 @@ from clean_data.maker import Maker
 
 from app.app import App
 
+import gc
+
 if __name__ == '__main__':
     reader = Reader()
     writer = Writer()
@@ -53,6 +55,12 @@ if __name__ == '__main__':
             writer.to_package(main, 'main')
             sample = main.sample(n=250000, random_state=0)
             writer.to_package(sample, 'sample')
+
+            del initiation
+            del disposition
+            del main
+            del sample
+            gc.collect()
 
     # read_source(from_source=False)
 
