@@ -85,6 +85,11 @@ class Charts():
         print('load data')
 
     def overview(self):
+        self.df = self.reader.to_df('main.bz2'
+                                    , preview=False
+                                    , echo=False
+                                    , classify=False
+                                    )
 
         title = str('Overview of Court Data')
 
