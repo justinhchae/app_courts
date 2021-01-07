@@ -64,17 +64,18 @@ class Application():
         # self.by_disposition()
         # self.by_court()
 
-    @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
+    # @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
+    @st.cache(max_entries=10, ttl=3600)
     def judge_data(self):
         # s = time.time()
-        cached_dict = {'figure1': Judge().overview(col=self.judge)}
+        # cached_dict = {'figure1': Judge().overview(col=self.judge)}
         # e = time.time()
         # print('Get Overview Figure From Function', e - s)
-        return cached_dict
+        fig = Judge().overview(col=self.judge)
+        return fig #cached_dict
 
     def by_judge(self):
-
-        cached = self.judge_data()
+        # cached = self.judge_data()
 
         if self.st.sidebar.checkbox(label="Show Analysis by Judge"
                                  , value=False
@@ -83,7 +84,8 @@ class Application():
             self.st.markdown('Judge Narrative - High Level')
 
             # s = time.time()
-            self.st.plotly_chart(cached['figure1'])
+            # self.st.plotly_chart(cached['figure1'])
+            self.st.plotly_chart(self.judge_data())
             # e = time.time()
             # print('Get Overview Figure from Cache', e - s)
 
