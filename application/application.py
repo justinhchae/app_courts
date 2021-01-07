@@ -8,7 +8,7 @@ class Application():
     def __init__(self):
         self.st = st
         self.df = None
-        self.judge_names = Reader().to_df('judges.bz2', preview=False, echo=False, classify=False)
+        self.judge_names = Reader().to_df('judges.pickle', preview=False, echo=False, classify=False)
         self.n_samples = None
         self.judge = 'judge'
         """
@@ -30,6 +30,14 @@ class Application():
         self.st.markdown('An Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
         self.st.markdown('[Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
 
+    @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
+    def overview_data(self):
+        # s = time.time()
+        cached_dict = {'f1': Charts().overview_figures()}
+        # e = time.time()
+        # print('Get Subplot or narrative from Function', e - s)
+        return cached_dict
+
     def object_overview(self):
 
         narrative = Charts().overview()
@@ -45,19 +53,9 @@ class Application():
                       , 'across', narrative['district_count'], ' primary districts in Cook County.'
                       )
 
-        @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
-        def get_cached():
-            # s = time.time()
-            cached_dict = {'f1': Charts().overview_figures()}
-            # e = time.time()
-            # print('Get Subplot or narrative from Function', e - s)
-            return cached_dict
-
-        cached = get_cached()
+        cached = self.overview_data()
 
         self.st.plotly_chart(cached['f1'])
-
-        # self.st.plotly_chart(Charts().overview_figures())
 
     def frame_objects(self):
         self.object_overview()
@@ -66,17 +64,17 @@ class Application():
         # self.by_disposition()
         # self.by_court()
 
+    @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
+    def judge_data(self):
+        # s = time.time()
+        cached_dict = {'figure1': Judge().overview(col=self.judge)}
+        # e = time.time()
+        # print('Get Overview Figure From Function', e - s)
+        return cached_dict
+
     def by_judge(self):
 
-        @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
-        def get_cached():
-            # s = time.time()
-            cached_dict = {'figure1': Judge().overview(col=self.judge)}
-            # e = time.time()
-            # print('Get Overview Figure From Function', e - s)
-            return cached_dict
-
-        cached = get_cached()
+        cached = self.judge_data()
 
         if self.st.sidebar.checkbox(label="Show Analysis by Judge"
                                  , value=False
@@ -96,19 +94,21 @@ class Application():
             if sidebar_selection:
                 self.st.markdown('Judge Narrative - Detail Level')
                 self.st.write(sidebar_selection)
+                self.st.plotly_chart(Judge().detail(col=sidebar_selection))
 
-                if sidebar_selection in cached:
-                    # s = time.time()
-                    self.st.plotly_chart(cached[sidebar_selection])
-                    # e = time.time()
-                    # print('Get Sidebar Selection from Cache', e - s)
-                else:
-                    # s = time.time()
-                    figure = Judge().detail(col=sidebar_selection)
-                    # e = time.time()
-                    # print('Get Sidebar Selection from Function', e - s)
-                    self.st.plotly_chart(figure)
-                    cached.update({sidebar_selection:figure})
+                # TODO Update Cached figures from sidebar selection
+                # if sidebar_selection in cached:
+                #     # s = time.time()
+                #     self.st.plotly_chart(cached[sidebar_selection])
+                #     # e = time.time()
+                #     # print('Get Sidebar Selection from Cache', e - s)
+                # else:
+                #     # s = time.time()
+                #     figure = Judge().detail(col=sidebar_selection)
+                #     # e = time.time()
+                #     # print('Get Sidebar Selection from Function', e - s)
+                #     self.st.plotly_chart(figure)
+                #     cached.update({sidebar_selection:figure})
 
     def by_initiation(self):
         #TODO
