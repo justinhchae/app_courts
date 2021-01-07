@@ -15,6 +15,7 @@ def obj_size_fmt(num):
 
 
 def memory_usage():
+    import pandas as pd
     memory_usage_by_variable = pd.DataFrame({k: sys.getsizeof(v) \
                                              for (k, v) in globals().items()}, index=['Size'])
     memory_usage_by_variable = memory_usage_by_variable.T
