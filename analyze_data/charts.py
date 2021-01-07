@@ -9,6 +9,7 @@ import numpy as np
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 
 import os
 import json
@@ -24,6 +25,8 @@ from analyze_data.colors import Colors
 
 # import locale
 # locale.setlocale(locale.LC_ALL, 'en_US')
+
+from sklearn import preprocessing
 
 class Charts():
     def __init__(self):
@@ -129,15 +132,17 @@ class Charts():
             , column_widths=[0.6, 0.4]
             , row_heights=[0.4, 0.6]
             , specs=[[{"type": "scatter"}, {"type": "bar"}],
-                     [{"type": "scatter"}, None]]
-            , subplot_titles=("Length of Pending Cases"
-                              , "Top 15 Judges by Case Load"
-                              , "Disposition Hearing Volume")
+                     [{"type": "scatter"}, {"type": "choropleth"}]]
+            , subplot_titles=("Length of Pending Cases by Time"
+                              , "Top 15 Judges by Case Volume"
+                              , "Disposition Hearing Volume by Time"
+                              , "Case Volume by Court Location")
         )
 
         self._ts_pending_case_len(df, row=1, col=1)
         self._ts_charge_class(df, row=2, col=1)
         self._bar_judge(df, row=1, col=2)
+        self._geo_map(df, row=2, col=2)
 
         self.fig.update_yaxes(showticklabels=False)
 
@@ -224,33 +229,76 @@ class Charts():
             row=row, col=col
         )
 
-    def _geo_map(self, df):
+    def _geo_map(self, df, row, col):
 
         df[self.fac_name] = df[self.court_fac].map(self.key_facname, na_action='ignore')
 
-        df1 = df[[self.fac_name, self.case_id]].groupby([self.fac_name], as_index=False)[self.case_id].agg('count')
+        df = df[[self.fac_name, self.case_id]].groupby([self.fac_name], as_index=False)[self.case_id].agg('count')
         count_col = str(self.case_id + '_count')
-        df1.rename(columns={self.case_id: count_col}, inplace=True)
+        df.rename(columns={self.case_id: count_col}, inplace=True)
 
         courts = self.geo_facilities[(self.geo_facilities['SubType'] == 'Court')]
-
         courts = courts[[self.fac_name, 'Muni', 'geometry']]
 
-        geo_df = pd.merge(left=courts, right=df1
+        districts = self.geo_districts
+
+        gdf = pd.merge(left=courts, right=df
                           , how='left'
                           , left_on=self.fac_name
                           , right_on=self.fac_name
                           ).dropna(subset=[self.fac_name])
 
-        geojson = geo_df.__geo_interface__
+        # geojson = districts.__geo_interface__
 
-        geo_df['lon'] = geo_df.geometry.x
-        geo_df['lat'] = geo_df.geometry.y
+        mm_scaler = preprocessing.MinMaxScaler(feature_range=(5,40))
 
-        center = geo_df[(geo_df[self.fac_name] == 'Circuit Court Branch 43/44')].geometry
+        # https://towardsdatascience.com/data-normalization-with-pandas-and-scikit-learn-7c1cc6ed6475
+        gdf['scaled'] = pd.DataFrame(mm_scaler.fit_transform(gdf[[count_col]]))
 
-        self.fig.update_geos(fitbounds='locations'
-                        , scope='usa'
-                        , lakecolor='LightBlue'
-                        , center=dict(lon=int(center.x), lat=int(center.y))
-                        )
+        gdf = gdf.dropna(how='any')
+
+        gdf['lon'] = gdf.geometry.x
+        gdf['lat'] = gdf.geometry.y
+
+        def human_format(num):
+            # https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
+            magnitude = 0
+            while abs(num) >= 1000:
+                magnitude += 1
+                num /= 1000.0
+            # add more suffixes if you need them
+            return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+
+        gdf[count_col] = gdf[count_col].apply(lambda x: human_format(x))
+
+        gdf = gdf.groupby(self.fac_name)
+
+        # COMEBACK: Map Plots
+        # fig = px.choropleth(districts
+        #                     , geojson=districts.geometry
+        #                     , locations=districts.index
+        #                     )
+
+        for name, group in gdf:
+            self.fig.add_trace(
+                go.Scattergeo(lat=group['lat']
+                              , lon=group['lon']
+                              , name=name
+                              , mode='markers'
+                              , hoverinfo='text'
+                              , text=group[[self.fac_name, count_col]]
+                              , marker=dict(size=group['scaled']
+                                            , opacity=0.5)
+                              )
+                ,row=row, col=col
+            )
+
+        self.fig.update_geos(
+                            fitbounds='locations'
+                            , scope='usa'
+                            # , lataxis=dict(range=(-85, -86))
+                            #,
+                             )
+
+
+

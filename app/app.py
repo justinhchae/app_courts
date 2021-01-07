@@ -35,15 +35,14 @@ class App():
         self.st.markdown('An Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
         self.st.markdown('[Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
 
-
     def object_overview(self):
 
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
-            s = time.time()
-            cached_dict = {'f1': Charts().overview_figures(self.df, self.n_samples)
-                           ,'n1': Charts().overview(self.df)}
-            e = time.time()
+            # s = time.time()
+            cached_dict = {'n1': Charts().overview(self.df)
+                           , 'f1': Charts().overview_figures(self.df, self.n_samples)}
+            # e = time.time()
             # print('Get Subplot or narrative from Function', e - s)
 
             return cached_dict
