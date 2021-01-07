@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import sidetable
 import geopandas
+import gc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn import preprocessing
@@ -104,6 +105,9 @@ class Charts():
                 , 'case_id': f"{case_id:,d}"
                 }
 
+        del df
+        gc.collect()
+
         return narrative
 
     def overview_figures(self, df, n_samples = 500000):
@@ -133,7 +137,8 @@ class Charts():
 
         self.fig.update_layout(title=dict(text="Visual Data Summary of Court Data", x=center)
                           , showlegend=False, paper_bgcolor=self.transparent, plot_bgcolor=self.transparent )
-
+        del df
+        gc.collect()
         return self.fig
 
     def _ts_pending_case_len(self, df, row, col):
@@ -160,6 +165,8 @@ class Charts():
             ),
             row=row, col=col
         )
+        del df
+        gc.collect()
 
     def _ts_charge_class(self, df, row, col):
 
@@ -202,6 +209,9 @@ class Charts():
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
 
+        del df
+        gc.collect()
+
     def _bar_judge(self, df, row, col):
         if isinstance(self.n_samples, int):
             df = df.sample(self.n_samples, random_state=0)
@@ -217,6 +227,9 @@ class Charts():
                    ),
             row=row, col=col
         )
+
+        del df
+        gc.collect()
 
     def _geo_map(self, df, row, col):
         if isinstance(self.n_samples, int):
@@ -290,6 +303,10 @@ class Charts():
                             # , lataxis=dict(range=(-85, -86))
                             #,
                              )
+        del df
+        del courts
+        del gdf
+        gc.collect()
 
 
 

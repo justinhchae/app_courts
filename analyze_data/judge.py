@@ -1,5 +1,6 @@
 
 import pandas as pd
+import gc
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -71,7 +72,8 @@ class Judge():
                           , paper_bgcolor=None
                           , plot_bgcolor=None
                           )
-        #
+        del df
+        gc.collect()
 
         return self.fig
 
@@ -108,6 +110,9 @@ class Judge():
                               , row=row, col=col)
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
+        del df
+        del counts
+        gc.collect()
 
     def _ts_charge_class(self, df, row, col):
         """
@@ -123,9 +128,6 @@ class Judge():
         df = df.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum()
 
         df = df.to_frame().reset_index()
-
-        test = df.groupby(self.charged_class, as_index=False).agg({'count': sum})
-        # print(test[self.charged_class].dtype)
 
         df = df.groupby(self.charged_class)
         
@@ -143,6 +145,9 @@ class Judge():
                               , row=row, col=col)
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
+
+        del df
+        gc.collect()
 
     def _bar_charge_class(self, df, row, col):
         n = 15
@@ -169,4 +174,5 @@ class Judge():
             row=row, col=col
         )
 
-
+        del df
+        gc.collect()
