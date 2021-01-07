@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from clean_data.cleaner import Cleaner
-
+from do_data.getter import Reader
 
 class Judge():
     def __init__(self):
@@ -33,23 +33,34 @@ class Judge():
         self.fig = None
 
         self.transparent = 'rgba(0,0,0,0)'
+        self.reader = Reader()
 
-    def overview(self, df, col):
+        self.df = self.reader.to_df('main.bz2'
+                                    , preview=False
+                                    , echo=False
+                                    , classify=False
+                                    )
+
+    def overview(self, col):
+
+
         title = str('Overview of Court Data by ' + col.title())
 
-        df = df.stb.freq([col], cum_cols=False)
+        df = self.df.stb.freq([col], cum_cols=False)
         graph = px.bar(df
                        , x=col
                        , y='count'
                        , title=title)
 
         graph.update_xaxes(tickangle=45, tickfont=dict(family='Rockwell'))
+        del df
+        gc.collect()
 
         return graph
 
-    def detail(self, df, col):
+    def detail(self, col):
 
-        df = df[(df[self.judge]==col)].copy()
+        df = self.df[(self.df[self.judge]==col)]
         center = 0.5
 
         self.fig = make_subplots(
@@ -110,9 +121,6 @@ class Judge():
                               , row=row, col=col)
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
-        del df
-        del counts
-        gc.collect()
 
     def _ts_charge_class(self, df, row, col):
         """
@@ -146,8 +154,6 @@ class Judge():
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
 
-        del df
-        gc.collect()
 
     def _bar_charge_class(self, df, row, col):
         n = 15
@@ -174,5 +180,3 @@ class Judge():
             row=row, col=col
         )
 
-        del df
-        gc.collect()
