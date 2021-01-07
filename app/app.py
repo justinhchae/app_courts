@@ -12,6 +12,7 @@ class App():
         self.judge = 'judge'
         """
         https://discuss.streamlit.io/t/how-to-render-chart-faster/6237
+        https://discuss.streamlit.io/t/this-app-has-gone-over-its-resource-limits/7334/4
         """
 
     def run_app(self, df=None):
@@ -37,11 +38,10 @@ class App():
 
     def object_overview(self):
 
-        @st.cache(hash_funcs={dict: lambda _: None})
+        @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
         def get_cached():
             # s = time.time()
-            cached_dict = {'n1': Charts().overview(self.df)
-                           , 'f1': Charts().overview_figures(self.df, self.n_samples)}
+            cached_dict = {'f1': Charts().overview_figures(self.df, self.n_samples)}
             # e = time.time()
             # print('Get Subplot or narrative from Function', e - s)
 
@@ -49,7 +49,7 @@ class App():
 
         cached = get_cached()
 
-        narrative = cached['n1']
+        narrative = Charts().overview(self.df)
 
         self.st.write('There are a total of',  narrative['total_count']
                       , ' court records based on Initiation and Disposition Court data. '
@@ -73,7 +73,7 @@ class App():
 
     def by_judge(self):
 
-        @st.cache(hash_funcs={dict: lambda _: None})
+        @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
         def get_cached():
             # s = time.time()
             cached_dict = {'figure1': Judge().overview(df=self.df, col=self.judge)}
