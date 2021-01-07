@@ -107,6 +107,7 @@ class Charts():
         return narrative
 
     def overview_figures(self, df, n_samples = 500000):
+
         self.n_samples = n_samples
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
         center = 0.5
@@ -136,7 +137,8 @@ class Charts():
         return self.fig
 
     def _ts_pending_case_len(self, df, row, col):
-        df = df.sample(self.n_samples, random_state=0)
+        if isinstance(self.n_samples, int):
+            df = df.sample(self.n_samples, random_state=0)
 
         df = df[[self.primary_flag_init, self.received_date, self.pending_date]]
         df = df[(df[self.pending_date].notnull() & df[self.primary_flag_init] == True)].copy()
@@ -161,7 +163,8 @@ class Charts():
 
     def _ts_charge_class(self, df, row, col):
 
-        df = df.sample(self.n_samples, random_state=0)
+        if isinstance(self.n_samples, int):
+            df = df.sample(self.n_samples, random_state=0)
 
         cols = [self.disp_date, self.charged_class]
 
@@ -200,6 +203,8 @@ class Charts():
                               , row=row, col=col)
 
     def _bar_judge(self, df, row, col):
+        if isinstance(self.n_samples, int):
+            df = df.sample(self.n_samples, random_state=0)
 
         n = 15
         df = df.stb.freq([self.judge], cum_cols=False)[:n]
@@ -214,6 +219,8 @@ class Charts():
         )
 
     def _geo_map(self, df, row, col):
+        if isinstance(self.n_samples, int):
+            df = df.sample(self.n_samples, random_state=0)
 
         df[self.fac_name] = df[self.court_fac].map(self.key_facname, na_action='ignore')
 
@@ -234,7 +241,7 @@ class Charts():
 
         # geojson = districts.__geo_interface__
 
-        mm_scaler = preprocessing.MinMaxScaler(feature_range=(5,40))
+        mm_scaler = preprocessing.MinMaxScaler(feature_range=(10,40))
 
         # https://towardsdatascience.com/data-normalization-with-pandas-and-scikit-learn-7c1cc6ed6475
         gdf['scaled'] = pd.DataFrame(mm_scaler.fit_transform(gdf[[count_col]]))

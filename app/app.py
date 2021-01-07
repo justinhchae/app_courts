@@ -1,13 +1,8 @@
 import streamlit as st
-import numpy as np
-import pandas as pd
-
-import time
 
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 
-import sys
 
 class App():
     def __init__(self):
@@ -28,8 +23,11 @@ class App():
         self.frame_objects()
         self.data_disclaimer()
 
-    def sample_size(self):
-        n_samples = len(self.df) // 2
+    def sample_size(self, size=None):
+        if size=='half':
+            n_samples = len(self.df) // 2
+        else:
+            n_samples = None
         self.n_samples = n_samples
 
     def frame(self):
@@ -68,7 +66,7 @@ class App():
 
     def frame_objects(self):
         self.object_overview()
-        # self.by_judge()
+        self.by_judge()
         # self.by_initiation()
         # self.by_disposition()
         # self.by_court()
@@ -77,9 +75,9 @@ class App():
 
         @st.cache(hash_funcs={dict: lambda _: None})
         def get_cached():
-            s = time.time()
+            # s = time.time()
             cached_dict = {'figure1': Judge().overview(df=self.df, col=self.judge)}
-            e = time.time()
+            # e = time.time()
             # print('Get Overview Figure From Function', e - s)
             return cached_dict
 
@@ -91,9 +89,9 @@ class App():
 
             self.st.markdown('Judge Narrative - High Level')
 
-            s = time.time()
+            # s = time.time()
             self.st.plotly_chart(cached['figure1'])
-            e = time.time()
+            # e = time.time()
             # print('Get Overview Figure from Cache', e - s)
 
             sidebar_picklist = self.df[self.judge].dropna(how='any').unique()
@@ -105,14 +103,14 @@ class App():
                 self.st.write(sidebar_selection)
 
                 if sidebar_selection in cached:
-                    s = time.time()
+                    # s = time.time()
                     self.st.plotly_chart(cached[sidebar_selection])
-                    e = time.time()
+                    # e = time.time()
                     # print('Get Sidebar Selection from Cache', e - s)
                 else:
-                    s = time.time()
+                    # s = time.time()
                     figure = Judge().detail(df=self.df, col=sidebar_selection)
-                    e = time.time()
+                    # e = time.time()
                     # print('Get Sidebar Selection from Function', e - s)
                     self.st.plotly_chart(figure)
                     cached.update({sidebar_selection:figure})
@@ -151,9 +149,9 @@ class App():
 
             self.df[col_list] = self.df[col_list].astype('object')
 
-        s = time.time()
+        # s = time.time()
         data_fixer()
-        e = time.time()
+        # e = time.time()
         # print('Fix Data', e - s)
 
     def data_disclaimer(self):
