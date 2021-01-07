@@ -1,10 +1,9 @@
-import pandas as pd
 import numpy as np
-import os
-import re
+import pandas as pd
 
 from clean_data.cleaner import Cleaner
 from clean_data.maker import Maker
+
 
 class Joiner():
     def __init__(self):

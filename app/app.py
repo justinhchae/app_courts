@@ -7,6 +7,8 @@ import time
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 
+import sys
+
 class App():
     def __init__(self):
         self.st = st

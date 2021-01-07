@@ -57,6 +57,7 @@ if __name__ == '__main__':
     # read_source(from_source=False)
 
     def run_app():
+
         df = reader.to_df('main.bz2'
                           , preview=False
                           , echo=False

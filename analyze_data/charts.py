@@ -1,32 +1,17 @@
 
-import pandas as pd
 # import modin as md
 import numpy as np
-
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-
-import plotly.express as px
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import plotly.figure_factory as ff
-
-import os
-import json
-from pandas.io.json import json_normalize
-
+import pandas as pd
 import sidetable
 import geopandas
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from sklearn import preprocessing
 
+from clean_data.cleaner import Cleaner
 from do_data.getter import Reader
 from do_data.writer import Writer
-from clean_data.cleaner import Cleaner
-from analyze_data.colors import Colors
 
-# import locale
-# locale.setlocale(locale.LC_ALL, 'en_US')
-
-from sklearn import preprocessing
 
 class Charts():
     def __init__(self):

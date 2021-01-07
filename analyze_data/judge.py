@@ -1,25 +1,11 @@
 
 import pandas as pd
-import numpy as np
-
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-
 import plotly.express as px
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from clean_data.cleaner import Cleaner
 
-import os
-import json
-from pandas.io.json import json_normalize
-
-import sidetable
-import geopandas
-
-from collections import deque
-from collections import defaultdict
 
 class Judge():
     def __init__(self):
