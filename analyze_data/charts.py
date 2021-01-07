@@ -75,23 +75,31 @@ class Charts():
         self.transparent = 'rgba(0,0,0,0)'
 
         self.n_samples = None
+        self.df = self.reader.to_df('main.bz2'
+                                    , preview=False
+                                    , echo=False
+                                    , classify=False
+                                    )
 
-    def overview(self, df):
+    def chart_data(self):
+        print('load data')
+
+    def overview(self):
 
         title = str('Overview of Court Data')
 
-        total_count = len(df)
-        judge_count = str(len(df[self.judge].dropna(how='any').unique()))
-        start_date = min(df[self.received_date])
-        end_date = max(df[self.received_date])
+        total_count = len(self.df)
+        judge_count = str(len(self.df[self.judge].dropna(how='any').unique()))
+        start_date = min(self.df[self.received_date])
+        end_date = max(self.df[self.received_date])
         span = str(np.round((end_date - start_date) / self.timedelta, decimals=2))
-        districts = list(df[self.district_courts].dropna(how='any').unique())
-        initiations = list(df[self.initiation_events].dropna(how='any').unique())
-        dispositions = list(df[self.disposition_types].dropna(how='any').unique())
+        districts = list(self.df[self.district_courts].dropna(how='any').unique())
+        initiations = list(self.df[self.initiation_events].dropna(how='any').unique())
+        dispositions = list(self.df[self.disposition_types].dropna(how='any').unique())
         # cpi = locale.format_string("%d", len(df[self.cpi].dropna(how='any').unique()), grouping=True)
-        cpi = len(df[self.cpi].dropna(how='any').unique())
+        cpi = len(self.df[self.cpi].dropna(how='any').unique())
         # case_id = locale.format_string("%d", len(df[self.case_id].dropna(how='any').unique()), grouping=True)
-        case_id = len(df[self.case_id].dropna(how='any').unique())
+        case_id = len(self.df[self.case_id].dropna(how='any').unique())
 
         narrative = {'total_count': f"{total_count:,d}"
                 ,'start_date':start_date.strftime('%B %Y')
@@ -105,12 +113,9 @@ class Charts():
                 , 'case_id': f"{case_id:,d}"
                 }
 
-        del df
-        gc.collect()
-
         return narrative
 
-    def overview_figures(self, df, n_samples = 500000):
+    def overview_figures(self, n_samples = None):
 
         self.n_samples = n_samples
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
@@ -128,20 +133,19 @@ class Charts():
                               , "Case Volume by Court Location")
         )
 
-        self._ts_pending_case_len(df, row=1, col=1)
-        self._ts_charge_class(df, row=2, col=1)
-        self._bar_judge(df, row=1, col=2)
-        self._geo_map(df, row=2, col=2)
+        self._ts_pending_case_len(self.df, row=1, col=1)
+        self._ts_charge_class(self.df, row=2, col=1)
+        self._bar_judge(self.df, row=1, col=2)
+        self._geo_map(self.df, row=2, col=2)
 
         self.fig.update_yaxes(showticklabels=False)
 
         self.fig.update_layout(title=dict(text="Visual Data Summary of Court Data", x=center)
                           , showlegend=False, paper_bgcolor=self.transparent, plot_bgcolor=self.transparent )
-        del df
-        gc.collect()
         return self.fig
 
     def _ts_pending_case_len(self, df, row, col):
+
         if isinstance(self.n_samples, int):
             df = df.sample(self.n_samples, random_state=0)
 
@@ -165,8 +169,6 @@ class Charts():
             ),
             row=row, col=col
         )
-        del df
-        gc.collect()
 
     def _ts_charge_class(self, df, row, col):
 
@@ -209,9 +211,6 @@ class Charts():
         self.fig.update_xaxes(title_text="Year", showgrid=False, zeroline=False
                               , row=row, col=col)
 
-        del df
-        gc.collect()
-
     def _bar_judge(self, df, row, col):
         if isinstance(self.n_samples, int):
             df = df.sample(self.n_samples, random_state=0)
@@ -227,9 +226,6 @@ class Charts():
                    ),
             row=row, col=col
         )
-
-        del df
-        gc.collect()
 
     def _geo_map(self, df, row, col):
         if isinstance(self.n_samples, int):
@@ -303,10 +299,6 @@ class Charts():
                             # , lataxis=dict(range=(-85, -86))
                             #,
                              )
-        del df
-        del courts
-        del gdf
-        gc.collect()
 
 
 
