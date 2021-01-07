@@ -75,14 +75,6 @@ class Charts():
         self.transparent = 'rgba(0,0,0,0)'
 
         self.n_samples = None
-        self.df = self.reader.to_df('main.bz2'
-                                    , preview=False
-                                    , echo=False
-                                    , classify=False
-                                    )
-
-    def chart_data(self):
-        print('load data')
 
     def overview(self):
         self.df = self.reader.to_df('main.bz2'
@@ -121,6 +113,12 @@ class Charts():
         return narrative
 
     def overview_figures(self, n_samples = None):
+
+        self.df = self.reader.to_df('main.bz2'
+                                    , preview=False
+                                    , echo=False
+                                    , classify=False
+                                    )
 
         self.n_samples = n_samples
         # https://towardsdatascience.com/how-to-create-maps-in-plotly-with-non-us-locations-ca974c3bc997
