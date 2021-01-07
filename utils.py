@@ -1,14 +1,16 @@
-import pandas as pd
-from do_data.getter import Reader
-from do_data.writer import Writer
-from do_data.joiner import Joiner
+import gc
 
-from clean_data.maker import Maker
-# from analyze_data.eda import EDA
+import pandas as pd
 
 from application.application import Application
+from clean_data.maker import Maker
+from do_data.config import Columns
+from do_data.getter import Reader
+from do_data.joiner import Joiner
+from do_data.writer import Writer
+from do_data.config import Columns
 
-import gc
+# from analyze_data.eda import EDA
 
 
 reader = Reader()
@@ -16,6 +18,7 @@ writer = Writer()
 joiner = Joiner()
 maker = Maker()
 app = Application()
+c = Columns()
 # eda = EDA()
 
 def read_source(from_source=False):
@@ -57,8 +60,8 @@ def read_source(from_source=False):
         sample = main.sample(n=250000, random_state=0)
         writer.to_package(sample, 'sample')
 
-        judges = pd.DataFrame(main['judge'].dropna(how='any').unique(), columns=['judge'])
-        writer.to_package(judges, 'judges', compression=False)
+        judges = pd.DataFrame(main[c.judge].dropna(how='any').unique(), columns=[c.judge])
+        writer.to_package(judges, c.judge, compression=False)
 
         del initiation
         del disposition
@@ -67,7 +70,4 @@ def read_source(from_source=False):
         del judges
         gc.collect()
 
-read_source(from_source=False)
-
-
-
+# read_source(from_source=False)

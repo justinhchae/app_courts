@@ -12,55 +12,15 @@ from sklearn import preprocessing
 from clean_data.cleaner import Cleaner
 from do_data.getter import Reader
 from do_data.writer import Writer
-
+from do_data.config import Columns
 
 class Charts():
     def __init__(self):
         self.today = pd.Timestamp.now()
         self.overview_stats = None
-        self.judge = 'judge'
-        self.received_date = 'received_date'
-        self.district_courts = 'disposition_court_name'
-        self.court_fac = 'disposition_court_facility'
-        self.initiation_events = 'event'
-        self.disposition_types = 'charge_disposition'
-        self.cpi = 'case_participant_id'
-        self.case_id = 'case_id'
-        self.disp_date = 'disposition_date'
-        self.disp_class = 'disposition_charged_class'
-        self.charged_class = 'class'
-        self.pending_date = 'disposition_date_days_pending'
-        self.primary_flag_init = 'primary_charge_flag_init'
-
-        self.key_district = {  1: 'District 1 - Chicago'
-                             , 2: 'District 2 - Skokie'
-                             , 3: 'District 3 - Rolling Meadows'
-                             , 4: 'District 4 - Maywood'
-                             , 5: 'District 5 - Bridgeview'
-                             , 6: 'District 6 - Markham'}
+        self.c = Columns()
 
         # https://loumeza.com/cook-county-branch-court-locations/
-
-        self.fac_name = 'Fac_Name'
-        self.key_facname = { '26Th Street' : 'Criminal Courts (26th/California)'
-                           , 'Markham Courthouse' : 'Markham Courthouse (6th District)'
-                           , 'Skokie Courthouse': 'Skokie Courthouse (2nd District)'
-                           , 'Rolling Meadows Courthouse' : 'Rolling Meadows Courthouse (3rd District)'
-                           , np.nan : np.nan
-                           , 'Maywood Courthouse' : 'Maywood Courthouse (4th District)'
-                           , 'Bridgeview Courthouse' : 'Bridgeview Courthouse (5th District)'
-                           , 'Dv Courthouse' : 'Domestic Violence Courthouse'
-                           , 'Dnu_3605 W. Fillmore St (Rjcc)' : 'RJCC'
-                           , 'Daley Center' : 'Daley Center'
-                           , '3605 W. Fillmore (Rjcc)' : 'RJCC'
-                           , 'Grand & Central (Area 5)' : 'Circuit Court Branch 23/50'
-                           , 'Harrison & Kedzie (Area 4)' : 'Circuit Court Branch 43/44'
-                           , '51St & Wentworth (Area 1)' : 'Circuit Court Branch 34/38'
-                           , 'Belmont & Western (Area 3)' : 'Circuit Court Branch 29/42'
-                           , '727 E. 111Th Street (Area 2)' : 'Circuit Court Branch 35/38'
-                            }
-
-
 
         self.timedelta = np.timedelta64(1, 'Y')
 
@@ -86,17 +46,17 @@ class Charts():
         title = str('Overview of Court Data')
 
         total_count = len(self.df)
-        judge_count = str(len(self.df[self.judge].dropna(how='any').unique()))
-        start_date = min(self.df[self.received_date])
-        end_date = max(self.df[self.received_date])
+        judge_count = str(len(self.df[self.c.judge].dropna(how='any').unique()))
+        start_date = min(self.df[self.c.received_date])
+        end_date = max(self.df[self.c.received_date])
         span = str(np.round((end_date - start_date) / self.timedelta, decimals=2))
-        districts = list(self.df[self.district_courts].dropna(how='any').unique())
-        initiations = list(self.df[self.initiation_events].dropna(how='any').unique())
-        dispositions = list(self.df[self.disposition_types].dropna(how='any').unique())
+        districts = list(self.df[self.c.disposition_court_name].dropna(how='any').unique())
+        initiations = list(self.df[self.c.event].dropna(how='any').unique())
+        dispositions = list(self.df[self.c.charge_class].dropna(how='any').unique())
         # cpi = locale.format_string("%d", len(df[self.cpi].dropna(how='any').unique()), grouping=True)
-        cpi = len(self.df[self.cpi].dropna(how='any').unique())
+        cpi = len(self.df[self.c.case_participant_id].dropna(how='any').unique())
         # case_id = locale.format_string("%d", len(df[self.case_id].dropna(how='any').unique()), grouping=True)
-        case_id = len(self.df[self.case_id].dropna(how='any').unique())
+        case_id = len(self.df[self.c.case_id].dropna(how='any').unique())
 
         narrative = {'total_count': f"{total_count:,d}"
                 ,'start_date':start_date.strftime('%B %Y')
@@ -152,18 +112,18 @@ class Charts():
         if isinstance(self.n_samples, int):
             df = df.sample(self.n_samples, random_state=0)
 
-        df = df[[self.primary_flag_init, self.received_date, self.pending_date]]
-        df = df[(df[self.pending_date].notnull() & df[self.primary_flag_init] == True)].copy()
-        df = df.drop(columns=[self.primary_flag_init])
+        df = df[[self.c.primary_charge_flag_init, self.c.received_date, self.c.disposition_date_days_pending]]
+        df = df[(df[self.c.disposition_date_days_pending].notnull() & df[self.c.primary_charge_flag_init] == True)].copy()
+        df = df.drop(columns=[self.c.primary_charge_flag_init])
 
         df = df.value_counts().to_frame('count').reset_index()
 
         # https://pbpython.com/pandas-grouper-agg.html
-        df = df.groupby([self.pending_date, pd.Grouper(key=self.received_date, freq='M')])['count'].sum().to_frame().reset_index()
+        df = df.groupby([self.c.disposition_date_days_pending, pd.Grouper(key=self.c.received_date, freq='M')])['count'].sum().to_frame().reset_index()
 
         self.fig.add_trace(
             go.Scatter(
-                x=df[self.received_date]
+                x=df[self.c.received_date]
                 , y=df['count']
                 , name='Primary Charge'
                 # , mode='markers'
@@ -178,14 +138,14 @@ class Charts():
         if isinstance(self.n_samples, int):
             df = df.sample(self.n_samples, random_state=0)
 
-        cols = [self.disp_date, self.charged_class]
+        cols = [self.c.disposition_date, self.c.charge_class]
 
         df = df[cols].value_counts().to_frame('count').reset_index()
 
         # https://pbpython.com/pandas-grouper-agg.html
-        df = df.groupby([self.charged_class, pd.Grouper(key=self.disp_date, freq='M')])['count'].sum().to_frame().reset_index()
+        df = df.groupby([self.c.charge_class, pd.Grouper(key=self.c.disposition_date, freq='M')])['count'].sum().to_frame().reset_index()
 
-        df = self.cleaner.classer(df=df, col_name=self.charged_class).groupby(self.charged_class)
+        df = self.cleaner.classer(df=df, col_name=self.c.charge_class).groupby(self.c.charge_class)
         # df2 = df2.set_index(self.disp_date)
         # print(df2)
 
@@ -201,7 +161,7 @@ class Charts():
 
         for name, group in df:
             self.fig.add_trace(
-                go.Scatter(x=group[self.disp_date]
+                go.Scatter(x=group[self.c.disposition_date]
                            , y=group['count']
                            , name=str('Class ' + name)
                            ,
@@ -219,13 +179,13 @@ class Charts():
             df = df.sample(self.n_samples, random_state=0)
 
         n = 15
-        df = df.stb.freq([self.judge], cum_cols=False)[:n]
+        df = df.stb.freq([self.c.judge], cum_cols=False)[:n]
 
         self.fig.add_trace(
             go.Bar(x=df['count'][:n]
-                   , y=df[self.judge][:n]
+                   , y=df[self.c.judge][:n]
                    , orientation='h'
-                   , name=self.judge
+                   , name=self.c.judge
                    ),
             row=row, col=col
         )
@@ -234,22 +194,22 @@ class Charts():
         if isinstance(self.n_samples, int):
             df = df.sample(self.n_samples, random_state=0)
 
-        df[self.fac_name] = df[self.court_fac].map(self.key_facname, na_action='ignore')
+        df[self.c.fac_name] = df[self.c.disposition_court_facility].map(self.c.key_facname, na_action='ignore')
 
-        df = df[[self.fac_name, self.case_id]].groupby([self.fac_name], as_index=False)[self.case_id].agg('count')
-        count_col = str(self.case_id + '_count')
-        df.rename(columns={self.case_id: count_col}, inplace=True)
+        df = df[[self.c.fac_name, self.c.case_id]].groupby([self.c.fac_name], as_index=False)[self.c.case_id].agg('count')
+        count_col = str(self.c.case_id + '_count')
+        df.rename(columns={self.c.case_id: count_col}, inplace=True)
 
         courts = self.geo_facilities[(self.geo_facilities['SubType'] == 'Court')]
-        courts = courts[[self.fac_name, 'Muni', 'geometry']]
+        courts = courts[[self.c.fac_name, 'Muni', 'geometry']]
 
         districts = self.geo_districts
 
         gdf = pd.merge(left=courts, right=df
                           , how='left'
-                          , left_on=self.fac_name
-                          , right_on=self.fac_name
-                          ).dropna(subset=[self.fac_name])
+                          , left_on=self.c.fac_name
+                          , right_on=self.c.fac_name
+                          ).dropna(subset=[self.c.fac_name])
 
         # geojson = districts.__geo_interface__
 
@@ -274,7 +234,7 @@ class Charts():
 
         gdf[count_col] = gdf[count_col].apply(lambda x: human_format(x))
 
-        gdf = gdf.groupby(self.fac_name)
+        gdf = gdf.groupby(self.c.fac_name)
 
         # COMEBACK: Map Plots
         # fig = px.choropleth(districts
@@ -289,7 +249,7 @@ class Charts():
                               , name=name
                               , mode='markers'
                               , hoverinfo='text'
-                              , text=group[[self.fac_name, count_col]]
+                              , text=group[[self.c.fac_name, count_col]]
                               , marker=dict(size=group['scaled']
                                             , opacity=0.5)
                               )
