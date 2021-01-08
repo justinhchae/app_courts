@@ -1,7 +1,8 @@
-geopandas==0.8.1
-pandas==1.1.4
-plotly~=4.13.0
+geopandas
+pandas
+plotly
 sklearn
-streamlit~=0.73.1
-numpy~=1.19.1
-sidetable~=0.8.0
+streamlit
+numpy
+sidetable
+matplotlib

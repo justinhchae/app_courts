@@ -70,4 +70,4 @@ def read_source(from_source=False):
         del judges
         gc.collect()
 
-# read_source(from_source=False)
+read_source(from_source=True)

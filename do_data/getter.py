@@ -5,6 +5,10 @@ import re
 from clean_data.cleaner import Cleaner
 from clean_data.maker import Maker
 from do_data.joiner import Joiner
+from do_data.config import Columns
+
+name = Columns()
+
 import geopandas
 
 # import ray
@@ -80,62 +84,75 @@ class Reader():
 
                 if clean_initiation:
                     df = self.cleaner.parse_cols(df)
-                    df = self.cleaner.parse_ids(df, ['case_id', 'case_participant_id'])
+                    df = self.cleaner.parse_ids(df, [name.case_id, name.case_participant_id])
                     date_cols = self.cleaner.get_date_cols(df)
                     df = self.cleaner.parse_dates(df, date_cols=date_cols)
-                    df = self.cleaner.parse_conversions(df, col_name='offense_category')
+                    df = self.cleaner.parse_conversions(df, col_name=name.offense_category)
                     df = self.cleaner.parse_subset(df, type='initiation')
 
-                    df = self.cleaner.impute_dates(df, col1='event_date', col2='received_date', date_type='initiation')
-                    df = self.cleaner.impute_dates(df, col1='felony_review_date', col2='received_date', date_type='initiation')
-                    df = self.cleaner.impute_dates(df, col1='arraignment_date', col2='received_date', date_type='initiation')
+                    df = self.cleaner.impute_dates(df, col1=name.event_date, col2=name.received_date, date_type='initiation')
+                    df = self.cleaner.impute_dates(df, col1=name.felony_review_date, col2=name.received_date, date_type='initiation')
+                    df = self.cleaner.impute_dates(df, col1=name.arraignment_date, col2=name.received_date, date_type='initiation')
                     df = self.cleaner.parse_duplicates(df)
 
                     if classify:
-                        df = self.cleaner.classer(df, 'class')
-                        df = self.cleaner.classer(df, 'race')
-                        df = self.cleaner.classer(df, 'gender')
-                        df = self.cleaner.classer(df, 'offense_category')
-                        df = self.cleaner.classer(df, 'updated_offense_category')
+                        df = self.cleaner.classer(df, name.charge_class)
+                        df = self.cleaner.classer(df, name.race)
+                        df = self.cleaner.classer(df, name.gender)
+                        df = self.cleaner.classer(df, name.offense_category)
+                        df = self.cleaner.classer(df, name.updated_offense_category)
                         df = self.cleaner.classer(df,
-                                                  [ 'charge_id', 'charge_version_id'
-                                                  , 'chapter', 'act', 'section', 'aoic'
-                                                  , 'event'
-                                                  , 'bond_type_initial', 'bond_type_current'
-                                                  , 'incident_city'
-                                                  , 'law_enforcement_agency', 'law_enforcement_unit'
-                                                  , 'felony_review_result'])
+                                                  [ name.charge_id
+                                                  , name.charge_version_id
+                                                  , name.chapter
+                                                  , name.act
+                                                  , name.section
+                                                  , name.aoic
+                                                  , name.event
+                                                  , name.bond_type_initial
+                                                  , name.bond_type_current
+                                                  , name.incident_city
+                                                  , name.law_enforcement_agency
+                                                  , name.law_enforcement_unit
+                                                  , name.felony_review_result])
 
                 if clean_disposition:
                     df = self.cleaner.parse_cols(df)
-                    df = self.cleaner.parse_ids(df, ['case_id', 'case_participant_id'])
+                    df = self.cleaner.parse_ids(df, [name.case_id, name.case_participant_id])
                     date_cols = self.cleaner.get_date_cols(df)
                     df = self.cleaner.parse_dates(df, date_cols=date_cols)
-                    df = self.cleaner.parse_conversions(df, col_name='offense_category')
-                    df = self.cleaner.parse_conversions(df, col_name='disposition_court_name')
-                    df = self.cleaner.parse_conversions(df, col_name='disposition_court_facility')
+                    df = self.cleaner.parse_conversions(df, col_name=name.offense_category)
+                    df = self.cleaner.parse_conversions(df, col_name=name.disposition_court_name)
+                    df = self.cleaner.parse_conversions(df, col_name=name.disposition_court_facility)
                     df = self.cleaner.parse_subset(df, type='disposition')
-                    df = self.cleaner.impute_dates(df, col1='disposition_date', col2='received_date', date_type='disposition')
-                    df = self.maker.make_disposition_cats(df, 'charge_disposition')
+                    df = self.cleaner.impute_dates(df, col1=name.disposition_date, col2=name.received_date, date_type='disposition')
+                    df = self.maker.make_disposition_cats(df, name.charge_disposition)
                     df = self.cleaner.parse_duplicates(df)
 
                     if classify:
-                        df = self.cleaner.classer(df, 'disposition_charged_class')
-                        df = self.cleaner.classer(df, 'disposition_court_name')
-                        df = self.cleaner.classer(df, 'judge')
-                        df = self.cleaner.classer(df, 'offense_category')
-                        df = self.cleaner.classer(df, 'updated_offense_category')
+                        df = self.cleaner.classer(df, name.disposition_charged_class)
+                        df = self.cleaner.classer(df, name.disposition_court_name)
+                        df = self.cleaner.classer(df, name.judge)
+                        df = self.cleaner.classer(df, name.offense_category)
+                        df = self.cleaner.classer(df, name.updated_offense_category)
                         df = self.cleaner.classer(df,
-                                                  [ 'charge_id', 'charge_version_id'
-                                                  , 'disposition_charged_chapter', 'disposition_charged_act'
-                                                  , 'disposition_charged_section', 'disposition_charged_aoic'
-                                                  , 'charge_disposition', 'charge_disposition_reason'
-                                                  , 'race', 'gender', 'incident_city'
-                                                  , 'law_enforcement_agency', 'law_enforcement_unit'
-                                                  , 'felony_review_result'])
+                                                  [ name.charge_id
+                                                  , name.charge_version_id
+                                                  , name.disposition_charged_chapter
+                                                  , name.disposition_charged_act
+                                                  , name.disposition_charged_section
+                                                  , name.disposition_charged_aoic
+                                                  , name.charge_disposition
+                                                  , name.charge_disposition_reason
+                                                  , name.race
+                                                  , name.gender
+                                                  , name.incident_city
+                                                  , name.law_enforcement_agency
+                                                  , name.law_enforcement_unit
+                                                  , name.felony_review_result])
 
                     if derive_data:
-                        df = self.maker.make_caselen(df, 'received_date', 'disposition_date')
+                        df = self.maker.make_caselen(df, name.received_date, name.disposition_date)
 
                 return df
 
