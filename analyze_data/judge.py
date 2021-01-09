@@ -12,7 +12,7 @@ from do_data.config import Columns
 class Judge():
     def __init__(self):
         self.overview_stats = None
-        self.c = Columns()
+        self.name = Columns()
 
         self.ordered_charges = ['M', 'X', '1', '2', '3', '4', 'A', 'B', 'C', 'O', 'P', 'Z']
         self.ordered_charges.reverse()
@@ -47,7 +47,7 @@ class Judge():
 
     def detail(self, col):
 
-        df = self.df[(self.df[self.c.judge]==col)]
+        df = self.df[(self.df[self.name.judge]==col)]
         center = 0.5
 
         self.fig = make_subplots(
@@ -79,23 +79,23 @@ class Judge():
         """
         https://pbpython.com/pandas-grouper-agg.html
         """
-        df = df[[self.c.disposition_date, self.c.case_length]]
-        df = df[(df[self.c.disposition_date].notnull())].copy()
-        df = df[(df[self.c.case_length] > 0 )].copy()
+        df = df[[self.name.disposition_date, self.name.case_length]]
+        df = df[(df[self.name.disposition_date].notnull())].copy()
+        df = df[(df[self.name.case_length] > 0 )].copy()
 
         counts = df.value_counts()
 
         df = counts.to_frame().reset_index()
         df.rename(columns={0: 'count'}, inplace=True)
 
-        df = df.groupby([self.c.case_length, pd.Grouper(key=self.c.disposition_date, freq='M')])['count'].sum()
+        df = df.groupby([self.name.case_length, pd.Grouper(key=self.name.disposition_date, freq='M')])['count'].sum()
         df = df.to_frame().reset_index()
-        df = df.sort_values(self.c.disposition_date)
+        df = df.sort_values(self.name.disposition_date)
 
         self.fig.add_trace(
             go.Scatter(
-                x=df[self.c.disposition_date]
-                , y=df[self.c.case_length]
+                x=df[self.name.disposition_date]
+                , y=df[self.name.case_length]
                 , name='Days'
                 # , mode='markers'
                 # # , name=str('Class ' + name)
@@ -116,19 +116,19 @@ class Judge():
 
         references: https://pbpython.com/pandas-grouper-agg.html
         """
-        df = df[[self.c.disposition_date, self.c.charge_class]].value_counts()
+        df = df[[self.name.disposition_date, self.name.charge_class]].value_counts()
         df = df.to_frame().reset_index()
         df.rename(columns={0: 'count'}, inplace=True)
 
-        df = df.groupby([self.c.charge_class, pd.Grouper(key=self.c.disposition_date, freq='M')])['count'].sum()
+        df = df.groupby([self.name.charge_class, pd.Grouper(key=self.name.disposition_date, freq='M')])['count'].sum()
 
         df = df.to_frame().reset_index()
 
-        df = df.groupby(self.c.charge_class)
+        df = df.groupby(self.name.charge_class)
         
         for name, group in df:
             self.fig.add_trace(
-                go.Scatter(x=group[self.c.disposition_date]
+                go.Scatter(x=group[self.name.disposition_date]
                            , y=group['count']
                            , name=str('Class ' + name)
                            ,
@@ -144,7 +144,7 @@ class Judge():
 
     def _bar_charge_class(self, df, row, col):
         n = 15
-        df = df[[self.c.judge, self.c.charge_class]].stb.freq([self.c.charge_class], cum_cols=False)[:n]
+        df = df[[self.name.judge, self.name.charge_class]].stb.freq([self.name.charge_class], cum_cols=False)[:n]
 
         # print(df[self.charged_class].dtypes)
 
@@ -155,11 +155,11 @@ class Judge():
         # df[self.charged_class] = df[self.charged_class].cat.as_ordered()
         # df[self.charged_class] = df[self.charged_class].cat.reorder_categories(ordered_subset, ordered=True)
 
-        color = list(df[self.c.charge_class].cat.codes)
+        color = list(df[self.name.charge_class].cat.codes)
         color.sort()
 
         self.fig.add_trace(
-            go.Bar(x=df[self.c.charge_class]
+            go.Bar(x=df[self.name.charge_class]
                    , y=df['count']
                    , marker=dict(color=color)
                    , name="Class"
