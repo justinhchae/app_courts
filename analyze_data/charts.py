@@ -37,7 +37,7 @@ class Charts():
         self.n_samples = None
 
     def overview(self):
-        self.df = self.reader.to_df('main.bz2'
+        self.df = self.reader.to_df('subset.bz2'
                                     , preview=False
                                     , echo=False
                                     , classify=False
@@ -74,7 +74,7 @@ class Charts():
 
     def overview_figures(self, n_samples = None):
 
-        self.df = self.reader.to_df('main.bz2'
+        self.df = self.reader.to_df('subset.bz2'
                                     , preview=False
                                     , echo=False
                                     , classify=False

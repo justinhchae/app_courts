@@ -6,3 +6,4 @@ streamlit
 numpy
 sidetable
 matplotlib
+seaborn

@@ -4,34 +4,36 @@ import pandas as pd
 from clean_data.cleaner import Cleaner
 from clean_data.maker import Maker
 
+from do_data.config import Columns
+
+name = Columns()
+
 
 class Joiner():
     def __init__(self):
         self.cleaner = Cleaner()
         self.maker = Maker()
         self.join_cols = [
-              'case_id'
-            , 'case_participant_id'
-            , 'received_date'
-            , 'offense_category'
-            , 'charge_id'
-            , 'charge_version_id'
-            , 'charge_count'
-            , 'arraignment_date'
+              name.case_id
+            , name.case_participant_id
+            , name.received_date
+            , name.offense_category
+            , name.charge_id
+            , name.charge_version_id
+            , name.charge_count
+            , name.arraignment_date
             , ]
 
     def initiation_disposition(self, df1, df2):
+
         cols = self.join_cols
 
-        df1_cols = ['gender']
-        df2_cols = ['age_at_incident'
-                    , 'race'
-                    , 'incident_city', 'incident_begin_date'
-                    , 'incident_end_date', 'law_enforcement_agency', 'law_enforcement_unit'
-                    , 'arrest_date', 'felony_review_date', 'felony_review_result']
-
-        # print(df1['law_enforcement_unit'].cat.categories)
-        # print(df2['law_enforcement_unit'].dtype)
+        df1_cols = [name.gender]
+        df2_cols = [name.age_at_incident
+                    , name.race
+                    , name.incident_city, name.incident_begin_date
+                    , name.incident_end_date, name.law_enforcement_agency, name.law_enforcement_unit
+                    , name.arrest_date, name.felony_review_date, name.felony_review_result]
 
         df1 = df1.drop(columns=df1_cols)
         df2 = df2.drop(columns=df2_cols)
@@ -40,8 +42,13 @@ class Joiner():
                       , suffixes=('_init', '_disp')
                       )
 
-        initiation_charge_cols = ['act', 'section', 'class', 'aoic', 'chapter']
-        disposition_charge_cols = ['disposition_charged_act', 'disposition_charged_section', 'disposition_charged_class', 'disposition_charged_aoic', 'disposition_charged_chapter']
+        initiation_charge_cols = [name.act, name.section, name.charge_class, name.aoic, name.chapter]
+        disposition_charge_cols = [name.disposition_charged_act
+                                    , name.disposition_charged_section
+                                    , name.disposition_charged_class
+                                    , name.disposition_charged_aoic
+                                    , name.disposition_charged_chapter
+                                   ]
 
         charge_cols = tuple(zip(initiation_charge_cols, disposition_charge_cols))
 
@@ -50,33 +57,10 @@ class Joiner():
 
         df = df.drop(columns=disposition_charge_cols)
 
-        df['offense_category'] = np.where(df['updated_offense_category_disp'].notnull(), df['updated_offense_category_disp']
-                                          , np.where(df['updated_offense_category_init'].notnull(), df['updated_offense_category_init'], df['offense_category']))
+        df[name.offense_category] = np.where(df['updated_offense_category_disp'].notnull(), df['updated_offense_category_disp']
+                                          , np.where(df['updated_offense_category_init'].notnull(), df['updated_offense_category_init'], df[name.offense_category]))
 
         df = df.drop(columns=['updated_offense_category_disp', 'updated_offense_category_init'])
-
-        #FIXME supress categorical transformation with nan categories [law_enforcement_unit] and [charge_disposition_reason]
-        # refactor in cleaner.py
-        # Likely bug in cleaner when forcing type to str
-        # TEMP WORK AROUND
-
-        bad_cols = ['law_enforcement_unit', 'charge_disposition_reason', 'bond_type_initial', 'bond_type_current']
-
-        df['law_enforcement_unit'] = np.where(df['law_enforcement_unit']=='nan', np.nan, df['law_enforcement_unit'])
-        df['law_enforcement_unit'] = df['law_enforcement_unit'].astype('category')
-
-        df['charge_disposition_reason'] = np.where(df['charge_disposition_reason'] == 'nan', np.nan, df['charge_disposition_reason'])
-        df['charge_disposition_reason'] = df['charge_disposition_reason'].astype('category')
-
-        df['bond_type_initial'] = np.where(df['bond_type_initial'] == 'nan', np.nan,
-                                                   df['bond_type_initial'])
-        df['bond_type_initial'] = df['bond_type_initial'].astype('category')
-
-        df['bond_type_current'] = np.where(df['bond_type_current'] == 'nan', np.nan,
-                                           df['bond_type_current'])
-        df['bond_type_current'] = df['bond_type_current'].astype('category')
-
-        # FIXME: move memory patches to cleaning routines
 
         def get_mem(df):
             total_mem = df.memory_usage().sum() / (1024 ** 2)
@@ -96,56 +80,30 @@ class Joiner():
             # int16 is -32768 to +32767
             print(total_mem)
 
-        cols = ['bond_amount_initial'
-            , 'bond_amount_current', 'age_at_incident'
-            , 'disposition_date_days_pending', 'case_length', 'charged_class_difference']
+        df = self.cleaner.classer(df, name.offense_category)
+        df = self.cleaner.classer(df,
+                                  [
+                                  name.charge_id
+                                  , name.charge_version_id
+                                  , name.charge_offense_title
+                                  , name.chapter
+                                  , name.act
+                                  , name.section
+                                  , name.charge_class
+                                  , name.aoic
+                                  , name.event
+                                  , name.bond_type_initial
+                                  , name.bond_type_current
+                                  , name.incident_city
+                                  , name.law_enforcement_agency
+                                  , name.law_enforcement_unit
+                                  , name.felony_review_result
+                                  , name.disposition_court_facility
+                                   ])
 
-        key = {'nan': np.nan,
-               1.: True}
-
-        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].map(key)
-        df['bond_electronic_monitor_flag_initial'] = df['bond_electronic_monitor_flag_initial'].map(key)
-        df['bond_electroinic_monitor_flag_current'] = df['bond_electroinic_monitor_flag_current'].map(key)
-
-        df['finding_no_probable_cause'] = df['finding_no_probable_cause'].astype('bool')
-        df['bond_electronic_monitor_flag_initial'] = df['bond_electronic_monitor_flag_initial'].astype('bool')
-        df['bond_electroinic_monitor_flag_current'] = df['bond_electroinic_monitor_flag_current'].astype('bool')
-
-        df[cols] = df[cols].astype('float32')
-
-        cols = ['received_date', 'event_date', 'arraignment_date', 'bond_date_initial'
-            , 'bond_date_current', 'incident_begin_date', 'incident_end_date'
-            , 'felony_review_date', 'disposition_date']
-
-        # df[cols] = df[cols].astype('datetime64[D]')
-
-        df['offense_category'] = df['offense_category'].astype('category')
-        df['charge_count'] = df['charge_count'].astype('int16')
-
-        cols = ['chapter', 'act', 'section', 'class', 'aoic'
-            , 'disposition_court_facility', 'disposition_charged_offense_title'
-            , 'charge_offense_title'
-                ]
-
-        df[cols] = df[cols].astype('category')
-
-        key = {'False': False,
-               'True': True,
-               'nan': np.nan}
-
-        df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].map(key)
         df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].astype('bool')
 
-        # print(df['bond_electroinic_monitor_flag_current'].unique())
-        # get_mem(df)
-
         # workaround for memory problems, usecols subset
-        usecols = ['case_id', 'case_participant_id', 'primary_charge_flag_init', 'class', 'received_date', 'event'
-            , 'judge', 'disposition_court_name', 'disposition_court_facility', 'charge_disposition', 'case_length'
-            , 'disposition_date', 'disposition_date_days_pending']
-
-        df = df[usecols]
-
 
         return df
 

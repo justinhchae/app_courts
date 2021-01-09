@@ -23,7 +23,7 @@ class Judge():
         self.transparent = 'rgba(0,0,0,0)'
         self.reader = Reader()
 
-        self.df = self.reader.to_df('main.bz2'
+        self.df = self.reader.to_df('subset.bz2'
                                     , preview=False
                                     , echo=False
                                     , classify=False

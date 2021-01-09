@@ -59,7 +59,6 @@ class Reader():
             if csv in filename or zip in filename:
                 path = os.sep.join([self.root, filename])
 
-
                 if echo:
                     print('Reading From:', path)
                     print()
@@ -88,19 +87,20 @@ class Reader():
                     date_cols = self.cleaner.get_date_cols(df)
                     df = self.cleaner.parse_dates(df, date_cols=date_cols)
                     df = self.cleaner.parse_conversions(df, col_name=name.offense_category)
-                    df = self.cleaner.parse_subset(df, type='initiation')
+                    # df = self.cleaner.parse_subset(df, type='initiation')
 
                     df = self.cleaner.impute_dates(df, col1=name.event_date, col2=name.received_date, date_type='initiation')
                     df = self.cleaner.impute_dates(df, col1=name.felony_review_date, col2=name.received_date, date_type='initiation')
                     df = self.cleaner.impute_dates(df, col1=name.arraignment_date, col2=name.received_date, date_type='initiation')
-                    df = self.cleaner.parse_duplicates(df)
 
                     if classify:
                         df = self.cleaner.classer(df, name.charge_class)
                         df = self.cleaner.classer(df, name.race)
                         df = self.cleaner.classer(df, name.gender)
+
                         df = self.cleaner.classer(df, name.offense_category)
                         df = self.cleaner.classer(df, name.updated_offense_category)
+
                         df = self.cleaner.classer(df,
                                                   [ name.charge_id
                                                   , name.charge_version_id
@@ -116,18 +116,24 @@ class Reader():
                                                   , name.law_enforcement_unit
                                                   , name.felony_review_result])
 
+                    df = self.cleaner.reduce_bool_precision(df)
+                    df = self.cleaner.reduce_num_precision(df)
+                    df = self.cleaner.reduce_nans(df)
+                    df = self.cleaner.parse_duplicates(df)
+
                 if clean_disposition:
                     df = self.cleaner.parse_cols(df)
                     df = self.cleaner.parse_ids(df, [name.case_id, name.case_participant_id])
                     date_cols = self.cleaner.get_date_cols(df)
                     df = self.cleaner.parse_dates(df, date_cols=date_cols)
+
                     df = self.cleaner.parse_conversions(df, col_name=name.offense_category)
+
                     df = self.cleaner.parse_conversions(df, col_name=name.disposition_court_name)
                     df = self.cleaner.parse_conversions(df, col_name=name.disposition_court_facility)
-                    df = self.cleaner.parse_subset(df, type='disposition')
+                    # df = self.cleaner.parse_subset(df, type='disposition')
                     df = self.cleaner.impute_dates(df, col1=name.disposition_date, col2=name.received_date, date_type='disposition')
                     df = self.maker.make_disposition_cats(df, name.charge_disposition)
-                    df = self.cleaner.parse_duplicates(df)
 
                     if classify:
                         df = self.cleaner.classer(df, name.disposition_charged_class)
@@ -142,6 +148,7 @@ class Reader():
                                                   , name.disposition_charged_act
                                                   , name.disposition_charged_section
                                                   , name.disposition_charged_aoic
+                                                  , name.disposition_charged_offense_title
                                                   , name.charge_disposition
                                                   , name.charge_disposition_reason
                                                   , name.race
@@ -153,6 +160,11 @@ class Reader():
 
                     if derive_data:
                         df = self.maker.make_caselen(df, name.received_date, name.disposition_date)
+
+                    df = self.cleaner.reduce_bool_precision(df)
+                    df = self.cleaner.reduce_num_precision(df)
+                    df = self.cleaner.reduce_nans(df)
+                    df = self.cleaner.parse_duplicates(df)
 
                 return df
 

@@ -9,7 +9,12 @@ import os
 
 import time
 
+from do_data.config import Columns
+name = Columns()
+
 from do_data.writer import Writer
+
+from collections import namedtuple
 
 class Cleaner():
     def __init__(self):
@@ -69,14 +74,9 @@ class Cleaner():
             df[col_name] = df[col_name].cat.as_ordered()
             df[col_name] = df[col_name].cat.reorder_categories(ordered_charges, ordered=True)
 
-        if col_name == 'disposition_court_name':
+        if col_name == name.disposition_court_name or col_name == name.disposition_court_facility:
             df[col_name] = df[col_name].str.strip()
             df[col_name] = df[col_name].str.title()
-            # df = df[df[col_name] != 'Traffic']
-            # df = df[~(df[col_name] == 'Traffic')].copy()
-            # print('------ Dropped Records with Traffic Court Category')
-            # df[col_name] = df[col_name].fillna(value='Court Not Specified')
-
             df[col_name] = df[col_name].astype('category')
 
         if col_name == 'race':
@@ -119,13 +119,7 @@ class Cleaner():
             df = df.drop(columns=['names', 'temp'])
 
         if isinstance(col_name, list):
-            for col in col_name:
-                if not isinstance(df[col], str):
-                    df[col] = df[col].astype(str)
-
-                df[col] = df[col].str.strip()
-                # df[col] = df[col].fillna(value='None')
-                df[col] = df[col].astype('category')
+            df[col_name] = df[col_name].astype('category')
 
         return df
 
@@ -330,4 +324,83 @@ class Cleaner():
     def parse_ids(self, df, cols):
         df[cols] = df[cols].astype('str')
         return df
+
+    def reduce_bool_precision(self, df, col=None):
+
+        print('------ Parsing least precision for boolean')
+
+        # print('--------- starting memory', df[cols].memory_usage())
+        key = {'nan': np.nan,
+               1.: True}
+
+        cols = list(df.columns)
+
+        bool_types = ['flag', 'finding_no_probable_cause']
+        to_convert = [x for x in cols if any(i in x for i in bool_types)]
+
+        df[to_convert] = df[to_convert].apply(lambda x: x.map(key, na_action='ignore').astype('bool'))
+
+        return df
+
+    def reduce_num_precision(self, df, col=None):
+
+        print('------ Parsing least precision for numeric')
+
+        if col:
+            to_convert = [col]
+        else:
+            temp = df.dtypes.to_frame().reset_index().astype(str)
+
+            data_types = [tuple(x) for x in temp.to_numpy()]
+            num_types = ['float', 'int']
+            to_convert = [x[0] for x in data_types if any(i in x[1] for i in num_types)]
+
+            # temp = df[to_convert].apply(lambda x: pd.Series(index=['min', 'max'], data=[x.min(), x.max()]))
+
+        precision_range = namedtuple('precision_range', 'low high')
+
+        i16 = precision_range(-32768, 32767)
+        i32 = precision_range(-2147483648, 2147483647)
+
+        def reduce_precision(x):
+            max_ = x.max()
+            min_ = x.min()
+
+            if np.issubdtype(x, np.integer):
+
+                if min_ >= i16.low:
+
+                    if max_ <= i16.high:
+                        x = x.astype(pd.Int16Dtype())
+                    elif max_ <= i32.high:
+                        x = x.astype(pd.Int32Dtype())
+                    else:
+                        x = x.astype(pd.Int64Dtype())
+            else:
+                x = x.astype('float32')
+
+            return x
+
+        df[to_convert] = df[to_convert].apply(lambda x: reduce_precision(x))
+
+        return df
+
+    def reduce_nans(self, df):
+        # https://stackoverflow.com/questions/38980514/most-concise-way-to-select-rows-where-any-column-contains-a-string-in-pandas-dat/43018248
+        print('------ Parsing least columns for nan values')
+
+        bad_cols = ['law_enforcement_unit', 'charge_disposition_reason', 'bond_type_initial', 'bond_type_current']
+        all_cols = list(df.columns)
+
+        to_convert = [x for x in all_cols if any(i in x for i in bad_cols)]
+
+        def classify(x):
+            x = np.where(x == 'nan', np.nan, x)
+            return x
+
+        df[to_convert] = df[to_convert].apply(lambda x: classify(x)).astype('category')
+
+        return df
+
+
 

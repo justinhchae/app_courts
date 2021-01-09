@@ -10,18 +10,16 @@ from do_data.joiner import Joiner
 from do_data.writer import Writer
 from do_data.config import Columns
 
-# from analyze_data.eda import EDA
-
 
 reader = Reader()
 writer = Writer()
 joiner = Joiner()
 maker = Maker()
 app = Application()
-c = Columns()
+name = Columns()
 # eda = EDA()
 
-def read_source(from_source=False):
+def read_source(from_source=False, write=True):
 
     if from_source:
         initiation = reader.to_df('Initiation.zip'
@@ -29,6 +27,7 @@ def read_source(from_source=False):
                                   , preview=False
                                   , classify=True
                                   )
+
         disposition = reader.to_df('Dispositions.zip'
                                    , clean_disposition=True
                                    , preview=False
@@ -45,8 +44,13 @@ def read_source(from_source=False):
                                             , col1='disposition_charged_class'
                                             , col2='class')
 
-        writer.to_package(initiation, 'initiation_modified')
-        writer.to_package(disposition, 'disposition_modified')
+        if write:
+            writer.to_package(disposition, 'disposition_modified')
+            writer.to_package(initiation, 'initiation_modified')
+
+        del initiation
+        del disposition
+        gc.collect()
 
     else:
 
@@ -56,18 +60,39 @@ def read_source(from_source=False):
                                    , preview=False)
 
         main = joiner.initiation_disposition(initiation, disposition)
-        writer.to_package(main, 'main')
-        sample = main.sample(n=250000, random_state=0)
-        writer.to_package(sample, 'sample')
 
-        judges = pd.DataFrame(main[c.judge].dropna(how='any').unique(), columns=[c.judge])
-        writer.to_package(judges, c.judge, compression=False)
+        if write:
+            writer.to_package(main, 'main')
+            sample = main.sample(250000, random_state=0)
+            writer.to_package(sample, 'sample')
 
-        del initiation
-        del disposition
+        judges = pd.DataFrame(main[name.judge].dropna(how='any').unique(), columns=[name.judge])
+
+        if write:
+            writer.to_package(judges, name.judge, compression=False)
+
+        usecols = ['case_id'
+                    , 'case_participant_id'
+                    , 'primary_charge_flag_init'
+                    , 'class'
+                    , 'received_date'
+                    , 'event'
+                    , 'judge'
+                    , 'disposition_court_name'
+                    , 'disposition_court_facility'
+                    , 'charge_disposition'
+                    , 'case_length'
+                    , 'disposition_date'
+                    , 'disposition_date_days_pending']
+
+        subset = main[usecols]
+
+        if write:
+            writer.to_package(subset, 'subset')
+
+        print(main.dtypes)
+
         del main
-        del sample
-        del judges
         gc.collect()
 
-read_source(from_source=True)
+read_source(from_source=False, write=True)

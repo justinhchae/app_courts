@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-
+from do_data.config import Columns
+name = Columns()
 from do_data.writer import Writer
-
+from clean_data.cleaner import Cleaner
 class Maker():
     def __init__(self):
         self.days = np.timedelta64(1, 'D')
@@ -15,6 +16,7 @@ class Maker():
                         , 'charge_id'
                         , 'charge_version_id'
                         , 'charge_count']
+        self.cleaner = Cleaner()
 
     def make_caselen(self, df, col1=None, col2=None):
 
@@ -85,6 +87,9 @@ class Maker():
 
         df = pd.merge(left=df1, right=df2[df2_cols], how='left', left_on=cols, right_on=cols)
 
+        cols = [name.offense_category, name.charge_offense_title]
+        df[cols] = df[cols].astype('category')
+
         def diff(x):
             s = (today - df[x]) / self.days
             return s
@@ -101,8 +106,7 @@ class Maker():
 
         df.drop(columns=[target], inplace=True)
 
-
-
+        df = self.cleaner.reduce_num_precision(df, new_col)
         return df
 
     def make_class_diff(self, df1, df2, col1, col2, diff_name='charged_class_difference'):
@@ -133,6 +137,8 @@ class Maker():
         df = df.drop(columns=[temp1, temp2])
         new_col2 = str('initial_charged_' + col2)
         df.rename(columns={col2:new_col2}, inplace=True)
+        
+        df = self.cleaner.reduce_num_precision(df, 'charged_class_difference')
 
         return df
 
