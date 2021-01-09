@@ -302,22 +302,16 @@ class Cleaner():
 
         return df
 
-    def parse_dates(self, df, date_cols, timedelta=None, parse_dates=None):
+    def parse_dates(self, df, date_cols=None):
         # filter erroneous dates where arrest date < received in lock up < released from lockup
         print('------ Parsing dates columns')
 
         if date_cols is None:
             return 'Need Date Cols'
 
-        # if timedelta is None:
-        #     timedelta = self.timedelta
+        df[date_cols] = df[date_cols].apply(lambda x: pd.to_datetime(x, errors='coerce', infer_datetime_format=False))
 
-        for col in date_cols:
-            print('--------', col)
-
-            df[col] = pd.to_datetime(df[col],
-                                     errors='coerce',
-                                     infer_datetime_format=False)
+        print(df[date_cols].dtypes)
 
         return df
 

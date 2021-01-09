@@ -95,4 +95,4 @@ def read_source(from_source=False, write=True):
         del main
         gc.collect()
 
-read_source(from_source=False, write=True)
+read_source(from_source=True, write=False)
