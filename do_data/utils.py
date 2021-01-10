@@ -28,3 +28,6 @@ def memory_usage():
 def get_mem(df):
     total_mem = df.memory_usage().sum() / (1024 ** 2)
     print(total_mem)
+
+# https://stackoverflow.com/questions/46206255/how-to-remove-hidden-macos-files-from-a-zip-file
+# zip -d filename.zip __MACOSX/\*

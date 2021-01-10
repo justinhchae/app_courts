@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from functools import reduce
+
 from clean_data.cleaner import Cleaner
 from clean_data.maker import Maker
 
@@ -22,9 +24,43 @@ class Joiner():
             , name.charge_version_id
             , name.charge_count
             , name.arraignment_date
-            , ]
+            ]
 
-    def initiation_disposition(self, df1, df2):
+    def make_main(self, df):
+        # https://stackoverflow.com/questions/23668427/pandas-three-way-joining-multiple-dataframes-on-columns
+        def get_mem(df):
+            total_mem = df.memory_usage().sum() / (1024 ** 2)
+            print(total_mem)
+
+        sentencing_cols = self.join_cols.copy()
+        keep_cols = [
+                     name.updated_offense_category
+                    , 'sentence_phase'
+                    , 'sentence_judge'
+                    , 'sentence_court_name'
+                    , 'sentence_court_facility'
+                    , 'sentence_date'
+                    , 'sentence_type'
+                    , 'current_sentence_flag'
+                    , 'commitment_type'
+                    , 'commitment_unit'
+                    , 'commitment_days'
+                    , 'commitment_dollars'
+                    , 'life_term'
+                    , name.case_length]
+        sentencing_cols.extend(keep_cols)
+
+        df1 = self.initiation_disposition(df[0], df[1], how='inner')
+
+        merged = pd.merge(left=df1, right=df[2][sentencing_cols], how='inner', left_on=self.join_cols, right_on=self.join_cols
+                      , suffixes=('_main', '_sent')
+                      )
+
+        # merged = reduce(lambda left, right: pd.merge(left, right, how='inner', on=self.join_cols), frames)
+
+        return merged
+
+    def initiation_disposition(self, df1, df2, how='left'):
 
         cols = self.join_cols
 
@@ -38,7 +74,8 @@ class Joiner():
         df1 = df1.drop(columns=df1_cols)
         df2 = df2.drop(columns=df2_cols)
 
-        df = pd.merge(left=df1, right=df2, how='left', left_on=cols, right_on=cols
+
+        df = pd.merge(left=df1, right=df2, how=how, left_on=cols, right_on=cols
                       , suffixes=('_init', '_disp')
                       )
 

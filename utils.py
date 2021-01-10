@@ -17,7 +17,7 @@ joiner = Joiner()
 maker = Maker()
 app = Application()
 name = Columns()
-# eda = EDA()
+
 
 def read_source(from_source=False, write=True):
 
@@ -44,12 +44,16 @@ def read_source(from_source=False, write=True):
                                             , col1='disposition_charged_class'
                                             , col2='class')
 
+        sentencing = reader.to_df('Sentencing.zip', preview=False, clean_sentencing=True)
+
         if write:
             writer.to_package(disposition, 'disposition_modified')
             writer.to_package(initiation, 'initiation_modified')
+            writer.to_package(sentencing, 'sentencing_modified')
 
         del initiation
         del disposition
+        del sentencing
         gc.collect()
 
     else:
@@ -58,13 +62,17 @@ def read_source(from_source=False, write=True):
                                   , preview=False)
         disposition = reader.to_df('disposition_modified.bz2'
                                    , preview=False)
+        sentencing = reader.to_df('sentencing_modified.bz2'
+                                   , preview=False)
 
         main = joiner.initiation_disposition(initiation, disposition)
+        main_new = joiner.make_main(df=[initiation, disposition, sentencing])
 
         if write:
             writer.to_package(main, 'main')
             sample = main.sample(250000, random_state=0)
             writer.to_package(sample, 'sample')
+            writer.to_package(main_new, 'main_new')
 
         judges = pd.DataFrame(main[name.judge].dropna(how='any').unique(), columns=[name.judge])
 
@@ -90,9 +98,10 @@ def read_source(from_source=False, write=True):
         if write:
             writer.to_package(subset, 'subset')
 
-        print(main.dtypes)
+        # print(main.dtypes)
 
         del main
+        del main_new
         gc.collect()
 
-read_source(from_source=True, write=False)
+read_source(from_source=False, write=True)
