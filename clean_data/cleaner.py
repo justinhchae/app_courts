@@ -74,7 +74,7 @@ class Cleaner():
             df[col_name] = df[col_name].cat.as_ordered()
             df[col_name] = df[col_name].cat.reorder_categories(ordered_charges, ordered=True)
 
-        if col_name == name.disposition_court_name or col_name == name.disposition_court_facility:
+        if col_name == name.disposition_court_name or col_name == name.disposition_court_facility or col_name == 'sentence_court_name':
             df[col_name] = df[col_name].str.strip()
             df[col_name] = df[col_name].str.title()
             df[col_name] = df[col_name].astype('category')
@@ -89,10 +89,10 @@ class Cleaner():
             key = {'Unknown Gender': 'Unknown'}
             df[col_name] = df[col_name].str.strip()
             df[col_name] = df[col_name].str.title()
-            df[col_name] = df[col_name].map(key)
+            df[col_name] = np.where(df[col_name] == 'Unknown Gender', df[col_name].map(key), df[col_name])
             df[col_name] = df[col_name].astype('category')
 
-        if col_name == 'judge':
+        if col_name == 'judge' or col_name == 'sentence_judge':
             # df[col_name] = df[col_name].fillna(value='Judge Not Specified')
             df[col_name] = df[col_name].str.strip()
             df[col_name] = df[col_name].str.replace('\.', '')
@@ -113,8 +113,8 @@ class Cleaner():
 
             key = {x1[i]: x2[i] for i in range(len(x1))}
 
-            df['judge'] = np.where(df['temp'] == True, df['judge'].map(key, na_action='ignore'), df['judge'])
-            df['judge'] = df['judge'].astype('category')
+            df[col_name] = np.where(df['temp'] == True, df[col_name].map(key, na_action='ignore'), df[col_name])
+            df[col_name] = df[col_name].astype('category')
 
             df = df.drop(columns=['names', 'temp'])
 
@@ -299,6 +299,24 @@ class Cleaner():
                 df[col1] = df[col_new]
 
                 df = df.drop(columns=[col_new, 'diff'])
+
+        if date_type == 'sentence':
+            today = pd.Timestamp.now()
+
+            impute = lambda x: x[col2] if x[col1] > today else x[col1]
+
+            df[col_new] = df.apply(impute, axis=1)
+
+            change_log = df[(df[col1] > today)]
+
+            filename = str('change_log_' + col1 + '_dates')
+            self.writer.to_csv(df=change_log, filename=filename)
+
+            print('------ Impute Dates for', col1, 'given', col2, ' ', len(df))
+
+            df[col1] = df[col_new]
+
+            df = df.drop(columns=col_new)
 
         return df
 
