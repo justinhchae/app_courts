@@ -10,6 +10,7 @@ ov1 = OV_1()
 class Application():
     def __init__(self):
         self.st = st
+
         self.df = None
         self.judge_names = Reader().to_df('judges.pickle', preview=False, echo=False, classify=False)
         self.n_samples = None
@@ -30,7 +31,28 @@ class Application():
 
     def frame(self):
         self.st.title('Analyze Cook County Court Data')
-        self.st.markdown('An Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
+
+        self.st.markdown('Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
+
+        self.st.write('In 2020, the COVID-19 Pandemic brought the world to a grinding halt across all sectors of business and government.',
+                      'Similarly, court systems reduced their availability and services while doing their part to support public health measures.',
+                      'However, unlike schools and businesses, some court systems have struggled to resume operations.',
+                      'The result, so far, has been a growing backlog of cases as individuals wait on the courts.')
+
+        self.st.plotly_chart(ov1.timeseries())
+
+        self.st.write('As one example of court volume and backlog over time, Cook County courts has seen a severe drop-off in cases across multiple phases of the system.',
+                      'In 2020, Cook County managed to process about half as many cases in prior years (at best).',
+                      'For instance, as a measure of volume in sentencing hearings, there were 18 thousand cases in 2019; however, only 5 thousand in 2020.')
+
+        self.st.write('Given the opportunity for alternative remote hearings (i.e. "Zoom Courts"), at issue is whether courts are not meeting their obligation to process cases during the Pandemic.',
+                      'As just one example of the impact of delayed court proceedings, individuals, who have yet to be convicted of any crime, remain in limbo while waiting on the courts.',
+                      'In some cases, people are in some form of incarceration (Jail or Electronic Monitoring) or are anxiously waiting for their day in court.',
+                      'As a result, we might ask questions such as "how long is too long" and "how many cases are there"?'
+                      )
+
+        self.st.write('Unfortunately, the court system is complex and a single number cannot descirbe how many cases are processed.',
+                      'As a result, this dashboard presents analysis of the data with dynamic charts and filters to provide transparent and up-front numbers.')
 
     def overview(self):
         self.object_overview()
@@ -45,12 +67,16 @@ class Application():
 
     def object_overview(self):
 
+        self.st.markdown('**Data Overview**')
+
         self.st.write('Cook county is the largest county in the United States by population and has millions of court records available for analysis.',
                       'In addition to size, Cook County is also the home county for Chicago and surrounding areas.',
                       'The availability of this data, at scale, provides interesting analytical opportunities to support public awareness of the court system.',
                       'Although the source data is publicly available, the raw data is split into different sections and is difficult to interpret without significant engineering.',
-                      'This dashboard is designed to answer fundamental questions about how the courts operate in Cook County.'
+                      'This dashboard represents the results of a processed and ready-to-analyze dataset about the courts.'
                       )
+
+        self.st.markdown('**Initiation - Disposition - Sentencing**')
 
         self.st.write('The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
                       'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
@@ -61,6 +87,8 @@ class Application():
 
 
         self.st.markdown('All source code, and cleaned data available in a [GitHub Respository](https://github.com/justinhchae/app_courts/tree/main/data)')
+
+        self.st.markdown('**Notes on Methodology**')
 
         self.st.write('Across all phases, cases are uniquely identified by Case IDs. In each case, there may be one or more individuals that are party to the case, given by Case Participant ID.',
                       'To provide high-level insights into court volumes, this dataset is filtered to identify aggregated measures of unique cases and individuals.',

@@ -12,7 +12,7 @@ from do_data.joiner import Joiner
 from do_data.writer import Writer
 from do_data.config import Columns
 from analyze_data.utils import Utilities
-
+from analyze_data.metrics import Metrics
 
 reader = Reader()
 writer = Writer()
@@ -21,11 +21,13 @@ maker = Maker()
 app = Application()
 name = Columns()
 utils = Utilities()
+metrics = Metrics()
 
+# utils.ov1_initiation()
+# utils.ov1_disposition()
+# utils.ov1_sentencing()
 
-utils.ov1_initiation()
-utils.ov1_disposition()
-utils.ov1_sentencing()
+metrics.ov1_timeseries()
 
 
 # initiation = reader.to_df('Initiation.zip'
