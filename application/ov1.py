@@ -11,3 +11,5 @@ class OV_1():
         return Metrics().ov1(year)
         # self.st.plotly_chart(Metrics().ov1_initiation())
 
+    def timeseries(self):
+        return Metrics().ov1_timeseries()

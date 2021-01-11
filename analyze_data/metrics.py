@@ -125,7 +125,6 @@ class Metrics():
                 row=row, col=col
             )
 
-
     def ov1_disposition(self, row, col, year=None):
         """
         return the most severe allegation for a given case (not always the primary charge
@@ -182,7 +181,6 @@ class Metrics():
                 ),
                 row=row, col=col
             )
-
 
     def ov1_sentencing(self, row, col, year=None):
         df = Reader().to_df('ov1_sentencing.pickle', preview=False)
@@ -260,6 +258,62 @@ class Metrics():
                 ),
                 row=row, col=col
             )
+
+
+    def ov1_timeseries(self):
+        df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
+        initiation = df[[name.case_participant_id, 'year']].groupby('year', as_index=False).agg('count')
+        initiation['type'] = 'initiation'
+        df = Reader().to_df('ov1_disposition.pickle', preview=False, classify=False, echo=False)
+        disposition = df[[name.case_participant_id, 'year']].groupby('year', as_index=False).agg('count')
+        disposition['type'] = 'disposition'
+        df = Reader().to_df('ov1_sentencing.pickle', preview=False, classify=False, echo=False)
+        sentencing = df[[name.case_participant_id, 'year']].groupby('year', as_index=False).agg('count')
+        sentencing['type'] = 'sentencing'
+
+        df = initiation.append(disposition)
+        df = df.append(sentencing)
+
+        df = df.rename(columns={name.case_participant_id: '#Cases'})
+
+        df = df[df['year'] > 2010]
+
+        fig = px.area(df, x='year', y='#Cases', color='type')
+
+        # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
+
+        fig.update_yaxes(title='Case Volume')
+        fig.update_xaxes(title='Year')
+
+        fig.update_layout(
+            hovermode='x unified',
+            showlegend=False
+            # , title_text=str('Court Data for ' + str(year))
+            , paper_bgcolor=self.transparent
+            , plot_bgcolor=self.transparent
+            , title='Court Volume Over Time - The COVID Court Cliff'
+            # updatemenus=[
+            #     dict(
+            #         type="buttons",
+            #         direction="left",
+            #         buttons=list([
+            #             dict(
+            #                 args=[{"yaxis.type": "linear"}],
+            #                 label="LINEAR",
+            #                 method="relayout"
+            #             ),
+            #             dict(
+            #                 args=[{"yaxis.type": "log"}],
+            #                 label="LOG",
+            #                 method="relayout"
+            #             )
+            #         ]),
+            #     ),
+            # ]
+        )
+
+        return fig
+
 
 
 
