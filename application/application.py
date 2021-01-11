@@ -51,6 +51,8 @@ class Application():
                       'In 2020, Cook County managed to process about half as many cases in prior years (at best).',
                       'For instance, monthly court volumes are down as much as 90% on a monthly basis.')
 
+        self.st.markdown('**The Issue**')
+
         self.st.write('Given the opportunity for alternative remote hearings (i.e. "Zoom Courts"), at issue is whether courts are not meeting their obligation to process cases during the Pandemic.',
                       'As just one example of the impact of delayed court proceedings, individuals, who have yet to be convicted of any crime, remain in limbo while waiting on the courts.',
                       'In some cases, people are in some form of incarceration (Jail or Electronic Monitoring) or are anxiously waiting for their day in court.',
