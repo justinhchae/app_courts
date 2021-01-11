@@ -2,7 +2,10 @@ import streamlit as st
 
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
+from application.ov1 import OV_1
 from do_data.getter import Reader
+
+ov1 = OV_1()
 
 class Application():
     def __init__(self):
@@ -22,15 +25,17 @@ class Application():
         #     self.sample_size()
 
         self.frame()
-        self.frame_objects()
+        self.overview()
         self.data_disclaimer()
 
     def frame(self):
         self.st.title('Analyze Cook County Court Data')
         self.st.markdown('An Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
-        self.st.markdown('[Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
 
-    @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
+    def overview(self):
+        self.object_overview()
+
+    # @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
     def overview_data(self):
         # s = time.time()
         cached_dict = {'f1': Charts().overview_figures()}
@@ -40,22 +45,28 @@ class Application():
 
     def object_overview(self):
 
-        narrative = Charts().overview()
-
-        self.st.write('There are a total of',  narrative['total_count']
-                      , ' court records based on Initiation and Disposition Court data. '
-                      , 'The data spans', narrative['span'], 'years from', narrative['start_date'], 'to', narrative['end_date'] +'.'
-                      , 'Court records include data for', narrative['judge_count'], 'judges,'
-                      , narrative['initiation_count'], 'types of initiation events,'
-                      , narrative['disposition_count'], 'types of disposition events,'
-                      , 'approximately ', narrative['cpi'], 'individuals (by case participant id),'
-                      , 'and approximately', narrative['case_id'], 'unique cases (by case id)'
-                      , 'across', narrative['district_count'], ' primary districts in Cook County.'
+        self.st.write('Cook county is the largest county in the United States by population and has millions of court records available for analysis.',
+                      'In addition to size, Cook County is also the home county for Chicago and surrounding areas. The availability of this data, at scale, provides interesting analytical opportunities.'
                       )
 
-        cached = self.overview_data()
+        self.st.write('The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
+                      'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.')
 
-        self.st.plotly_chart(cached['f1'])
+        self.st.plotly_chart(ov1.court_initiation())
+
+        self.st.markdown('All source code, and cleaned data available in a [GitHub Respository](https://github.com/justinhchae/app_courts/tree/main/data)')
+
+        self.st.write('Across all phases, cases are uniquely identified by Case IDs. In each case, there may be one or more individuals that are party to the case, given by Case Participant ID.',
+                      'To provide high-level insights into court volumes, this dataset is filtered to identify aggregated measures of unique cases and individuals.',
+                      'For instance, for what might be considered a sigular event, a person may be charged with multiple allegations and multiple counts of a given crime.',
+                      'Although the severity of such circumstances is not taken lightly, counting each of these instances may overstate a characterization of court volumes.',
+                      'As a result, to avoid double-counting, this analysis filters Initiation and Disposition records in two key ways.')
+
+        self.st.write('For Initiation Events, the original source table of approximately 1 million records is reudce to about 350k records where the Primary Charge Flag == True.',
+                      'For Disposition Hearings, the original source table of approximately 700k reocrds is reduced to about 350k records by the most severe charge in the case.',
+                      'For example, in Initiation Events, the most severe criminal charge or allegation is usually the most severe charge if there are multiple counts and multiple charges.',
+                      'In another example for Disposition Hearings, the most severe charge may not be the primary charge due to pleadings and other intricacies of the court system.',
+                      )
 
     def frame_objects(self):
         self.object_overview()
@@ -152,4 +163,6 @@ class Application():
         # print('Fix Data', e - s)
 
     def data_disclaimer(self):
+        self.st.write('This site is under construction and active analysis. Please stop by again for future updates!')
+        self.st.markdown('[Cook County Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
         self.st.markdown('"This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago.  The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site.  The data provided at this site is subject to change at any time.  It is understood that the data provided at this site is being used at one’s own risk."')

@@ -20,6 +20,7 @@ class Writer():
         self.to_csv(df, filename, compression, echo)
         self.to_pickle(df, filename, compression, echo)
 
+
     def to_csv(self, df, filename='file.csv', compression=True, echo=True):
         """
         :param df: a pandas dataframe
@@ -57,6 +58,13 @@ class Writer():
             if echo:
                 print('Wrote dataframe to', path)
                 print()
+
+    def to_feather(self, df, filename='file.feather', echo=True):
+        filename_feather = str(filename + '.feather')
+        path = os.sep.join([self.root, filename_feather])
+        df.to_feather(path)
+        if echo:
+            print('Wrote dataframe to', path)
 
     def to_pickle(self, df
                   , filename='file.pickle'
