@@ -11,7 +11,7 @@ from do_data.writer import Writer
 from do_data.config import Columns
 name = Columns()
 
-from pandasgui import show
+# from pandasgui import show
 
 class Utilities():
     def __init__(self):

@@ -1,7 +1,7 @@
 import gc
 
 import pandas as pd
-from pandasgui import show
+# from pandasgui import show
 
 
 from application.application import Application
