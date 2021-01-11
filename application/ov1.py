@@ -7,7 +7,7 @@ class OV_1():
     def __init__(self):
         pass
 
-    def court_initiation(self):
-        return Metrics().ov1()
+    def court_counts(self, year=None):
+        return Metrics().ov1(year)
         # self.st.plotly_chart(Metrics().ov1_initiation())
 

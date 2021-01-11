@@ -15,7 +15,7 @@ from do_data.writer import Writer
 from do_data.config import Columns
 name = Columns()
 
-# from pandasgui import show
+from pandasgui import show
 from analyze_data.colors import Colors
 
 colors = Colors()
@@ -51,22 +51,21 @@ class Metrics():
         self.df = None
         self.fig = None
 
-    def ov1(self):
+    def ov1(self, year="All Time"):
         self.fig = make_subplots(
             rows=1, cols=3
-            # , column_widths=[0.6, 0.4]
-            # , row_heights=[0.4, 0.6]
             , specs=[[{"type": "bar"}, {"type": "bar"}, {"type": "bar"}]]
             , subplot_titles=("Initiation"
                               , "Disposition"
                               , "Sentencing")
         )
 
-        self.ov1_initiation(row=1, col=1)
-        self.ov1_disposition(row=1, col=2)
-        self.ov1_sentencing(row=1, col=3)
+        self.ov1_initiation(row=1, col=1, year=year)
+        self.ov1_disposition(row=1, col=2, year=year)
+        self.ov1_sentencing(row=1, col=3, year=year)
 
         self.fig.update_layout(showlegend=False
+                          , title_text=str('Court Data for ' + str(year))
                           , paper_bgcolor=self.transparent
                           , plot_bgcolor=self.transparent)
 
@@ -74,54 +73,76 @@ class Metrics():
 
         return self.fig
 
-    def ov1_initiation(self, row, col):
+    def ov1_initiation(self, row, col, year=None):
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
 
-        df = df[df[name.primary_charge_flag]==True]
+        if year !='All Time':
+            df = df[(df['year']==year)]
+
         total_case_id = len(df[name.case_id].unique())
         total_cpi = len(df[name.case_participant_id].unique())
-        cases_pending = len(df[df[name.disposition_date_days_pending].notnull()])
-        # cpi_bond = df[[name.case_id, name.case_participant_id, name.bond_type_current]][df[name.bond_type_current].notnull()].drop_duplicates()
-        cases_bond = len(df[(df[name.bond_type_current] != 'No Bond') & (df[name.bond_type_current].notnull())])
 
-        df = pd.DataFrame({'count': [total_case_id, total_cpi, cases_bond, cases_pending],
-                           'variable': [name.case_id, name.case_participant_id, name.bond_type_current, name.disposition_date_days_pending],
-                           'value': ['1 - Cases', '2 - Individuals', '3 - Current Bond', '4 - Disposition Pending Days'],
-                           'Color': [np.nan, np.nan, np.nan, np.nan]})
+        bond_types = df.stb.freq([name.bond_type_current], cum_cols=False).drop(columns='percent')
+        bond_types = pd.melt(bond_types, id_vars=['count'], value_vars=[name.bond_type_current])
+        bond_types = bond_types.sort_values(by=['count'], ascending=False)
 
-        df['Width'] = .8
+        event_types = df.stb.freq([name.event], cum_cols=False).drop(columns='percent')
+        event_types = pd.melt(event_types, id_vars=['count'], value_vars=[name.event])
+        event_types = event_types.sort_values(by=['count'], ascending=False)
+
+        df = pd.DataFrame({'count': [total_case_id, total_cpi],
+                           'variable': ['case_id', name.case_participant_id],
+                           'value': ['Cases', 'Individuals'],
+                           'Color': [np.nan, np.nan]})
+
+        df = df.append(bond_types)
+        df = df.append(event_types)
 
         df['Color'] = df['variable'].map({name.case_id: 'blues',
                                           name.case_participant_id: 'ylgn',
-                                          name.disposition_date_days_pending: 'sunset',
+                                          name.event: 'sunset',
                                           name.bond_type_current: 'sunset',
                                           })
 
-        df = df.groupby('value')
+        df['variable'] = df['variable'].map({name.case_id: '1 - Cases',
+                                             name.case_participant_id: '2 - Individuals',
+                                             name.event: '3 - Hearing Type',
+                                             name.bond_type_current: '4 - Bond Type'
+                                             })
+        df['Width'] = 1
+
+        df = df.groupby('variable')
 
         for x, y in df:
             self.fig.add_trace(
                 go.Bar(
-                      x=y['value']
-                    , y=y['count']
+                    x=y['variable']
+                    , y=y['count']  # , color=df_plot['value']
                     , marker=dict(color=y['count'], colorscale=y['Color'].iloc[0])
-                    , text=x
+                    , text=y['value']
                     , width=y['Width']
                 ),
                 row=row, col=col
             )
 
 
-    def ov1_disposition(self, row, col):
+    def ov1_disposition(self, row, col, year=None):
         """
         return the most severe allegation for a given case (not always the primary charge
         https://stackoverflow.com/questions/15705630/get-the-rows-which-have-the-max-count-in-groups-using-groupby
         """
         df = Reader().to_df('ov1_disposition.pickle', preview=False, classify=False, echo=False)
 
+        if year !='All Time':
+            df = df[(df['year']==year)]
+
         disp_cats = df.stb.freq([name.charge_disposition_cat], cum_cols=False).drop(columns='percent')
         disp_cats = pd.melt(disp_cats, id_vars=['count'], value_vars=[name.charge_disposition_cat])
-        disp_cats = disp_cats.sort_values(by=['count'])
+        disp_cats = disp_cats.sort_values(by=['count'], ascending=False)
+
+        charge_cats = df.stb.freq([name.disposition_charged_class], cum_cols=False).drop(columns='percent')
+        charge_cats = pd.melt(charge_cats, id_vars=['count'], value_vars=[name.disposition_charged_class])
+        charge_cats = charge_cats.sort_values(by=['count'], ascending=False)
 
         total_case_id = len(df[name.case_id].unique())
         total_cpi = len(df[name.case_participant_id].unique())
@@ -132,10 +153,12 @@ class Metrics():
                            'Color': [np.nan, np.nan]})
 
         df = df.append(disp_cats)
+        df = df.append(charge_cats)
 
         df['Color'] = df['variable'].map({name.case_id: 'blues',
                                           name.case_participant_id: 'ylgn',
-                                          name.charge_disposition_cat: 'sunset_r',
+                                          name.charge_disposition_cat: 'sunset',
+                                          name.disposition_charged_class: 'sunset'
                                           })
 
         df['Width'] = 1
@@ -143,6 +166,7 @@ class Metrics():
         df['variable'] = df['variable'].map({name.case_id: '1 - Cases',
                                           name.case_participant_id: '2 - Individuals',
                                           name.charge_disposition_cat: '3 - Charge Category',
+                                          name.disposition_charged_class: '4 - Charge Class'
                                           })
 
         df = df.groupby('variable')
@@ -160,8 +184,11 @@ class Metrics():
             )
 
 
-    def ov1_sentencing(self, row, col):
+    def ov1_sentencing(self, row, col, year=None):
         df = Reader().to_df('ov1_sentencing.pickle', preview=False)
+
+        if year !='All Time':
+            df = df[(df['year']==year)]
 
         cols = [
               name.case_id
@@ -182,7 +209,6 @@ class Metrics():
         df = df[idx].drop_duplicates(subset=cols)
 
         total_cpi = len(df[name.case_participant_id].unique())
-        # print(total_cpi)
 
         judges = df.stb.freq([name.sentence_judge], cum_cols=False).drop(columns='percent')
         judges = pd.melt(judges, id_vars=['count'], value_vars=[name.sentence_judge])
@@ -207,8 +233,6 @@ class Metrics():
         df = df.append(judges)
         df = df.append(sentence)
         df = df.append(commitment)
-
-        # colors.make_scales()
 
         df['Color'] = df['variable'].map({name.case_participant_id:'ylgn',
                                        name.sentence_judge:'sunset',

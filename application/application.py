@@ -46,13 +46,19 @@ class Application():
     def object_overview(self):
 
         self.st.write('Cook county is the largest county in the United States by population and has millions of court records available for analysis.',
-                      'In addition to size, Cook County is also the home county for Chicago and surrounding areas. The availability of this data, at scale, provides interesting analytical opportunities.'
+                      'In addition to size, Cook County is also the home county for Chicago and surrounding areas.',
+                      'The availability of this data, at scale, provides interesting analytical opportunities to support public awareness of the court system.',
+                      'Although the source data is publicly available, the raw data is split into different sections and is difficult to interpret without significant engineering.',
+                      'This dashboard is designed to answer fundamental questions about how the courts operate in Cook County.'
                       )
 
         self.st.write('The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
-                      'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.')
+                      'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
+                      )
+        year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
 
-        self.st.plotly_chart(ov1.court_initiation())
+        self.st.plotly_chart(ov1.court_counts(year))
+
 
         self.st.markdown('All source code, and cleaned data available in a [GitHub Respository](https://github.com/justinhchae/app_courts/tree/main/data)')
 
@@ -62,10 +68,10 @@ class Application():
                       'Although the severity of such circumstances is not taken lightly, counting each of these instances may overstate a characterization of court volumes.',
                       'As a result, to avoid double-counting, this analysis filters Initiation and Disposition records in two key ways.')
 
-        self.st.write('For Initiation Events, the original source table of approximately 1 million records is reudce to about 350k records where the Primary Charge Flag == True.',
-                      'For Disposition Hearings, the original source table of approximately 700k reocrds is reduced to about 350k records by the most severe charge in the case.',
+        self.st.write('For Initiation Events, the original source table of approximately 1 million records is reudced to about 350k records where the Primary Charge Flag == True.',
+                      'For Disposition Hearings, the original source table of approximately 700k records is reduced to about 350k records by the most severe charge in the case.',
                       'For example, in Initiation Events, the most severe criminal charge or allegation is usually the most severe charge if there are multiple counts and multiple charges.',
-                      'In another example for Disposition Hearings, the most severe charge may not be the primary charge due to pleadings and other intricacies of the court system.',
+                      'In another example for Disposition Hearings, the most severe charge associated with a given case may not be the primary charge due to pleadings and other intricacies of the court system.',
                       )
 
     def frame_objects(self):
