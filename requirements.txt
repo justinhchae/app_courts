@@ -8,3 +8,4 @@ sidetable
 matplotlib
 seaborn
 plotly_express
+pandasgui
