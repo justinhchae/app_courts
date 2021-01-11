@@ -42,7 +42,8 @@ class Application():
         self.st.markdown('**The COVID Court Cliff**')
 
         self.st.write('Exactly how many cases are in the backlog? It depends on which phase of the court system you are investigating.',
-                      'On a monthly basis over the past 10 years; however, the backlog may be the difference between the trend and an actual count of cases')
+                      'On a monthly basis over the past 10 years; however, the backlog may be the difference between the projected trend (given by a logistic regression) and an actual count of cases.',
+                      )
 
         self.st.plotly_chart(ov1.timeseries())
 
