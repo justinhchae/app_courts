@@ -349,8 +349,8 @@ class Cleaner():
 
         bool_types = ['flag', 'finding_no_probable_cause']
         to_convert = [x for x in cols if any(i in x for i in bool_types)]
-
-        df[to_convert] = df[to_convert].apply(lambda x: x.map(key, na_action='ignore').astype('bool'))
+        # df[to_convert] = df[to_convert].apply(lambda x: x.map(key, na_action='ignore').astype('bool'))
+        df[to_convert] = df[to_convert].astype('bool')
 
         return df
 

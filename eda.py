@@ -11,6 +11,7 @@ from do_data.getter import Reader
 from do_data.joiner import Joiner
 from do_data.writer import Writer
 from do_data.config import Columns
+from analyze_data.utils import Utilities
 
 
 reader = Reader()
@@ -19,6 +20,12 @@ joiner = Joiner()
 maker = Maker()
 app = Application()
 name = Columns()
+utils = Utilities()
+
+
+utils.ov1_initiation()
+utils.ov1_disposition()
+utils.ov1_sentencing()
 
 
 # initiation = reader.to_df('Initiation.zip'
@@ -26,34 +33,17 @@ name = Columns()
 #                                   , preview=False
 #                                   , classify=True
 #                                   )
-#
-# disposition = reader.to_df('Dispositions.zip'
-#                            , clean_disposition=True
-#                            , preview=False
-#                            , classify=True
-#                            )
-#
-# initiation = maker.make_disposition_pending(df1=initiation
-#                                             , df2=disposition
-#                                             , source='received_date'
-#                                             , target='disposition_date')
-#
-# disposition = maker.make_class_diff(df1=disposition
-#                                     , df2=initiation
-#                                     , col1='disposition_charged_class'
-#                                     , col2='class')
-#
-# main = joiner.initiation_disposition(initiation, disposition)
 
-df = reader.to_df('Sentencing.zip', preview=False, clean_sentencing=True)
 
-cols = ['commitment_type'
-       , 'commitment_days'
-       , 'commitment_unit'
-       , 'commitment_dollars'
-       , 'commitment_weight'
-       , 'life_term'
-       # , 'commitment_unit_new'
-        ]
-gui = show(df)
+
+# initiation = reader.to_df('initiation_modified.bz2'
+#                                   , preview=False)
+# disposition = reader.to_df('disposition_modified.bz2'
+#                                    , preview=False)
+# sentencing = reader.to_df('sentencing_modified.bz2'
+#                                    , preview=False)
+# gui = show(initiation)
+
+
+
 
