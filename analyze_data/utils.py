@@ -86,6 +86,7 @@ class Utilities():
             , name.disposition_date
             , name.commitment_days
             , name.sentence_type
+            , name.charge_disposition_cat
                 ]
         df = df[cols]
 

@@ -39,6 +39,11 @@ class Application():
                       'However, unlike schools and businesses, some court systems have struggled to resume operations.',
                       'The result, so far, has been a growing backlog of cases as individuals wait on the courts.')
 
+        self.st.markdown('**The COVID Court Cliff**')
+
+        self.st.write('Exactly how many cases are in the backlog? It depends on which phase of the court system you are investigating.',
+                      'On a monthly basis over the past 10 years; however, the backlog may be the difference between the trend and an actual count of cases')
+
         self.st.plotly_chart(ov1.timeseries())
 
         self.st.write('As one example of court volume and backlog over time, Cook County courts has seen a severe drop-off in cases across multiple phases of the system.',
