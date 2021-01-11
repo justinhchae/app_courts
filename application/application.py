@@ -48,7 +48,7 @@ class Application():
 
         self.st.write('As one example of court volume and backlog over time, Cook County courts has seen a severe drop-off in cases across multiple phases of the system.',
                       'In 2020, Cook County managed to process about half as many cases in prior years (at best).',
-                      'For instance, as a measure of volume in sentencing hearings, there were 18 thousand cases in 2019; however, only 5 thousand in 2020.')
+                      'For instance, monthly court volumes are down as much as 90% on a monthly basis.')
 
         self.st.write('Given the opportunity for alternative remote hearings (i.e. "Zoom Courts"), at issue is whether courts are not meeting their obligation to process cases during the Pandemic.',
                       'As just one example of the impact of delayed court proceedings, individuals, who have yet to be convicted of any crime, remain in limbo while waiting on the courts.',

@@ -353,14 +353,12 @@ class Metrics():
 
         df = initiation.append(disposition)
         df = df.append(sentencing).reset_index(drop=True)
-
-        print(df)
         g = df.groupby('type')
 
         fig = go.Figure()
 
         for group, frame in g:
-            print(group)
+
             # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
 
             fig.add_trace(go.Scatter(x=frame['date'], y=frame['count'], name=group, fill='tozeroy'))
