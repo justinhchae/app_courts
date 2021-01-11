@@ -44,7 +44,7 @@ class Reader():
               , clean_sentencing=False
               , preview=True
               , classify=True
-              , echo=True
+              , echo=False
               , derive_data=True
               ):
 

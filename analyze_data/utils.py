@@ -20,7 +20,7 @@ class Utilities():
         self.charged_class_code = 'charged_class_category'
 
         self.common_cols = [
-            name.case_id
+              name.case_id
             , name.case_participant_id
             , name.received_date
             , name.updated_offense_category
@@ -32,8 +32,12 @@ class Utilities():
     def ov1_initiation(self):
         df = Reader().to_df('initiation_modified.bz2', preview=False)
         df = df[df[name.primary_charge_flag]==True]
-        cols = [name.case_id, name.case_participant_id, name.primary_charge_flag, name.disposition_date_days_pending, name.bond_type_current]
+        cols = [name.case_id, name.received_date, name.event_date, name.case_participant_id, name.event, name.primary_charge_flag, name.disposition_date_days_pending, name.bond_type_current]
         df = df[cols]
+
+        df['year'] = df[name.event_date].dt.year.astype('float32').fillna(value=0)
+        df['year'] = df.apply(lambda x: x[name.received_date].year if x['year'] == 0 else x['year'], axis=1)
+        df['year'] = df['year'].astype('int16')
         Writer().to_pickle(df=df, filename='ov1_initiation', compression=False)
 
     def ov1_disposition(self):
@@ -54,12 +58,17 @@ class Utilities():
         cols = [name.case_id
             , name.case_participant_id
             , name.received_date
+            , name.disposition_date
             , name.updated_offense_category
             , name.disposition_charged_class
             , name.charge_disposition_cat
                 ]
 
         df = df[cols]
+
+        df['year'] = df[name.disposition_date].dt.year.astype('float32').fillna(value=0)
+        df['year'] = df.apply(lambda x: x[name.received_date].year if x['year'] == 0 else x['year'], axis=1)
+        df['year'] = df['year'].astype('int16')
 
         Writer().to_pickle(df=df, filename='ov1_disposition', compression=False)
 
@@ -73,9 +82,16 @@ class Utilities():
             , name.updated_offense_category
             , name.disposition_charged_class
             , name.sentence_judge
+            , name.sentence_date
+            , name.disposition_date
             , name.commitment_days
             , name.sentence_type
                 ]
         df = df[cols]
+
+        df['year'] = df[name.sentence_date].dt.year.astype('float32').fillna(value=0)
+        df['year'] = df.apply(lambda x: x[name.disposition_date].year if x['year'] == 0 else x['year'], axis=1)
+        df['year'] = df.apply(lambda x: x[name.received_date].year if x['year'] == 0 else x['year'], axis=1)
+        df['year'] = df['year'].astype('int16')
         Writer().to_pickle(df=df, filename='ov1_sentencing', compression=False)
 
