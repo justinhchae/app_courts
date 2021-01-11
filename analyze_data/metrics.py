@@ -17,6 +17,7 @@ name = Columns()
 
 # from pandasgui import show
 from analyze_data.colors import Colors
+from scipy import stats
 
 colors = Colors()
 
@@ -262,6 +263,7 @@ class Metrics():
 
     def ov1_timeseries(self):
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
+
         initiation = df[[name.case_participant_id, 'year']].groupby('year', as_index=False).agg('count')
         initiation['type'] = 'initiation'
         df = Reader().to_df('ov1_disposition.pickle', preview=False, classify=False, echo=False)
@@ -279,7 +281,6 @@ class Metrics():
         df = df[df['year'] > 2010]
 
         fig = px.area(df, x='year', y='#Cases', color='type')
-
         # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
 
         fig.update_yaxes(title='Case Volume')
@@ -292,27 +293,107 @@ class Metrics():
             , paper_bgcolor=self.transparent
             , plot_bgcolor=self.transparent
             , title='Court Volume Over Time - The COVID Court Cliff'
-            # updatemenus=[
-            #     dict(
-            #         type="buttons",
-            #         direction="left",
-            #         buttons=list([
-            #             dict(
-            #                 args=[{"yaxis.type": "linear"}],
-            #                 label="LINEAR",
-            #                 method="relayout"
-            #             ),
-            #             dict(
-            #                 args=[{"yaxis.type": "log"}],
-            #                 label="LOG",
-            #                 method="relayout"
-            #             )
-            #         ]),
-            #     ),
-            # ]
+        )
+
+        self.ov1_regression()
+
+        return fig
+
+    def ov1_regression(self):
+        # from sklearn.linear_model import LinearRegression
+        # from plotly.graph_objs.scatter.marker import Line
+        df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
+        df = df[df['year'] > 2010]
+        df = df[df['year'] < 2021]
+
+        counts = df.value_counts()
+        df = counts.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
+
+        df = df.groupby([pd.Grouper(key=name.event_date, freq='M')])['count'].sum().to_frame().reset_index()
+        initiation = df.sort_values(name.event_date).dropna(subset=['count'])
+        initiation['type'] = 'initiation'
+
+        del df
+
+        df = Reader().to_df('ov1_disposition.pickle', preview=False, classify=False, echo=False)
+        df = df[df['year'] > 2010]
+        df = df[df['year'] < 2021]
+
+        counts = df.value_counts()
+        df = counts.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
+
+        df = df.groupby([pd.Grouper(key=name.disposition_date, freq='M')])['count'].sum().to_frame().reset_index()
+        disposition = df.sort_values(name.disposition_date).dropna(subset=['count'])
+        disposition['type'] = 'disposition'
+
+        del df
+
+        df = Reader().to_df('ov1_sentencing.pickle', preview=False, classify=False, echo=False)
+        df = df[df['year'] > 2010]
+        df = df[df['year'] < 2021]
+
+        counts = df.value_counts()
+        df = counts.to_frame().reset_index()
+        df.rename(columns={0: 'count'}, inplace=True)
+
+        df = df.groupby([pd.Grouper(key=name.sentence_date, freq='M')])['count'].sum().to_frame().reset_index()
+        sentencing = df.sort_values(name.sentence_date).dropna(subset=['count'])
+        sentencing['type'] = 'sentencing'
+
+        del df
+
+
+        initiation = initiation.rename(columns={name.event_date:'date'})
+
+        disposition = disposition.rename(columns={name.disposition_date:'date'})
+
+        sentencing = sentencing.rename(columns={name.sentence_date:'date'})
+
+        df = initiation.append(disposition)
+        df = df.append(sentencing).reset_index(drop=True)
+
+        print(df)
+        g = df.groupby('type')
+
+        fig = go.Figure()
+
+        for group, frame in g:
+            print(group)
+            # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
+
+            fig.add_trace(go.Scatter(x=frame['date'], y=frame['count'], name=group, fill='tozeroy'))
+
+            help_fig = px.scatter(frame, x=frame['date'], y=frame['count'], trendline="lowess")
+            x_trend = help_fig["data"][1]['x']
+            y_trend = help_fig["data"][1]['y']
+
+            fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name='Trend'))
+
+            # fig.add_trace(go.Line(x=x_trend, y=y_trend, name=str('Logistic Trend ' + group)))
+
+        # # fig = px.area(df, x='year', y='#Cases', color='type')
+        # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
+
+        fig.update_yaxes(title='Case Volume')
+        fig.update_xaxes(title='Year')
+
+        fig.update_layout(
+            hovermode='x',
+            showlegend=False
+            # , title_text=str('Court Data for ' + str(year))
+            , paper_bgcolor=self.transparent
+            , plot_bgcolor=self.transparent
+            , title='Court Volume Over Time - The COVID Court Cliff'
         )
 
         return fig
+
+
+
+
+
 
 
 

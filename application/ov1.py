@@ -12,4 +12,4 @@ class OV_1():
         # self.st.plotly_chart(Metrics().ov1_initiation())
 
     def timeseries(self):
-        return Metrics().ov1_timeseries()
+        return Metrics().ov1_regression()
