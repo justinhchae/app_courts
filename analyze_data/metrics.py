@@ -260,7 +260,6 @@ class Metrics():
                 row=row, col=col
             )
 
-
     def ov1_timeseries(self):
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
 
@@ -383,7 +382,8 @@ class Metrics():
 
         return fig
 
-
+    def dv1_bond(self):
+        df = Reader().to_df('ov1_sentencing.pickle', preview=False)
 
 
 

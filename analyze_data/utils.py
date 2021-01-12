@@ -11,7 +11,7 @@ from do_data.writer import Writer
 from do_data.config import Columns
 name = Columns()
 
-# from pandasgui import show
+from pandasgui import show
 
 class Utilities():
     def __init__(self):
@@ -95,4 +95,12 @@ class Utilities():
         df['year'] = df.apply(lambda x: x[name.received_date].year if x['year'] == 0 else x['year'], axis=1)
         df['year'] = df['year'].astype('int16')
         Writer().to_pickle(df=df, filename='ov1_sentencing', compression=False)
+
+    def dv1_bond(self):
+        df = Reader().to_df('initiation_modified.bz2', preview=False)
+        # df[name.bond_electronic_monitor_flag_initial] = df[name.bond_electronic_monitor_flag_initial].fillna(0)
+        print(df[name.bond_electronic_monitor_flag_initial].unique())
+        # df = Reader().to_df('disposition_modified.bz2', preview=False)
+        # df = Reader().to_df('initiation_modified.bz2', preview=False)
+
 

@@ -1,7 +1,7 @@
 import gc
 
 import pandas as pd
-# from pandasgui import show
+
 
 
 from application.application import Application
@@ -23,9 +23,11 @@ name = Columns()
 utils = Utilities()
 metrics = Metrics()
 
-utils.ov1_initiation()
-utils.ov1_disposition()
-utils.ov1_sentencing()
+# utils.ov1_initiation()
+# utils.ov1_disposition()
+# utils.ov1_sentencing()
+
+# utils.dv1_bond()
 
 # metrics.ov1_timeseries()
 
@@ -35,8 +37,8 @@ utils.ov1_sentencing()
 #                                   , preview=False
 #                                   , classify=True
 #                                   )
-
-
+# from pandasgui import show
+# gui = show(initiation)
 
 # initiation = reader.to_df('initiation_modified.bz2'
 #                                   , preview=False)

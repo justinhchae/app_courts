@@ -138,7 +138,9 @@ class Joiner():
                                   , name.disposition_court_facility
                                    ])
 
-        df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].astype('bool')
+        # df['primary_charge_flag_disp'] = df['primary_charge_flag_disp'].astype('bool')
+
+        # print(df.dtypes)
 
         # workaround for memory problems, usecols subset
 
