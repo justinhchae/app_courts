@@ -312,6 +312,7 @@ class Metrics():
         initiation = df[[name.event_date, name.event]].groupby([pd.Grouper(key=name.event_date, freq=frequency)]).agg('count').reset_index()
         initiation = initiation.sort_values(name.event_date)
         initiation['type'] = 'initiation'
+        initiation['color'] = self.purple
         initiation = initiation.rename(columns={name.event:'count'})
         # counts = df.value_counts()
         # df = counts.to_frame().reset_index()
@@ -332,6 +333,7 @@ class Metrics():
         df = df[[name.disposition_date, name.charge_disposition_cat]].groupby([pd.Grouper(key=name.disposition_date, freq=frequency)]).agg('count').reset_index()
         disposition = df.sort_values(name.disposition_date)
         disposition['type'] = 'disposition'
+        disposition['color'] = self.orange
         disposition = disposition.rename(columns={name.charge_disposition_cat: 'count'})
 
         del df
@@ -343,6 +345,7 @@ class Metrics():
         df = df[[name.sentence_date, name.sentence_type]].groupby([pd.Grouper(key=name.sentence_date, freq=frequency)]).agg('count').reset_index()
         sentencing = df.sort_values(name.sentence_date)
         sentencing['type'] = 'sentencing'
+        sentencing['color'] = self.green
         sentencing = sentencing.rename(columns={name.sentence_type: 'count'})
 
         del df
@@ -351,8 +354,14 @@ class Metrics():
         disposition = disposition.rename(columns={name.disposition_date:'date'})
         sentencing = sentencing.rename(columns={name.sentence_date:'date'})
 
-        df = initiation.append(disposition)
-        df = df.append(sentencing).reset_index(drop=True)
+        # df = initiation.append(disposition)
+        # df = df.append(sentencing).reset_index(drop=True)
+
+        df = sentencing.append(disposition)
+        df = df.append(initiation).reset_index(drop=True)
+
+
+
 
         g = df.groupby('type')
         fig = go.Figure()
@@ -360,13 +369,13 @@ class Metrics():
         for group, df in g:
             # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
 
-            fig.add_trace(go.Scatter(x=df['date'], y=df['count'], name=group, fill='tozeroy'))
+            fig.add_trace(go.Scatter(x=df['date'], y=df['count'], name=group, fill='tozeroy', marker=dict(color=df['color'].iloc[0])))
 
             help_fig = px.scatter(df, x=df['date'], y=df['count'], trendline="lowess")
             x_trend = help_fig["data"][1]['x']
             y_trend = help_fig["data"][1]['y']
 
-            fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name=str(group + ' trend')))
+            fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name='trend', line = dict(color=df['color'].iloc[0], width=4, dash='dash')))
 
         # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
 
