@@ -303,18 +303,25 @@ class Metrics():
         # from sklearn.linear_model import LinearRegression
         # from plotly.graph_objs.scatter.marker import Line
         frequency = 'M'
+
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
+
         df = df[df['year'] > 2010]
         df = df[df['year'] < 2021]
 
-        counts = df.value_counts()
-        df = counts.to_frame().reset_index()
-        df.rename(columns={0: 'count'}, inplace=True)
-
-
-        df = df.groupby([pd.Grouper(key=name.event_date, freq=frequency)])['count'].sum().to_frame().reset_index()
-        initiation = df.sort_values(name.event_date).dropna(subset=['count'])
+        initiation = df[[name.event_date, name.event]].groupby([pd.Grouper(key=name.event_date, freq=frequency)]).agg('count').reset_index()
+        initiation = initiation.sort_values(name.event_date)
         initiation['type'] = 'initiation'
+        initiation = initiation.rename(columns={name.event:'count'})
+        # counts = df.value_counts()
+        # df = counts.to_frame().reset_index()
+        # df.rename(columns={0: 'count'}, inplace=True)
+        #
+        # df = df.groupby([pd.Grouper(key=name.event_date, freq=frequency)])['count'].sum().to_frame().reset_index()
+        # initiation = df.sort_values(name.event_date).dropna(subset=['count'])
+        # initiation['type'] = 'initiation'
+        #
+        # print(initiation)
 
         del df
 
@@ -322,13 +329,10 @@ class Metrics():
         df = df[df['year'] > 2010]
         df = df[df['year'] < 2021]
 
-        counts = df.value_counts()
-        df = counts.to_frame().reset_index()
-        df.rename(columns={0: 'count'}, inplace=True)
-
-        df = df.groupby([pd.Grouper(key=name.disposition_date, freq=frequency)])['count'].sum().to_frame().reset_index()
-        disposition = df.sort_values(name.disposition_date).dropna(subset=['count'])
+        df = df[[name.disposition_date, name.charge_disposition_cat]].groupby([pd.Grouper(key=name.disposition_date, freq=frequency)]).agg('count').reset_index()
+        disposition = df.sort_values(name.disposition_date)
         disposition['type'] = 'disposition'
+        disposition = disposition.rename(columns={name.charge_disposition_cat: 'count'})
 
         del df
 
@@ -336,16 +340,12 @@ class Metrics():
         df = df[df['year'] > 2010]
         df = df[df['year'] < 2021]
 
-        counts = df.value_counts()
-        df = counts.to_frame().reset_index()
-        df.rename(columns={0: 'count'}, inplace=True)
-
-        df = df.groupby([pd.Grouper(key=name.sentence_date, freq=frequency)])['count'].sum().to_frame().reset_index()
-        sentencing = df.sort_values(name.sentence_date).dropna(subset=['count'])
+        df = df[[name.sentence_date, name.sentence_type]].groupby([pd.Grouper(key=name.sentence_date, freq=frequency)]).agg('count').reset_index()
+        sentencing = df.sort_values(name.sentence_date)
         sentencing['type'] = 'sentencing'
+        sentencing = sentencing.rename(columns={name.sentence_type: 'count'})
 
         del df
-
 
         initiation = initiation.rename(columns={name.event_date:'date'})
         disposition = disposition.rename(columns={name.disposition_date:'date'})
@@ -357,16 +357,16 @@ class Metrics():
         g = df.groupby('type')
         fig = go.Figure()
 
-        for group, frame in g:
+        for group, df in g:
             # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
 
-            fig.add_trace(go.Scatter(x=frame['date'], y=frame['count'], name=group, fill='tozeroy'))
+            fig.add_trace(go.Scatter(x=df['date'], y=df['count'], name=group, fill='tozeroy'))
 
-            help_fig = px.scatter(frame, x=frame['date'], y=frame['count'], trendline="lowess")
+            help_fig = px.scatter(df, x=df['date'], y=df['count'], trendline="lowess")
             x_trend = help_fig["data"][1]['x']
             y_trend = help_fig["data"][1]['y']
 
-            fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name='Trend'))
+            fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name=str(group + ' trend')))
 
         # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
 
