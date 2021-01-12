@@ -299,11 +299,7 @@ class Metrics():
 
         return fig
 
-    def ov1_regression(self):
-        # from sklearn.linear_model import LinearRegression
-        # from plotly.graph_objs.scatter.marker import Line
-        frequency = 'M'
-
+    def ov1_regression(self, frequency='M'):
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
 
         df = df[df['year'] > 2010]
@@ -345,7 +341,7 @@ class Metrics():
         df = df[[name.sentence_date, name.sentence_type]].groupby([pd.Grouper(key=name.sentence_date, freq=frequency)]).agg('count').reset_index()
         sentencing = df.sort_values(name.sentence_date)
         sentencing['type'] = 'sentencing'
-        sentencing['color'] = self.green
+        sentencing['color'] = self.teal
         sentencing = sentencing.rename(columns={name.sentence_type: 'count'})
 
         del df
@@ -354,14 +350,8 @@ class Metrics():
         disposition = disposition.rename(columns={name.disposition_date:'date'})
         sentencing = sentencing.rename(columns={name.sentence_date:'date'})
 
-        # df = initiation.append(disposition)
-        # df = df.append(sentencing).reset_index(drop=True)
-
         df = sentencing.append(disposition)
         df = df.append(initiation).reset_index(drop=True)
-
-
-
 
         g = df.groupby('type')
         fig = go.Figure()
