@@ -3,7 +3,7 @@ import streamlit as st
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 from application.ov1 import OV_1
-from application.bond import BondApp
+from application.bond import BondTree
 from do_data.getter import Reader
 
 ov1 = OV_1()
@@ -151,7 +151,7 @@ class Application():
     def bond_data(self):
 
         if self.sidebar_selection == 'Bond Data':
-            BondApp().bond_data()
+            BondTree().bond_data()
 
     def by_judge(self):
         # cached = self.judge_data()

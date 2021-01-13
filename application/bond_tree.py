@@ -5,7 +5,7 @@ from do_data.getter import Reader
 
 dv1 = DV_1()
 
-class BondApp():
+class BondTree():
     def __init__(self):
         self.st = st
 
@@ -35,7 +35,7 @@ class BondApp():
             self.overview()
             # clicked = st.button("Click me " + key)
 
-        my_expander = st.beta_expander("About Bond Data in Cook County (Click to Expand)", expanded=False)
+        my_expander = st.beta_expander("About Bond Data Treemap in Cook County (Click to Expand)", expanded=False)
         with my_expander:
             clicked = header("first")
 

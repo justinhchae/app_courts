@@ -1,6 +1,6 @@
-from application.bond import BondApp
+from application.bond import BondTree
 
-app = BondApp()
+app = BondTree()
 
 def run_app():
     app.run_app()
