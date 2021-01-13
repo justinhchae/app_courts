@@ -167,6 +167,8 @@ class Application():
                                                   2011],
                                          key='bond_slider')
 
+            self.st.write('Bond Data for', str(year))
+
             self.st.plotly_chart(dv1.bond_tree(year))
 
     def by_judge(self):
