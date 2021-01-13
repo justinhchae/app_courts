@@ -22,7 +22,7 @@ class BondApp():
             self.data_disclaimer()
             # clicked = st.button("Click me " + key)
 
-        my_expander = st.beta_expander("Disclaimer and Notices", expanded=True)
+        my_expander = st.beta_expander("Disclaimer and Notices", expanded=False)
         with my_expander:
             clicked = footer("second")
 
@@ -35,7 +35,7 @@ class BondApp():
             self.overview()
             # clicked = st.button("Click me " + key)
 
-        my_expander = st.beta_expander("About Bond Data in Cook County (Click to Expand)", expanded=True)
+        my_expander = st.beta_expander("About Bond Data in Cook County (Click to Expand)", expanded=False)
         with my_expander:
             clicked = header("first")
 
