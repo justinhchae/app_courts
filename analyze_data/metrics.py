@@ -382,7 +382,7 @@ class Metrics():
 
         return fig
 
-    def dv1_bond(self, year=2020):
+    def dv1_bond(self, year=2020, annotation = 'Interactive Visualization by @justinhchae for Chicago Appleseed'):
 
         df = Reader().to_df('dv1_bond.pickle', preview=False)
 
@@ -404,13 +404,21 @@ class Metrics():
         df['root'] = 'initiation event'
         df['weights'] = df[name.event].cat.codes
 
+
         fig = px.treemap(df
                          , path=['root', 'race', 'event', 'bond_type_current']
                          , values='bond_amount_current'
                          # , hover_data=['class']
                          , color='bond_amount_current'
                          , color_continuous_scale='RdBu_r'
+                         , title='Bond Data for ' + str(year)
                          )
+
+        fig.add_annotation(x=.1, y=-.1,
+                           text=annotation,
+                           showarrow=False,
+                           )
+
         return fig
 
 

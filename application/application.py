@@ -43,7 +43,7 @@ class Application():
 
     def frame(self):
         self.st.title('Analysis of Cook County Court Data')
-        self.st.markdown('Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
+        self.st.markdown('Interactive Data Visualization by @justinhchae for Chicago Appleseed *[Alpha Version]*')
         self.bond_data()
 
         if self.sidebar_selection == 'Featured: COVID Cliff':
