@@ -12,7 +12,17 @@ dv1 = DV_1()
 class Application():
     def __init__(self):
         self.st = st
+        self.sidebar_picklist = ['Featured: COVID Cliff','Bond Data']
 
+        self.sidebar_selection = self.st.sidebar.selectbox('Select Analysis', self.sidebar_picklist)
+
+        # self.bond_box = self.st.sidebar.checkbox(label="Bond Data"
+        #                          , value=False
+        #                          , key='bond_tree')
+        #
+        # self.featured = self.st.sidebar.checkbox(label="Featured Analysis"
+        #                          , value=True
+        #                          , key='covid_cliff')
         self.df = None
         self.judge_names = Reader().to_df('judges.pickle', preview=False, echo=False, classify=False)
         self.n_samples = None
@@ -37,37 +47,43 @@ class Application():
 
         self.st.markdown('Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
 
-        self.st.write('In 2020, the COVID-19 Pandemic brought the world to a grinding halt across all sectors of business and government.',
-                      'Similarly, court systems reduced their availability and services while doing their part to support public health measures.',
-                      'However, unlike schools and businesses, some court systems have struggled to resume operations.',
-                      'The result, so far, has been a growing backlog of cases as individuals wait on the courts.')
+
 
         self.bond_data()
 
-        self.st.markdown('**The COVID Court Cliff**')
+        # if self.featured:
 
-        self.st.write('Exactly how many cases are in the backlog? It depends on which phase of the court system you are investigating.',
-                      'On a monthly basis over the past 10 years; however, the backlog may be the difference between the projected trend (given by a logistic regression) and an actual count of cases.',
-                      )
+        if self.sidebar_selection == 'Featured: COVID Cliff':
+            self.st.write(
+                'In 2020, the COVID-19 Pandemic brought the world to a grinding halt across all sectors of business and government.',
+                'Similarly, court systems reduced their availability and services while doing their part to support public health measures.',
+                'However, unlike schools and businesses, some court systems have struggled to resume operations.',
+                'The result, so far, has been a growing backlog of cases as individuals wait on the courts.')
 
-        self.st.plotly_chart(ov1.timeseries())
+            self.st.markdown('**The COVID Court Cliff**')
 
-        self.st.write('As one example of court volume and backlog over time, Cook County courts has seen a severe drop-off in cases across multiple phases of the system.',
-                      'In 2020, Cook County managed to process about half as many cases in prior years (at best).',
-                      'For instance, monthly court volumes are down as much as 90% on a monthly basis.')
+            self.st.write('Exactly how many cases are in the backlog? It depends on which phase of the court system you are investigating.',
+                          'On a monthly basis over the past 10 years; however, the backlog may be the difference between the projected trend (given by a logistic regression) and an actual count of cases.',
+                          )
 
-        self.st.markdown('**The Issue**')
+            self.st.plotly_chart(ov1.timeseries())
 
-        self.st.write('Given the opportunity for alternative remote hearings (i.e. "Zoom Courts"), at issue is whether courts are not meeting their obligation to process cases during the Pandemic.',
-                      'As just one example of the impact of delayed court proceedings, individuals, who have yet to be convicted of any crime, remain in limbo while waiting on the courts.',
-                      'In some cases, people are in some form of incarceration (Jail or Electronic Monitoring) or are anxiously waiting for their day in court.',
-                      'As a result, we might ask questions such as "how long is too long" and "how many cases are there"?'
-                      )
+            self.st.write('As one example of court volume and backlog over time, Cook County courts has seen a severe drop-off in cases across multiple phases of the system.',
+                          'In 2020, Cook County managed to process about half as many cases in prior years (at best).',
+                          'For instance, monthly court volumes are down as much as 90% on a monthly basis.')
 
-        self.st.write('Unfortunately, the court system is complex and a single number cannot descirbe how many cases are processed.',
-                      'As a result, this dashboard presents analysis of the data with dynamic charts and filters to provide transparent and up-front numbers.')
+            self.st.markdown('**The Issue**')
 
-        # self.st.sidebar.checkbox('Bond Data', value=False)
+            self.st.write('Given the opportunity for alternative remote hearings (i.e. "Zoom Courts"), at issue is whether courts are not meeting their obligation to process cases during the Pandemic.',
+                          'As just one example of the impact of delayed court proceedings, individuals, who have yet to be convicted of any crime, remain in limbo while waiting on the courts.',
+                          'In some cases, people are in some form of incarceration (Jail or Electronic Monitoring) or are anxiously waiting for their day in court.',
+                          'As a result, we might ask questions such as "how long is too long" and "how many cases are there"?'
+                          )
+
+            self.st.write('Unfortunately, the court system is complex and a single number cannot descirbe how many cases are processed.',
+                          'As a result, this dashboard presents analysis of the data with dynamic charts and filters to provide transparent and up-front numbers.')
+
+            # self.st.sidebar.checkbox('Bond Data', value=False)
 
     def overview(self):
         self.object_overview()
@@ -96,6 +112,7 @@ class Application():
         self.st.write('The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
                       'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
                       )
+
         year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
 
         self.st.plotly_chart(ov1.court_counts(year))
@@ -136,9 +153,8 @@ class Application():
         return fig #cached_dict
 
     def bond_data(self):
-        if self.st.sidebar.checkbox(label="Bond Data"
-                                 , value=False
-                                 , key='bond_tree'):
+
+        if self.sidebar_selection == 'Bond Data':
 
             self.st.markdown('**Bond Data Tree Map**')
 
@@ -152,7 +168,6 @@ class Application():
                                          key='bond_slider')
 
             self.st.plotly_chart(dv1.bond_tree(year))
-
 
     def by_judge(self):
         # cached = self.judge_data()
