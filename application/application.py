@@ -3,11 +3,10 @@ import streamlit as st
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 from application.ov1 import OV_1
-from application.dv1 import DV_1
+from application.bond import BondApp
 from do_data.getter import Reader
 
 ov1 = OV_1()
-dv1 = DV_1()
 
 class Application():
     def __init__(self):
@@ -44,14 +43,8 @@ class Application():
 
     def frame(self):
         self.st.title('Analysis of Cook County Court Data')
-
         self.st.markdown('Interactive Dashboard by @justinhchae for Chicago Appleseed *[Alpha Version]*')
-
-
-
         self.bond_data()
-
-        # if self.featured:
 
         if self.sidebar_selection == 'Featured: COVID Cliff':
             self.st.write(
@@ -158,21 +151,7 @@ class Application():
     def bond_data(self):
 
         if self.sidebar_selection == 'Bond Data':
-
-            self.st.markdown('**Bond Data Tree Map**')
-
-            self.st.write('In this bond data tree map, the size of the box indicates the relative percentage of each category.',
-                          'For example, for all Initiation events where a bond is granted, the tree map breaks down charges by race, hearing type, and bond type.',
-                          'Bigger boxes indiciate more counts of that combination of data and red colors indicate higher dollar amounts.')
-
-            year = self.st.select_slider('Slide to Filter data by Year',
-                                         options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012,
-                                                  2011],
-                                         key='bond_slider')
-
-            self.st.write('Bond Data for', str(year))
-
-            self.st.plotly_chart(dv1.bond_tree(year))
+            BondApp().bond_data()
 
     def by_judge(self):
         # cached = self.judge_data()

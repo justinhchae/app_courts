@@ -28,7 +28,7 @@ class BondApp():
         self.st.markdown('**Bond Data Tree Map**')
         self.st.write(
             'In this bond data tree map, the size of the box indicates the relative percentage of each category.',
-            'For example, for all Initiation events where a bond is granted, the tree map breaks down by charged race, hearing type, and bond type.',
+            'For example, for all Initiation events where a bond is granted, the tree map breaks down charges by race, hearing type, and bond type.',
             'Bigger boxes indiciate more counts of that combination of data and red colors indicate higher dollar amounts.')
 
         year = self.st.select_slider('Slide to Filter data by Year',
