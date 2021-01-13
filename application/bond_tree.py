@@ -26,7 +26,6 @@ class BondTree():
         with my_expander:
             clicked = footer("second")
 
-
     def frame(self):
         # self.st.title('Analysis of Cook County Bond Data')
         # self.st.title('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
@@ -66,7 +65,7 @@ class BondTree():
             'All source code, and cleaned data available in a [GitHub Respository](https://github.com/justinhchae/app_courts/tree/main/data)')
 
         st.markdown(
-            '_This site is under construction and active analysis. Please stop by again for future updates!_')
+            '_This site is under construction and active analysis._')
         # self.st.write('This site is under construction and active analysis. Please stop by again for future updates!')
         st.markdown('[Cook County Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
         st.markdown(
