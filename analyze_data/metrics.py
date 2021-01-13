@@ -298,7 +298,7 @@ class Metrics():
 
         return fig
 
-    def ov1_regression(self, frequency='M'):
+    def ov1_regression(self, frequency='M', annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
 
         df = df[df['year'] > 2010]
@@ -309,15 +309,6 @@ class Metrics():
         initiation['type'] = 'initiation'
         initiation['color'] = self.purple
         initiation = initiation.rename(columns={name.event:'count'})
-        # counts = df.value_counts()
-        # df = counts.to_frame().reset_index()
-        # df.rename(columns={0: 'count'}, inplace=True)
-        #
-        # df = df.groupby([pd.Grouper(key=name.event_date, freq=frequency)])['count'].sum().to_frame().reset_index()
-        # initiation = df.sort_values(name.event_date).dropna(subset=['count'])
-        # initiation['type'] = 'initiation'
-        #
-        # print(initiation)
 
         del df
 
@@ -380,6 +371,7 @@ class Metrics():
             , title='Monthly Court Volume Over Time'
         )
 
+
         return fig
 
     def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
@@ -422,7 +414,9 @@ class Metrics():
 
         return fig
 
+    def dv1_bond_ts(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
 
+        df = Reader().to_df('dv1_bond.pickle', preview=False)
 
 
 

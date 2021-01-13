@@ -4,6 +4,7 @@ from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 from application.ov1 import OV_1
 from application.bond_tree import BondTree
+from application.footer import Footer
 from do_data.getter import Reader
 
 ov1 = OV_1()
@@ -32,18 +33,32 @@ class Application():
         """
 
     def run_app(self):
-        # if df is not None:
-        #     self.df = df
-        #     self.sample_size()
 
         self.frame()
-        # self.overview()
-        self.frame_objects()
-        self.data_disclaimer()
+
+        def footer(key):
+            # st.subheader('Disclaimer and Notices')
+            # self.data_disclaimer()
+            Footer().data_disclaimer()
+            # clicked = st.button("Click me " + key)
+
+        my_expander = st.beta_expander("Disclaimer and Notices", expanded=False)
+        with my_expander:
+            clicked = footer("second")
 
     def frame(self):
         self.st.title('Analysis of Cook County Court Data')
-        self.st.markdown('Interactive Data Visualization by @justinhchae for Chicago Appleseed *[Alpha Version]*')
+        self.st.markdown('Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
+
+        def header(key):
+            st.subheader('About This Data')
+            self.overview()
+            # clicked = st.button("Click me " + key)
+
+        my_expander = st.beta_expander("About Data Overview (Click to Expand)", expanded=False)
+        with my_expander:
+            clicked = header("first")
+
         self.bond_data()
 
         if self.sidebar_selection == 'Featured: COVID Cliff':
@@ -70,12 +85,8 @@ class Application():
             self.st.write('Given the opportunity for alternative remote hearings (i.e. "Zoom Courts"), at issue is whether courts are not meeting their obligation to process cases during the Pandemic.',
                           'As just one example of the impact of delayed court proceedings, individuals, who have yet to be convicted of any crime, remain in limbo while waiting on the courts.',
                           'In some cases, people are in some form of incarceration (Jail or Electronic Monitoring) or are anxiously waiting for their day in court.',
-                          'As a result, we might ask questions such as "how long is too long" and "how many cases are there"?'
+                          'This dashboard might answer questions regarding the operation of the courts over time.'
                           )
-
-            self.st.write('Unfortunately, the court system is complex and a single number cannot descirbe how many cases are processed.',
-                          'As a result, this dashboard presents analysis of the data with dynamic charts and filters to provide transparent and up-front numbers.')
-
             # self.st.sidebar.checkbox('Bond Data', value=False)
 
     def overview(self):
@@ -100,8 +111,6 @@ class Application():
                       'This dashboard represents the results of a processed and ready-to-analyze dataset about the courts.'
                       )
 
-
-
         if self.sidebar_selection != 'Bond Data':
             self.st.markdown('**Initiation - Disposition - Sentencing**')
 
@@ -112,31 +121,6 @@ class Application():
 
             year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
             self.st.plotly_chart(ov1.court_counts(year))
-
-
-        self.st.markdown('All source code, and cleaned data available in a [GitHub Respository](https://github.com/justinhchae/app_courts/tree/main/data)')
-
-        self.st.markdown('**Notes on Methodology**')
-
-        self.st.write('Across all phases, cases are uniquely identified by Case IDs. In each case, there may be one or more individuals that are party to the case, given by Case Participant ID.',
-                      'To provide high-level insights into court volumes, this dataset is filtered to identify aggregated measures of unique cases and individuals.',
-                      'For instance, for what might be considered a sigular event, a person may be charged with multiple allegations and multiple counts of a given crime.',
-                      'Although the severity of such circumstances is not taken lightly, counting each of these instances may overstate a characterization of court volumes.',
-                      'As a result, to avoid double-counting, this analysis filters Initiation and Disposition records in two key ways.')
-
-        self.st.write('For Initiation Events, the original source table of approximately 1 million records is reudced to about 350k records where the Primary Charge Flag == True.',
-                      'For Disposition Hearings, the original source table of approximately 700k records is reduced to about 350k records by the most severe charge in the case.',
-                      'For example, in Initiation Events, the most severe criminal charge or allegation is usually the most severe charge if there are multiple counts and multiple charges.',
-                      'In another example for Disposition Hearings, the most severe charge associated with a given case may not be the primary charge due to pleadings and other intricacies of the court system.',
-                      )
-
-    def frame_objects(self):
-        self.object_overview()
-
-        # self.by_judge()
-        # self.by_initiation()
-        # self.by_disposition()
-        # self.by_court()
 
     # @st.cache(hash_funcs={dict: lambda _: None}, max_entries=10, ttl=3600)
     @st.cache(max_entries=10, ttl=3600)
@@ -229,10 +213,3 @@ class Application():
         data_fixer()
         # e = time.time()
         # print('Fix Data', e - s)
-
-    def data_disclaimer(self):
-        self.st.markdown('**Disclaimer and Notices**')
-        self.st.markdown('_This site is under construction and active analysis. Please stop by again for future updates!_')
-        # self.st.write('This site is under construction and active analysis. Please stop by again for future updates!')
-        self.st.markdown('[Cook County Data Source](https://datacatalog.cookcountyil.gov/browse?category=Courts)')
-        self.st.markdown('"This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago.  The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site.  The data provided at this site is subject to change at any time.  It is understood that the data provided at this site is being used at one’s own risk."')
