@@ -395,13 +395,14 @@ class Metrics():
 
         df['root'] = 'initiation event'
         df['weights'] = df[name.event].cat.codes
+        df.rename(columns={name.bond_amount_current:'Bond Amount'}, inplace=True)
 
 
         fig = px.treemap(df
-                         , path=['root', 'race', 'event', 'bond_type_current']
-                         , values='bond_amount_current'
+                         , path=['root', name.race, name.event, name.bond_type_current]
+                         , values='Bond Amount'
                          , hover_data=['race']
-                         , color='bond_amount_current'
+                         , color='Bond Amount'
                          , color_continuous_scale='RdBu_r'
 
                          , title='Bond Data by Race for ' + str(year)
