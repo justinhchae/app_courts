@@ -148,7 +148,8 @@ class Application():
 
             year = self.st.select_slider('Slide to Filter data by Year',
                                          options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012,
-                                                  2011])
+                                                  2011],
+                                         key='bond_slider')
 
             self.st.plotly_chart(dv1.bond_tree(year))
 
