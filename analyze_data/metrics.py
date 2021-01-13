@@ -404,7 +404,7 @@ class Metrics():
                          , color='bond_amount_current'
                          , color_continuous_scale='RdBu_r'
 
-                         , title='Bond Data for ' + str(year)
+                         , title='Bond Data by Race for ' + str(year)
                          )
 
         fig.add_annotation(x=.1, y=-.1,
