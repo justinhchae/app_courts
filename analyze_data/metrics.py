@@ -15,7 +15,7 @@ from do_data.writer import Writer
 from do_data.config import Columns
 name = Columns()
 
-from pandasgui import show
+# from pandasgui import show
 from analyze_data.colors import Colors
 from scipy import stats
 
