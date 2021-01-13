@@ -107,15 +107,18 @@ class Application():
                       'This dashboard represents the results of a processed and ready-to-analyze dataset about the courts.'
                       )
 
-        self.st.markdown('**Initiation - Disposition - Sentencing**')
 
-        self.st.write('The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
-                      'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
-                      )
 
-        year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
+        if self.sidebar_selection != 'Bond Data':
+            self.st.markdown('**Initiation - Disposition - Sentencing**')
 
-        self.st.plotly_chart(ov1.court_counts(year))
+            self.st.write(
+                'The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
+                'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
+                )
+
+            year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
+            self.st.plotly_chart(ov1.court_counts(year))
 
 
         self.st.markdown('All source code, and cleaned data available in a [GitHub Respository](https://github.com/justinhchae/app_courts/tree/main/data)')
@@ -159,8 +162,8 @@ class Application():
             self.st.markdown('**Bond Data Tree Map**')
 
             self.st.write('In this bond data tree map, the size of the box indicates the relative percentage of each category.',
-                          'For example, for all Initiation events where a bond is granted, the tree map breaks down by charged class, hearing type, and bond type.',
-                          'Colors indicate the amount of bond (higher amounts in red)')
+                          'For example, for all Initiation events where a bond is granted, the tree map breaks down by charged race, hearing type, and bond type.',
+                          'Bigger boxes indiciate more counts of that combination of data and red colors indicate higher dollar amounts.')
 
             year = self.st.select_slider('Slide to Filter data by Year',
                                          options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012,

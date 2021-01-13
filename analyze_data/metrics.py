@@ -389,6 +389,10 @@ class Metrics():
         if year !='All Time':
             df = df[(df['year']==year)]
 
+        df[name.race].cat.add_categories(['None'], inplace=True)
+        df[name.race].fillna('None', inplace=True)
+        df[name.race].cat.remove_categories(np.nan, inplace=True)
+
         df[name.bond_type_current].cat.add_categories(['None'], inplace=True)
         df[name.bond_type_current].fillna('None', inplace=True)
         df[name.bond_type_current].cat.remove_categories(np.nan, inplace=True)
@@ -401,7 +405,7 @@ class Metrics():
         df['weights'] = df[name.event].cat.codes
 
         fig = px.treemap(df
-                         , path=['root', 'class','event', 'bond_type_current']
+                         , path=['root', 'race', 'event', 'bond_type_current']
                          , values='bond_amount_current'
                          , hover_data=['class']
                          , color='bond_amount_current'
