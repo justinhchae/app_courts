@@ -1,7 +1,5 @@
 import gc
-
 import pandas as pd
-
 
 
 from application.application import Application
@@ -26,10 +24,10 @@ metrics = Metrics()
 # utils.ov1_initiation()
 # utils.ov1_disposition()
 # utils.ov1_sentencing()
-
 # utils.dv1_bond()
 
 # metrics.ov1_timeseries()
+metrics.dv1_bond()
 
 
 # initiation = reader.to_df('Initiation.zip'
@@ -47,7 +45,6 @@ metrics = Metrics()
 # sentencing = reader.to_df('sentencing_modified.bz2'
 #                                    , preview=False)
 # gui = show(initiation)
-
 
 
 

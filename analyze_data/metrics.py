@@ -15,7 +15,7 @@ from do_data.writer import Writer
 from do_data.config import Columns
 name = Columns()
 
-# from pandasgui import show
+from pandasgui import show
 from analyze_data.colors import Colors
 from scipy import stats
 
@@ -382,8 +382,35 @@ class Metrics():
 
         return fig
 
-    def dv1_bond(self):
-        df = Reader().to_df('ov1_sentencing.pickle', preview=False)
+    def dv1_bond(self, year=2020):
+
+        df = Reader().to_df('dv1_bond.pickle', preview=False)
+
+        if year !='All Time':
+            df = df[(df['year']==year)]
+
+        df[name.bond_type_current].cat.add_categories(['None'], inplace=True)
+        df[name.bond_type_current].fillna('None', inplace=True)
+        df[name.bond_type_current].cat.remove_categories(np.nan, inplace=True)
+
+        df[name.event].cat.add_categories(['None'], inplace=True)
+        df[name.event].fillna('None', inplace=True)
+        df[name.event].cat.remove_categories(np.nan, inplace=True)
+
+        df['root'] = 'initiation event'
+        df['weights'] = df[name.event].cat.codes
+
+        fig = px.treemap(df
+                         , path=['root', 'class','event', 'bond_type_current']
+                         , values='bond_amount_current'
+                         , hover_data=['class']
+                         , color='bond_amount_current'
+                         , color_continuous_scale='RdBu_r'
+                         )
+        return fig
+
+
+
 
 
 

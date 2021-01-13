@@ -3,9 +3,11 @@ import streamlit as st
 from analyze_data.judge import Judge
 from analyze_data.charts import Charts
 from application.ov1 import OV_1
+from application.dv1 import DV_1
 from do_data.getter import Reader
 
 ov1 = OV_1()
+dv1 = DV_1()
 
 class Application():
     def __init__(self):
@@ -26,7 +28,8 @@ class Application():
         #     self.sample_size()
 
         self.frame()
-        self.overview()
+        # self.overview()
+        self.frame_objects()
         self.data_disclaimer()
 
     def frame(self):
@@ -38,6 +41,8 @@ class Application():
                       'Similarly, court systems reduced their availability and services while doing their part to support public health measures.',
                       'However, unlike schools and businesses, some court systems have struggled to resume operations.',
                       'The result, so far, has been a growing backlog of cases as individuals wait on the courts.')
+
+        self.bond_data()
 
         self.st.markdown('**The COVID Court Cliff**')
 
@@ -61,6 +66,8 @@ class Application():
 
         self.st.write('Unfortunately, the court system is complex and a single number cannot descirbe how many cases are processed.',
                       'As a result, this dashboard presents analysis of the data with dynamic charts and filters to provide transparent and up-front numbers.')
+
+        # self.st.sidebar.checkbox('Bond Data', value=False)
 
     def overview(self):
         self.object_overview()
@@ -112,7 +119,8 @@ class Application():
 
     def frame_objects(self):
         self.object_overview()
-        self.by_judge()
+
+        # self.by_judge()
         # self.by_initiation()
         # self.by_disposition()
         # self.by_court()
@@ -127,6 +135,24 @@ class Application():
         fig = Judge().overview(col=self.judge)
         return fig #cached_dict
 
+    def bond_data(self):
+        if self.st.sidebar.checkbox(label="Bond Data"
+                                 , value=False
+                                 , key='bond_tree'):
+
+            self.st.markdown('**Bond Data Tree Map**')
+
+            self.st.write('In this bond data tree map, the size of the box indicates the relative percentage of each category.',
+                          'For example, for all Initiation events where a bond is granted, the tree map breaks down by charged class, hearing type, and bond type.',
+                          'Colors indicate the amount of bond (higher amounts in red)')
+
+            year = self.st.select_slider('Slide to Filter data by Year',
+                                         options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012,
+                                                  2011])
+
+            self.st.plotly_chart(dv1.bond_tree(year))
+
+
     def by_judge(self):
         # cached = self.judge_data()
 
@@ -138,6 +164,7 @@ class Application():
 
             # s = time.time()
             # self.st.plotly_chart(cached['figure1'])
+
             self.st.plotly_chart(self.judge_data())
             # e = time.time()
             # print('Get Overview Figure from Cache', e - s)
@@ -181,7 +208,6 @@ class Application():
         # TODO
         pass
 
-    @st.cache
     def data(self):
         """
         Converts all categorical columns to object types.

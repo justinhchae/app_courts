@@ -9,7 +9,7 @@ from do_data.getter import Reader
 from do_data.joiner import Joiner
 from do_data.writer import Writer
 from do_data.config import Columns
-
+from analyze_data.utils import Utilities
 
 reader = Reader()
 writer = Writer()
@@ -17,9 +17,10 @@ joiner = Joiner()
 maker = Maker()
 app = Application()
 name = Columns()
+sub_utils = Utilities()
 
 
-def read_source(from_source=False, write=True):
+def read_source(from_source=False, write=True, process_subsets=True):
 
     if from_source:
         initiation = reader.to_df('Initiation.zip'
@@ -50,6 +51,12 @@ def read_source(from_source=False, write=True):
             writer.to_package(disposition, 'disposition_modified')
             writer.to_package(initiation, 'initiation_modified')
             writer.to_package(sentencing, 'sentencing_modified')
+
+            if process_subsets:
+                sub_utils.ov1_initiation()
+                sub_utils.ov1_disposition()
+                sub_utils.ov1_sentencing()
+                sub_utils.dv1_bond()
 
         del initiation
         del disposition
@@ -104,4 +111,4 @@ def read_source(from_source=False, write=True):
         del main_new
         gc.collect()
 
-read_source(from_source=False, write=True)
+read_source(from_source=True, write=True, process_subsets=True)
