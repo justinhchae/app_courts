@@ -407,7 +407,7 @@ class Metrics():
         fig = px.treemap(df
                          , path=['root', 'race', 'event', 'bond_type_current']
                          , values='bond_amount_current'
-                         , hover_data=['class']
+                         # , hover_data=['class']
                          , color='bond_amount_current'
                          , color_continuous_scale='RdBu_r'
                          )
