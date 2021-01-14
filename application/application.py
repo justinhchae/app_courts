@@ -43,16 +43,16 @@ class Application():
 
         self.st.markdown('**Data Overview**')
 
-        if self.sidebar_selection != 'Bond Data':
-            self.st.markdown('**Initiation - Disposition - Sentencing**')
+        # if self.sidebar_selection != 'Bond Data':
+        self.st.markdown('**Initiation - Disposition - Sentencing**')
 
-            self.st.write(
-                'The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
-                'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
-                )
+        self.st.write(
+            'The court system is comprised of at least five phases that include Intake, Initiation, Dispositions, Sentencing, Diversions.',
+            'Out of the five phases, this dashboard currently processes Initiation, Disposition, and Sentencing phases.',
+            )
 
-            year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
-            self.st.plotly_chart(OV_1().court_counts(year))
+        year = self.st.select_slider('Slide to Filter data by Year', options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011])
+        self.st.plotly_chart(OV_1().court_counts(year))
 
     def menu_options(self):
         if self.sidebar_selection == 'Bond Data':
