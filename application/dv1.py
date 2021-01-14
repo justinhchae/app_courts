@@ -9,3 +9,6 @@ class DV_1():
 
     def bond_tree(self, year):
         return Metrics().dv1_bond(year)
+
+    def bond_timeseries(self):
+        return Metrics().dv1_bond_timeseries()

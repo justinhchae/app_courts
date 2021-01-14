@@ -2,10 +2,11 @@ import streamlit as st
 
 from application.dv1 import DV_1
 from application.footer import Footer
+from do_data.getter import Reader
 
 dv1 = DV_1()
 
-class BondTree():
+class BondTime():
     def __init__(self):
         self.st = st
 
@@ -37,20 +38,10 @@ class BondTree():
         self.bond_data()
 
     def overview(self):
-        self.st.write(
-            'In this bond data tree map, the size of the box indicates the relative percentage of each category.',
-            'For example, for all Initiation events where a bond is granted, the tree map breaks down charges by race, hearing type, and bond type.',
-            'Bigger boxes indiciate more counts of that combination of data and red colors indicate higher dollar amounts.')
-
-        self.st.write('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
+        #TODO: write narrative and overview
+        st.write('Bond Time Overview: PENDING')
 
     def bond_data(self):
+        #TODO: create graphs in metrics
+        st.write('Bond Time Data: PENDING')
 
-        year = self.slider_year()
-        self.st.plotly_chart(dv1.bond_tree(year))
-
-    def slider_year(self):
-        return self.st.select_slider('Slide to Filter data by Year',
-                                     options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012,
-                                              2011],
-                                     key='bond_slider')
