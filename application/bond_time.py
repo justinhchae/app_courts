@@ -2,7 +2,6 @@ import streamlit as st
 
 from application.dv1 import DV_1
 from application.footer import Footer
-from do_data.getter import Reader
 
 dv1 = DV_1()
 
@@ -35,13 +34,15 @@ class BondTime():
         with my_expander:
             clicked = header("first")
 
-        self.bond_data()
+        self.data()
 
     def overview(self):
         #TODO: write narrative and overview
         st.write('Bond Time Overview: PENDING')
 
-    def bond_data(self):
+    def data(self):
         #TODO: create graphs in metrics
         st.write('Bond Time Data: PENDING')
+        dv1.bond_timeseries()
+
 

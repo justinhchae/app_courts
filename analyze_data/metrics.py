@@ -416,15 +416,7 @@ class Metrics():
         return fig
 
     def dv1_bond_timeseries(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
-
         df = Reader().to_df('dv1_bond.pickle', preview=False)
-        print(df)
-
-
-
-
-
-
-
+        #TODO, look at EM and BOND over time...
 
 

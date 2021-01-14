@@ -27,7 +27,8 @@ metrics = Metrics()
 # utils.dv1_bond()
 
 # metrics.ov1_timeseries()
-metrics.dv1_bond()
+# metrics.dv1_bond()
+metrics.dv1_bond_timeseries()
 
 
 # initiation = reader.to_df('Initiation.zip'

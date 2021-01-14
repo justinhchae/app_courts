@@ -54,14 +54,18 @@ class Application():
 
     def menu_options(self):
         if self.sidebar_selection == 'Bond Treemap':
-            BondTree().bond_data()
+            BondTree().data()
 
         if self.sidebar_selection == 'Featured: COVID Cliff':
             self.st.write('')
             Featured().narrative()
 
         if self.sidebar_selection == 'Bond Timeseries':
-            BondTime().bond_data()
+            BondTime().data()
+
+        #TODO
+        # if self.sidebar_selection == 'Electronic Monitoring':
+        #     pass
 
     def footer(self):
         def footer(key):

@@ -34,7 +34,7 @@ class BondTree():
         with my_expander:
             clicked = header("first")
 
-        self.bond_data()
+        self.data()
 
     def overview(self):
         self.st.write(
@@ -44,7 +44,7 @@ class BondTree():
 
         self.st.write('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
 
-    def bond_data(self):
+    def data(self):
 
         year = self.slider_year()
         self.st.plotly_chart(dv1.bond_tree(year))
