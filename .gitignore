@@ -4,3 +4,6 @@ data/.DS_Store
 *.csv
 *.csv
 learnings.py
+*.xlsx
+figures/em_jail_flow.png
+analyze_data/flow_tracking.py

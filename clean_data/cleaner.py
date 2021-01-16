@@ -8,6 +8,7 @@ import os
 # import matplotlib.pyplot as plt
 
 import time
+import texthero as hero
 
 from do_data.config import Columns
 name = Columns()
@@ -23,6 +24,10 @@ class Cleaner():
         # self.filename = os.sep.join(['data', 'file.csv'])
         # self.path = os.environ['PWD'] + os.sep + self.filename
         self.log = []
+
+    def parse_redactions(self, df, cols):
+        df = df.drop(columns=cols)
+        return df
 
     def parse_geo(self, df, type):
         pass
@@ -42,6 +47,179 @@ class Cleaner():
         date_pattern = r'_date'
         date_cols = [c for c in df.columns if re.search(date_pattern, c)]
         return date_cols
+
+    def jail_classifications(self, df):
+        pipeline = [
+            hero.preprocessing.remove_punctuation
+        ]
+
+        df['charge_class'] = hero.clean(df['charge_class'], pipeline)
+
+        # https://stackoverflow.com/questions/43071415/remove-multiple-blanks-in-dataframe
+        df['charge_class'] = df['charge_class'].replace('\s+', ' ', regex=True)
+
+        orig_cols = [
+              'Class M Felony Murder'
+            , 'X'
+            , 'Class X Felony'
+            , '1'
+            , 'Class 1 Felony'
+            , '2'
+            , 'Class 2 Felony'
+            , '3'
+            , 'Class 3 Felony'
+            , '4'
+            , 'Class 4 Felony'
+            , 'M'
+            , 'A'
+            , 'Class A Misdemeanor'
+            , 'B'
+            , 'Class B Misdemeanor'
+            , 'C'
+            , 'Class C Misdemeanor'
+            , 'O'
+            , 'Other'
+            , 'L'
+            , 'P'
+            , 'Petty Offense'
+            , 'U'
+            , '0'
+            , 'Z'
+            , 'Generic Code For Any Class'
+        ]
+
+        new_cols = [
+              'M'
+            , 'X'
+            , 'X'
+            , '1'
+            , '1'
+            , '2'
+            , '2'
+            , '3'
+            , '3'
+            , '4'
+            , '4'
+            , 'Unspecified Misdemeanor'
+            , 'A'
+            , 'A'
+            , 'B'
+            , 'B'
+            , 'C'
+            , 'C'
+            , 'O'
+            , 'O'
+            , 'L'
+            , 'P'
+            , 'P'
+            , 'U'
+            , '0'
+            , 'Z'
+            , 'Generic Code For Any Class'
+        ]
+
+        key = dict(zip(orig_cols, new_cols))
+        df['charge_class'] = df['charge_class'].map(key)
+
+        new_cols = [
+              'M'
+            , 'X'
+            , '1'
+            , '2'
+            , '3'
+            , '4'
+            , 'A'
+            , 'B'
+            , 'C'
+            , 'Unspecified Misdemeanor'
+            , 'O'
+            , 'L'
+            , 'P'
+            , 'U'
+            , '0'
+            , 'Z'
+            , 'Generic Code For Any Class'
+        ]
+
+        new_cols.reverse()
+
+        df['charge_class'] = pd.Categorical(df['charge_class']
+                                            , ordered=True
+                                            , categories=new_cols)
+
+        return df
+
+    def parse_titlecase(self, df, col):
+        df[col] = df[col].str.title()
+        return df
+
+    def em_classifications(self, df):
+
+        # https://www.isp.state.il.us/docs/chrinews_0910.pdf
+
+        pipeline = [
+            hero.preprocessing.remove_punctuation
+        ]
+
+        df['charge_class'] = hero.clean(df['charge_class'], pipeline)
+
+        # https://stackoverflow.com/questions/43071415/remove-multiple-blanks-in-dataframe
+        df['charge_class'] = df['charge_class'].replace('\s+', ' ', regex=True)
+
+        orig_cols = [
+                       'Class M Felony Murder'
+                     , 'Class X Felony'
+                     , 'Class 1 Felony'
+                     , 'Class 2 Felony'
+                     , 'Class 3 Felony'
+                     , 'Class 4 Felony'
+                     , 'F'
+                     , 'Class A Misdemeanor'
+                     , 'Class B Misdemeanor'
+                     , 'Class C Misdemeanor'
+                     , 'M'
+                     , 'Other'
+                     , 'Petty Offense'
+                     , 'Q'
+                     , 'T'
+                     , 'V'
+                     , 'Business Offense'
+                     , 'Generic Code For Any Class'
+                     ]
+
+        new_cols = [
+              'M'
+            , 'X'
+            , '1'
+            , '2'
+            , '3'
+            , '4 Felony'
+            , 'Unspecified Felony'
+            , 'A'
+            , 'B'
+            , 'C'
+            , 'Unspecified Misdemeanor'
+            , 'O'
+            , 'P'
+            , 'Q'
+            , 'T'
+            , 'V'
+            , 'Business Offense'
+            , 'Generic Code For Any Class'
+        ]
+
+        key = dict(zip(orig_cols, new_cols))
+        df['charge_class'] = df['charge_class'].map(key)
+
+        new_cols.reverse()
+        df['charge_class'] = pd.Categorical(df['charge_class']
+                                            , ordered=True
+                                            , categories=new_cols)
+
+
+
+        return df
+
 
     def classer(self, df, col_name, echo=False):
         if echo:
@@ -80,46 +258,60 @@ class Cleaner():
             df[col_name] = df[col_name].astype('category')
 
         if col_name == 'race':
-            df[col_name] = df[col_name].str.strip()
-            df[col_name] = df[col_name].str.title()
-            # df[col_name] = df[col_name].fillna(value='None')
-            df[col_name] = df[col_name].astype('category')
+            try:
+                df[col_name] = df[col_name].str.strip()
+                df[col_name] = df[col_name].str.title()
+                # df[col_name] = df[col_name].fillna(value='None')
+                df[col_name] = df[col_name].astype('category')
+            except:
+                pass
 
         if col_name == 'gender':
-            key = {'Unknown Gender': 'Unknown'}
-            df[col_name] = df[col_name].str.strip()
-            df[col_name] = df[col_name].str.title()
-            df[col_name] = np.where(df[col_name] == 'Unknown Gender', df[col_name].map(key), df[col_name])
-            df[col_name] = df[col_name].astype('category')
+            try:
+                key = {'Unknown Gender': 'Unknown'}
+                df[col_name] = df[col_name].str.strip()
+                df[col_name] = df[col_name].str.title()
+                df[col_name] = np.where(df[col_name] == 'Unknown Gender', df[col_name].map(key), df[col_name])
+                df[col_name] = df[col_name].astype('category')
+            except:
+                pass
 
         if col_name == 'judge' or col_name == 'sentence_judge':
-            # df[col_name] = df[col_name].fillna(value='Judge Not Specified')
-            df[col_name] = df[col_name].str.strip()
-            df[col_name] = df[col_name].str.replace('\.', '')
-            df[col_name] = df[col_name].str.replace('\s+', ' ')
-            df[col_name] = df[col_name].str.title()
+            try:
+                # df[col_name] = df[col_name].fillna(value='Judge Not Specified')
+                df[col_name] = df[col_name].str.strip()
+                df[col_name] = df[col_name].str.replace('\.', '')
+                df[col_name] = df[col_name].str.replace('\s+', ' ')
+                df[col_name] = df[col_name].str.title()
 
-            df['temp'] = df[col_name].str.contains(',', na=False)
-            df['names'] = np.where(df['temp'] == True, df[col_name].str.split(','), df[col_name])
+                df['temp'] = df[col_name].str.contains(',', na=False)
+                df['names'] = np.where(df['temp'] == True, df[col_name].str.split(','), df[col_name])
 
-            temp = df[(df['temp'] == True)]
-            names = temp['names'].tolist()
+                temp = df[(df['temp'] == True)]
+                names = temp['names'].tolist()
 
-            backwards = [list(x) for x in set(tuple(x) for x in names)]
-            x1 = [', '.join(str(c).strip() for c in s) for s in backwards]
+                backwards = [list(x) for x in set(tuple(x) for x in names)]
+                x1 = [', '.join(str(c).strip() for c in s) for s in backwards]
 
-            forwards = [reverse(x) for x in backwards]
-            x2 = [' '.join(str(c).strip() for c in s) for s in forwards]
+                forwards = [reverse(x) for x in backwards]
+                x2 = [' '.join(str(c).strip() for c in s) for s in forwards]
 
-            key = {x1[i]: x2[i] for i in range(len(x1))}
+                key = {x1[i]: x2[i] for i in range(len(x1))}
 
-            df[col_name] = np.where(df['temp'] == True, df[col_name].map(key, na_action='ignore'), df[col_name])
-            df[col_name] = df[col_name].astype('category')
+                df[col_name] = np.where(df['temp'] == True, df[col_name].map(key, na_action='ignore'), df[col_name])
+                df[col_name] = df[col_name].astype('category')
 
-            df = df.drop(columns=['names', 'temp'])
+                df = df.drop(columns=['names', 'temp'])
+            except:
+                pass
 
         if isinstance(col_name, list):
-            df[col_name] = df[col_name].astype('category')
+            try:
+                df[col_name] = df[col_name].astype('category')
+            except:
+                pass
+
+
 
         return df
 

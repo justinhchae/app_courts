@@ -31,6 +31,14 @@ class Maker():
         df['case_length'] = (df[col2] - df[col1]) / self.days
         return df
 
+    def make_status(self, df, status_type):
+        df['ej_status'] = status_type
+        return df
+
+    def make_status_date(self, df, date):
+        df['detainee_status_date'] = pd.to_datetime(date)
+        return df
+
     def make_commitment(self, df):
         # https://stackoverflow.com/questions/41719259/how-to-remove-numbers-from-string-terms-in-a-pandas-dataframe
         # https://stackoverflow.com/questions/35376387/extract-int-from-string-in-pandas
