@@ -42,6 +42,8 @@ class Reader():
               , clean_initiation=False
               , clean_disposition=False
               , clean_sentencing=False
+              , clean_em=False
+              , clean_jail=False
               , preview=True
               , classify=True
               , echo=False
@@ -215,6 +217,75 @@ class Reader():
                     df = df.drop(columns=['length_of_case_in_days', 'commitment_term'])
 
                     #TODO: commitment_term
+
+                if clean_jail:
+                    df = self.cleaner.parse_cols(df)
+                    date_cols = self.cleaner.get_date_cols(df)
+                    df = self.cleaner.parse_dates(df, date_cols=date_cols)
+                    df = self.cleaner.parse_redactions(df, ['inmate_first', 'inmate_last'])
+                    df = self.cleaner.parse_titlecase(df, 'detainee_status')
+
+                    df = self.cleaner.classer(df, name.race)
+                    df = self.cleaner.classer(df, name.gender)
+                    df = self.cleaner.classer(df, name.judge)
+
+                    df = self.cleaner.jail_classifications(df)
+
+                    df = self.cleaner.classer(df,
+                                              [
+                                                  'booking_location'
+                                                  , 'detainer_agency'
+                                                  , 'detainer_type'
+                                                  , 'housing_division'
+                                                  , 'housing_section'
+                                                  , 'housing_cell'
+                                                  , 'housing_bed'
+                                                  , 'ir'
+                                                  , 'active_case'
+                                                  , 'detainee_status'
+                                                  , 'case_disposition'
+                                                  , 'case_categorization'
+                                                  , 'court_location'
+                                                  , 'charge_description'
+                                                  , 'charge_statute'
+                                                  , 'charge_disposition'
+                                                  , 'bond_type'
+                                                  , 'homeless_status'
+                                               ])
+
+                if clean_em:
+                    df = self.cleaner.parse_cols(df)
+                    date_cols = self.cleaner.get_date_cols(df)
+                    df = self.cleaner.parse_dates(df, date_cols=date_cols)
+                    df = self.cleaner.parse_redactions(df=df, cols=['inmate_last', 'inmate_first'])
+
+                    df = self.cleaner.parse_titlecase(df, 'detainee_status')
+
+                    df = self.cleaner.classer(df, name.race)
+                    df = self.cleaner.classer(df, name.gender)
+                    df = self.cleaner.classer(df, name.judge)
+
+                    df = self.cleaner.em_classifications(df)
+
+                    df = self.cleaner.classer(df,
+                                              [
+                                                'detainer_agency'
+                                              , 'detainer_type'
+                                              , 'detainer_note'
+                                              , 'housing_section'
+                                              , 'ir'
+                                              , 'active_case'
+                                              , 'releasable_status'
+                                              , 'detainee_status'
+                                              , 'case_disposition'
+                                              , 'case_categorization'
+                                              , 'charge_description'
+                                              , 'statute'
+                                              , 'charge_disposition'
+                                              , 'bond_type'
+                                              , 'homeless_status'
+                                            ])
+
 
                 return df
 

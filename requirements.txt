@@ -9,3 +9,5 @@ matplotlib
 seaborn
 plotly_express
 pandasgui
+texthero
+networkx
