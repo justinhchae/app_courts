@@ -29,8 +29,17 @@ class BondData():
 
     def overview(self):
         st.write('Based on Cook County Open Court Data, this page provides a count of bond types and amounts over the years.',
-                 'Top - a Timeline of bond with recent legislative milestones. Bottom - A Treemap of bond types by race, and hearing type.')
+                 'Top - a Timeline of bond with recent legislative milestones. Monthly bond volumes are indicated by line height on the y-axis.',
+                 'The size of each dot represents a dollar total of bond dollars in a given month.',
+                 'Bottom - A Treemap of bond types by race, and hearing type.')
         st.markdown('[Chicago Appleseed Center for Fair Courts](http://www.chicagoappleseed.org/)')
+
+    # @st.cache(max_entries=10, ttl=3600, hash_funcs={dict: lambda _: None})
+    # def cache_fig(self):
+    #     afig = dv1.bond_timeseries()
+    #     cached_dict = {'bond_timeseries': afig}
+    #     return cached_dict
+
     def data(self):
         self.header()
         st.plotly_chart(dv1.bond_timeseries())
