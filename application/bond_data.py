@@ -24,7 +24,7 @@ class BondData():
             clicked = header_section("first")
 
     def frame(self):
-        self.st.title('A Look Back at Bond in Chicagoland')
+        self.st.title('A Visual Brief on Bond in Chicagoland')
         self.data()
 
     def overview(self):
