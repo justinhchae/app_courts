@@ -24,8 +24,6 @@ class BondData():
             clicked = header_section("first")
 
     def frame(self):
-        self.st.title('Analysis of Cook County Court Data')
-        self.st.markdown('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
         self.data()
 
     def overview(self):
