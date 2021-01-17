@@ -1,6 +1,6 @@
-from application.bond_tree import BondTree
+from application.bond_data import BondData
 
-app = BondTree()
+app = BondData()
 
 def run_app():
     app.run_app()

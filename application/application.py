@@ -1,7 +1,6 @@
 import streamlit as st
 
-from application.bond_tree import BondTree
-from application.bond_time import BondTime
+from application.bond_data import BondData
 from application.footer import Footer
 from application.featured import Featured
 from application.ov1 import OV_1
@@ -10,7 +9,7 @@ from application.ov1 import OV_1
 class Application():
     def __init__(self):
         self.st = st
-        self.sidebar_picklist = ['Featured: COVID Cliff','Bond Treemap', 'Bond Timeseries']
+        self.sidebar_picklist = ['Featured: COVID Cliff','Bond Data']
         self.sidebar_selection = self.st.sidebar.selectbox('Select Analysis', self.sidebar_picklist)
 
         """
@@ -23,7 +22,7 @@ class Application():
 
     def frame(self):
         self.st.title('Analysis of Cook County Court Data')
-        self.st.markdown('Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
+        self.st.markdown('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
 
         self.header()
         self.menu_options()
@@ -53,15 +52,12 @@ class Application():
         self.st.plotly_chart(OV_1().court_counts(year))
 
     def menu_options(self):
-        if self.sidebar_selection == 'Bond Treemap':
-            BondTree().data()
+        if self.sidebar_selection == 'Bond Data':
+            BondData().frame()
 
         if self.sidebar_selection == 'Featured: COVID Cliff':
             self.st.write('')
             Featured().narrative()
-
-        if self.sidebar_selection == 'Bond Timeseries':
-            BondTime().data()
 
         #TODO
         # if self.sidebar_selection == 'Electronic Monitoring':

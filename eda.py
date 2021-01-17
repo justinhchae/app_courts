@@ -11,7 +11,7 @@ from do_data.writer import Writer
 from do_data.config import Columns
 from analyze_data.utils import Utilities
 from analyze_data.metrics import Metrics
-from analyze_data.flow_tracking import FlowTracking
+from analyze_data.network import Network
 
 reader = Reader()
 writer = Writer()
@@ -21,7 +21,7 @@ app = Application()
 name = Columns()
 utils = Utilities()
 metrics = Metrics()
-tracker = FlowTracking()
+tracker = Network()
 
 
 # tracker.organize()
@@ -35,7 +35,7 @@ tracker = FlowTracking()
 
 # metrics.ov1_timeseries()
 # metrics.dv1_bond()
-# metrics.dv1_bond_timeseries()
+metrics.dv1_bond_timeseries()
 
 def parse_em_data():
     cols = ['ir', 'detainee_status', 'detainee_status_date', 'ej_status']

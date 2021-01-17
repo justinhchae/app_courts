@@ -19,6 +19,8 @@ name = Columns()
 from analyze_data.colors import Colors
 from scipy import stats
 
+from sklearn import preprocessing
+
 colors = Colors()
 
 class Metrics():
@@ -371,7 +373,6 @@ class Metrics():
             , title='Monthly Court Volume Over Time'
         )
 
-
         return fig
 
     def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
@@ -415,8 +416,134 @@ class Metrics():
 
         return fig
 
-    def dv1_bond_timeseries(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+    def dv1_bond_timeseries(self, frequency='M', year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+
         df = Reader().to_df('dv1_bond.pickle', preview=False)
-        #TODO, look at EM and BOND over time...
+        df = df[df['year'] > 2010]
+        df = df[df['year'] < 2021]
+
+        df = df[[name.bond_date_current, name.bond_type_current, name.bond_amount_current]]
+
+        aggies = ['count', 'sum', 'mean', 'min', 'max']
+        df = df.groupby([name.bond_type_current, pd.Grouper(key=name.bond_date_current, freq=frequency)])[name.bond_amount_current].agg(aggies).reset_index()
+        df[aggies] = df[aggies].fillna(0)
+
+        scaler = preprocessing.MinMaxScaler(feature_range=(5, 35))
+
+        # https://towardsdatascience.com/data-normalization-with-pandas-and-scikit-learn-7c1cc6ed6475
+        df['scaled'] = pd.DataFrame(scaler.fit_transform(df[['mean']]))
+
+        key = {
+                'C Bond': self.purple
+              , 'D Bond': self.blue
+              , 'I Bond': self.green
+              , 'No Bond': self.gray
+               }
+        
+        df['color'] = df[name.bond_type_current].map(key, na_action='ignore')
+
+        grouped = df.groupby(name.bond_type_current)
+
+        fig = go.Figure()
+
+        annotation_y = []
+
+        for group, df in grouped:
+            # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
+            # fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum'], name=group))
+            # print(df[''])
+
+            y_val = np.max(df['sum'])
+            annotation_y.append(y_val)
+
+            fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum']
+                                     , name=group
+                                     , mode='markers'
+                                     , marker=dict(size=df['scaled'], color=df['color'])
+                                     , showlegend=False
+                                     , hoverinfo='skip'
+                                     ))
+
+            fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum']
+                                     , name=group
+                                     , mode='lines'
+                                     , line=dict(color=df['color'].iloc[0])
+                                     ))
+
+        a1_date = pd.to_datetime('2017-02-13')
+
+        a2_date = pd.to_datetime('2021-01-14')
+
+        maxv = np.max(annotation_y)
+        minv = np.mean(annotation_y)
+
+        # fig.add_shape(x0=[a1_date], y0=[test], text=['poo'], type='line')
+
+        fig.add_shape(type="line",
+                      x0=a1_date, y0=0, x1=a1_date, y1=maxv*.7,
+                      line=dict(color=self.red, width=2)
+                      )
+
+        fig.add_trace(go.Scatter(
+            x=[a1_date], y=[maxv*.7]
+            , text='<b>Bail Reform Act 2017</b>'
+            , mode='text'
+            , showlegend=False
+            , hoverinfo='skip'
+        ))
+
+        fig.add_shape( type="line",
+                       x0=a2_date, y0=0, x1=a2_date, y1=minv*1.3
+                      , line=dict(color=self.red, width=2)
+                      )
+
+        fig.add_trace(go.Scatter(
+            x=[a2_date], y=[minv*1.3]
+            , text='<b>Pre-Trial Fairness Act 2021</b>'
+            , mode='text'
+            , showlegend=False
+            , hoverinfo='skip'
+        ))
+
+
+
+        a3_date = pd.to_datetime('2020-09-30')
+
+        fig.add_shape(type="line",
+                      x0=a3_date, y0=0, x1=a3_date, y1=minv*.5
+                      , line=dict(color=self.gray, width=1)
+                      )
+
+        fig.add_trace(go.Scatter(
+            x=[a3_date], y=[minv*.5]
+            , text='Last Data Point'
+            , mode='text'
+            , showlegend=False
+            , hoverinfo='skip'
+        ))
+
+        # fig.update_layout(uniformtext_minsize=20, uniformtext_mode='hide')
+
+        fig.update_traces(textposition='top left')
+
+        fig.update_layout(
+            hovermode='x',
+            showlegend=True
+            # , title_text=str('Court Data for ' + str(year))
+            , paper_bgcolor=self.transparent
+            , plot_bgcolor=self.transparent
+            , title='Cook County Bond History (Monthly Totals by Type) | Legislation'
+            , xaxis_title = annotation
+        )
+
+        fig.update_layout(legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="right",
+            x=0.99,
+        ))
+
+
+        return fig
 
 
