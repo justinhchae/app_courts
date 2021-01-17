@@ -362,7 +362,7 @@ class Metrics():
         # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
 
         fig.update_yaxes(title='Case Volume')
-        fig.update_xaxes(title='Year')
+        fig.update_xaxes(title=annotation)
 
         fig.update_layout(
             hovermode='x',
