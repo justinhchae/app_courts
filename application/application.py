@@ -22,7 +22,7 @@ class Application():
 
     def frame(self):
         self.st.title('Analysis of Cook County Court Data')
-        self.st.markdown('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
+        self.st.markdown('An Interactive Visualization by @justinhchae for [Chicago Appleseed Center for Fair Courts](http://www.chicagoappleseed.org/)')
 
         self.header()
         self.menu_options()
