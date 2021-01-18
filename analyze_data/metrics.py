@@ -704,7 +704,7 @@ class Metrics():
                 , xaxis_title=annotation
             )
 
-            fig.show()
+            # fig.show()
             return fig
 
 
