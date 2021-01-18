@@ -11,6 +11,7 @@ class BondData():
 
     def run_app(self):
         self.frame()
+        st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
         self.footer()
 
     def about(self):
