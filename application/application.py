@@ -28,6 +28,7 @@ class Application():
 
         self.header()
         self.menu_options()
+        st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
         self.footer()
 
     def header(self):
@@ -55,14 +56,12 @@ class Application():
 
     def menu_options(self):
         if self.sidebar_selection == 'Sentencing Data':
-            self.st.write('')
             SentencingData().frame()
 
         if self.sidebar_selection == 'Bond Data':
             BondData().frame()
 
         if self.sidebar_selection == 'Court Volume':
-            self.st.write('')
             Featured().narrative()
 
         #TODO

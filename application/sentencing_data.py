@@ -24,6 +24,7 @@ class SentencingData():
             clicked = expander("first")
 
     def frame(self):
+        st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
         self.st.title('The Court System as a Network')
         self.filters()
         self.data()

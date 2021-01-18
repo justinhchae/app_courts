@@ -13,7 +13,7 @@ class BondData():
         self.frame()
         self.footer()
 
-    def header(self):
+    def about(self):
         def expander(key):
             st.subheader('About This Data')
             self.overview()
@@ -24,6 +24,7 @@ class BondData():
             clicked = expander("first")
 
     def frame(self):
+        st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
         self.st.title('A Visual Brief on Bond in Chicagoland')
         self.data()
 
@@ -42,10 +43,26 @@ class BondData():
     #     return cached_dict
 
     def data(self):
-        self.header()
+        self.narrative_time()
         st.plotly_chart(dv1.bond_timeseries())
+        st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
+        self.about()
+        self.narrative_tree()
         st.plotly_chart(dv1.bond_tree())
         dv1.bond_tree_header()
+
+    def narrative_time(self):
+        self.st.markdown(
+            '_Over the years, how big has bond been in Cook County?_')
+        self.st.markdown(
+            '_This timeline displays monthly bond amounts by bond type._')
+
+    def narrative_tree(self):
+        st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
+        self.st.markdown(
+            '_Where did bond dollars come from? How much money and for what types of court events?_')
+        self.st.markdown(
+            '_This treemap displays the relative proportion of bond amounts paid by race and court event with filters for time_')
 
     def footer(self):
         def expander(key):

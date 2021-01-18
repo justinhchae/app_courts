@@ -21,8 +21,6 @@ class DV_1():
             'For example, for all Initiation events where a bond is granted, the tree map breaks down charges by race, hearing type, and bond type.',
             'Bigger boxes indiciate more counts of that combination of data and red colors indicate higher dollar amounts.')
 
-        st.write('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
-
     def bond_tree_header(self):
         def expander(key):
             st.subheader('About This Data')
