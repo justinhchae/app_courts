@@ -592,7 +592,8 @@ class Metrics():
                 #     arrowcolor='black'
                 # )
 
-
+            ghost_trace1 = None
+            ghost_trace2 = None
 
             for i, node in enumerate(G.nodes()):
                 x, y = pos_[node]
@@ -623,21 +624,24 @@ class Metrics():
                         , showlegend=False
                     ))
 
+                    ghost_trace1 = tuple([x]), tuple([y]), scaled_node_values[i]
 
                 elif node in sentence_types:
+
+                    marker = dict(size=scaled_node_values[i], color=self.red, line=dict(color='black'), symbol=1)
 
                     fig.add_trace(go.Scatter(
 
                         x=tuple([x]), y=tuple([y])
                         , name=node
                         , mode='markers'
-                        , marker=dict(size=scaled_node_values[i], color=self.red, line=dict(color='black'), symbol=1)
+                        , marker=marker
                         , text=node
                         , hoverinfo=['name+text']
                         , showlegend=False
-                        , textposition='top center'
+                        , textposition='top center'))
 
-                    ))
+                    ghost_trace2 = tuple([x]), tuple([y]), marker
 
                 else:
                     fig.add_trace(go.Scatter(
@@ -650,9 +654,27 @@ class Metrics():
                         , showlegend=False
                     ))
 
-            #TODO: Add a ghost trace to add judge icon to legend icons
+            if ghost_trace1:
+                fig.add_trace(go.Scatter(
+                    x=ghost_trace1[0], y=ghost_trace1[1]
+                    , name='Judge'
+                    , mode='markers'
+                    , marker=dict(size=ghost_trace1[2], color=self.gray)
+                    , text='Judge'
+                    , hoverinfo=None
+                    , showlegend=True
+                ))
 
-
+            if ghost_trace2:
+                fig.add_trace(go.Scatter(
+                    x=ghost_trace2[0], y=ghost_trace2[1]
+                    , name='Sentence Type'
+                    , mode='markers'
+                    , marker=ghost_trace2[2]
+                    , text='Sentence Type'
+                    , hoverinfo=None
+                    , showlegend=True
+                ))
 
             fig.update_yaxes(showticklabels=False)
             fig.update_xaxes(showticklabels=False)
@@ -669,7 +691,8 @@ class Metrics():
                 yanchor="bottom",
                 y=1.02,
                 xanchor="right",
-                x=1
+                x=1,
+                font_size=10
             ))
 
             fig.update_layout(
@@ -681,7 +704,7 @@ class Metrics():
                 , xaxis_title=annotation
             )
 
-            # fig.show()
+            fig.show()
             return fig
 
 
