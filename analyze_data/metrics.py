@@ -546,7 +546,10 @@ class Metrics():
 
         return fig
 
-    def dv1_sentencing_network(self, ingest_df=False, generate_graph=True, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+    def dv1_sentencing_network(self, disp_nodes=True, disp_edges=True
+                               , ingest_df=False, generate_graph=True
+                               , annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+
         df = Reader().to_df('ov1_sentencing.pickle', preview=False)
         # df = df[df['year'] > 2010]
         # df = df[df['year'] < 2021]
@@ -561,98 +564,102 @@ class Metrics():
 
             fig = go.Figure()
 
-            for i, edge in enumerate(G.edges()):
-                n2 = edge[0]
-                n1 = edge[1]
-                x0, y0 = pos_[n1]
-                x1, y1 = pos_[n2]
-
-                fig.add_trace(go.Scatter(
-                    x=tuple((x0, x1)),y=tuple((y0, y1))
-                    , name=G.edges()[edge]['label']
-                    , mode='lines'
-                    , line=dict(width=edge_widths[i])
-                    , hoverinfo=['name']
-                    , showlegend=False))
-
-                # fig.add_annotation(
-                #     x=x0,  # arrows' head
-                #     y=y0,  # arrows' head
-                #     ax=x1,  # arrows' tail
-                #     ay=y1,  # arrows' tail
-                #     xref='x',
-                #     yref='y',
-                #     axref='x',
-                #     ayref='y',
-                #     # text='',  # if you want only the arrow
-                #     showarrow=True,
-                #     arrowhead=3,
-                #     arrowsize=1,
-                #     arrowwidth=edge_widths[i],
-                #     arrowcolor='black'
-                # )
-
             ghost_trace1 = None
             ghost_trace2 = None
 
-            for i, node in enumerate(G.nodes()):
-                x, y = pos_[node]
+            if disp_edges:
 
-                # print(G.nodes(data=True)[node])
+                for i, edge in enumerate(G.edges()):
+                    n2 = edge[0]
+                    n1 = edge[1]
+                    x0, y0 = pos_[n1]
+                    x1, y1 = pos_[n2]
 
-                # [x for x in cols if any(i in x for i in bool_types)]
-
-                if node in hubs:
                     fig.add_trace(go.Scatter(
-                        x=tuple([x]), y=tuple([y])
-                        , name=node
-                        , mode='markers'
-                        , marker=dict(size=scaled_node_values[i])
-                        # , text=node
-                        , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                        x=tuple((x0, x1)),y=tuple((y0, y1))
+                        , name=G.edges()[edge]['label']
+                        , mode='lines'
+                        , line=dict(width=edge_widths[i])
                         , hoverinfo=['name']
-                    ))
+                        , showlegend=False))
 
-                elif node in judges:
-                    fig.add_trace(go.Scatter(
-                        x=tuple([x]), y=tuple([y])
-                        , name=node
-                        , mode='markers'
-                        , marker=dict(size=scaled_node_values[i], color=self.gray)
-                        , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
-                        , hoverinfo=['name+text']
-                        , showlegend=False
-                    ))
+                    # fig.add_annotation(
+                    #     x=x0,  # arrows' head
+                    #     y=y0,  # arrows' head
+                    #     ax=x1,  # arrows' tail
+                    #     ay=y1,  # arrows' tail
+                    #     xref='x',
+                    #     yref='y',
+                    #     axref='x',
+                    #     ayref='y',
+                    #     # text='',  # if you want only the arrow
+                    #     showarrow=True,
+                    #     arrowhead=3,
+                    #     arrowsize=1,
+                    #     arrowwidth=edge_widths[i],
+                    #     arrowcolor='black'
+                    # )
 
-                    ghost_trace1 = tuple([x]), tuple([y]), scaled_node_values[i]
+            if disp_nodes:
 
-                elif node in sentence_types:
+                for i, node in enumerate(G.nodes()):
+                    x, y = pos_[node]
 
-                    marker = dict(size=scaled_node_values[i], color=self.red, line=dict(color='black'), symbol=1)
+                    # print(G.nodes(data=True)[node])
 
-                    fig.add_trace(go.Scatter(
+                    # [x for x in cols if any(i in x for i in bool_types)]
 
-                        x=tuple([x]), y=tuple([y])
-                        , name=node
-                        , mode='markers'
-                        , marker=marker
-                        , text=node
-                        , hoverinfo=['name+text']
-                        , showlegend=False
-                        , textposition='top center'))
+                    if node in hubs:
+                        fig.add_trace(go.Scatter(
+                            x=tuple([x]), y=tuple([y])
+                            , name=node
+                            , mode='markers'
+                            , marker=dict(size=scaled_node_values[i])
+                            # , text=node
+                            , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                            , hoverinfo=['name']
+                        ))
 
-                    ghost_trace2 = tuple([x]), tuple([y]), marker
+                    elif node in judges:
+                        fig.add_trace(go.Scatter(
+                            x=tuple([x]), y=tuple([y])
+                            , name=node
+                            , mode='markers'
+                            , marker=dict(size=scaled_node_values[i], color=self.gray)
+                            , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                            , hoverinfo=['name+text']
+                            , showlegend=False
+                        ))
 
-                else:
-                    fig.add_trace(go.Scatter(
-                        x=tuple([x]), y=tuple([y])
-                        , name=node
-                        , mode='markers'
-                        , marker=dict(size=scaled_node_values[i])
-                        , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
-                        , hoverinfo=['name']
-                        , showlegend=False
-                    ))
+                        ghost_trace1 = tuple([x]), tuple([y]), scaled_node_values[i]
+
+                    elif node in sentence_types:
+
+                        marker = dict(size=scaled_node_values[i], color=self.red, line=dict(color='black'), symbol=1)
+
+                        fig.add_trace(go.Scatter(
+
+                            x=tuple([x]), y=tuple([y])
+                            , name=node
+                            , mode='markers'
+                            , marker=marker
+                            , text=node
+                            , hoverinfo=['name+text']
+                            , showlegend=False
+                            , textposition='top center'))
+
+                        ghost_trace2 = tuple([x]), tuple([y]), marker
+
+                    else:
+                        fig.add_trace(go.Scatter(
+                            x=tuple([x]), y=tuple([y])
+                            , name=node
+                            , mode='markers'
+                            , marker=dict(size=scaled_node_values[i])
+                            , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                            , hoverinfo=['name']
+                            , showlegend=False
+                        ))
 
             if ghost_trace1:
                 fig.add_trace(go.Scatter(
@@ -706,11 +713,3 @@ class Metrics():
 
             # fig.show()
             return fig
-
-
-
-
-
-
-
-

@@ -1,6 +1,7 @@
 import streamlit as st
 
 from application.bond_data import BondData
+from application.sentencing_data import SentencingData
 from application.footer import Footer
 from application.featured import Featured
 from application.ov1 import OV_1
@@ -34,7 +35,7 @@ class Application():
             self.overview()
             # clicked = st.button("Click me " + key)
 
-        my_expander = st.beta_expander("Data Overview (Click to Expand)", expanded=False)
+        my_expander = st.beta_expander("Data Overview", expanded=False)
         with my_expander:
             clicked = expander("first")
 
@@ -54,10 +55,7 @@ class Application():
     def menu_options(self):
         if self.sidebar_selection == 'Sentencing Data':
             self.st.write('')
-            self.st.plotly_chart(DV_1().sentencing_network())
-            self.st.markdown('_What does the court system look like? As a network of judges, courts, and sentencing decisions, one way to visualize the courts is as a network graph._')
-            self.st.markdown('_This network graph depicts the path of a case starting with a judge (gray circles), the sentencing type (lines), the associated courts (large nodes) and outcomes (squares)._')
-            self.st.markdown('_Larger icons indicate higher percentage of cases and bolder lines indicate longer sentences as measured by commitment days._')
+            SentencingData().frame()
 
         if self.sidebar_selection == 'Bond Data':
             BondData().frame()

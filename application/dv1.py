@@ -36,5 +36,5 @@ class DV_1():
     def bond_timeseries(self):
         return Metrics().dv1_bond_timeseries()
 
-    def sentencing_network(self):
-        return Metrics().dv1_sentencing_network()
+    def sentencing_network(self, disp_edges=True, disp_nodes=True):
+        return Metrics().dv1_sentencing_network(disp_edges=disp_edges, disp_nodes=disp_nodes)
