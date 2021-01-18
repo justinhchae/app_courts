@@ -58,7 +58,6 @@ class SentencingData():
         with my_expander:
             clicked = expander("filter")
 
-
     def footer(self):
         def expander(key):
             Footer().data_disclaimer()

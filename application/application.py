@@ -9,6 +9,7 @@ from application.dv1 import DV_1
 
 class Application():
     def __init__(self):
+        st.set_page_config(page_title='Fair Courts')
         self.st = st
         self.sidebar_picklist = ['Sentencing Data', 'Court Volume','Bond Data']
         self.sidebar_selection = self.st.sidebar.selectbox('Select Analysis', self.sidebar_picklist)
