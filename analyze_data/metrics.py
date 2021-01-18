@@ -303,6 +303,8 @@ class Metrics():
         return fig
 
     def ov1_regression(self, frequency='M', annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+
+
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
 
         df = df[df['year'] > 2010]
@@ -363,6 +365,7 @@ class Metrics():
 
         # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
 
+
         fig.update_yaxes(title='Case Volume')
         fig.update_xaxes(title=annotation)
 
@@ -420,6 +423,9 @@ class Metrics():
 
     def dv1_bond_timeseries(self, frequency='M', year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
 
+        tax_df = Reader().to_df('tax_data.pickle', preview=False, classify=False, echo=False)
+        # tax_df = tax_df.groupby('date')
+
         df = Reader().to_df('dv1_bond.pickle', preview=False)
         df = df[df['year'] > 2010]
         df = df[df['year'] < 2021]
@@ -472,8 +478,13 @@ class Metrics():
                                      , line=dict(color=df['color'].iloc[0])
                                      ))
 
-        a1_date = pd.to_datetime('2017-02-13')
+        fig.add_trace(go.Scatter(x=tax_df['date'], y=tax_df['muni_public_util_tax']
+                                 , name='Chicago Municipal Public Utility Tax'
+                                 , mode='lines+markers'
+                                 , line=dict(color=self.red)
+                                 ))
 
+        a1_date = pd.to_datetime('2017-02-13')
         a2_date = pd.to_datetime('2021-01-14')
 
         maxv = np.max(annotation_y)
@@ -533,15 +544,17 @@ class Metrics():
             # , title_text=str('Court Data for ' + str(year))
             , paper_bgcolor=self.transparent
             , plot_bgcolor=self.transparent
-            , title='Cook County Bond History (Monthly Totals by Type) | Legislation'
+            , title='Cook County Bond History'
             , xaxis_title = annotation
         )
 
         fig.update_layout(legend=dict(
-            yanchor="top",
-            y=0.99,
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
             xanchor="right",
-            x=0.99,
+            x=1,
+            font_size=10
         ))
 
         return fig

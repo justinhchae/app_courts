@@ -19,7 +19,7 @@ class BondData():
             self.overview()
             # clicked = st.button("Click me " + key)
 
-        my_expander = st.beta_expander("About Bond Data in Cook County (Click to Expand)", expanded=True)
+        my_expander = st.beta_expander("About Bond Data in Cook County", expanded=True)
         with my_expander:
             clicked = expander("first")
 
@@ -54,8 +54,7 @@ class BondData():
     def narrative_time(self):
         self.st.markdown(
             '_Over the years, how big has bond been in Cook County?_')
-        self.st.markdown(
-            '_This timeline displays monthly bond amounts by bond type._')
+        self.st.markdown('_As one measure of comparison, total bond dollars accounted for up to 50% of Chicago Municipal Public Utility Taxes between 2012 and 2015 while accounting for significantly less in recent years from 2017 to 2021._')
 
     def narrative_tree(self):
         st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)

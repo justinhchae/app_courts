@@ -41,6 +41,12 @@ class Utilities():
 
         return df
 
+    def misc_tax_data(self):
+        df = pd.read_csv('data/chicago_muni_tax.csv')
+        df['date'] = pd.to_datetime(df['date'])
+        df['muni_public_util_tax'] = df['muni_public_util_tax'].astype('int32')
+        Writer().to_pickle(df, 'tax_data', compression=False)
+
     def ov1_initiation(self):
         df = Reader().to_df('initiation_modified.bz2', preview=False)
         df = df[df[name.primary_charge_flag]==True].reset_index(drop=True)
