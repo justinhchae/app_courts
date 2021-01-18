@@ -19,7 +19,7 @@ class BondData():
             self.overview()
             # clicked = st.button("Click me " + key)
 
-        my_expander = st.beta_expander("About Bond Data in Cook County", expanded=True)
+        my_expander = st.beta_expander("About Bond Data in Cook County", expanded=False)
         with my_expander:
             clicked = expander("first")
 

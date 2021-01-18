@@ -37,7 +37,7 @@ tracker = Network()
 
 # metrics.ov1_regression()
 # metrics.dv1_bond()
-metrics.dv1_bond_timeseries()
+# metrics.dv1_bond_timeseries()
 
 # metrics.dv1_sentencing_network()
 
