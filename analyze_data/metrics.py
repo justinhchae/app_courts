@@ -677,7 +677,7 @@ class Metrics():
                 # , title_text=str('Court Data for ' + str(year))
                 , paper_bgcolor=self.transparent
                 , plot_bgcolor=self.transparent
-                , title='Court System as a Network'
+                , title='Courts as a Network'
                 , xaxis_title=annotation
             )
 
