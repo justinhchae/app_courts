@@ -561,6 +561,39 @@ class Metrics():
 
             fig = go.Figure()
 
+            for i, edge in enumerate(G.edges()):
+                n2 = edge[0]
+                n1 = edge[1]
+                x0, y0 = pos_[n1]
+                x1, y1 = pos_[n2]
+
+                fig.add_trace(go.Scatter(
+                    x=tuple((x0, x1)),y=tuple((y0, y1))
+                    , name=G.edges()[edge]['label']
+                    , mode='lines'
+                    , line=dict(width=edge_widths[i])
+                    , hoverinfo=['name']
+                    , showlegend=False))
+
+                # fig.add_annotation(
+                #     x=x0,  # arrows' head
+                #     y=y0,  # arrows' head
+                #     ax=x1,  # arrows' tail
+                #     ay=y1,  # arrows' tail
+                #     xref='x',
+                #     yref='y',
+                #     axref='x',
+                #     ayref='y',
+                #     # text='',  # if you want only the arrow
+                #     showarrow=True,
+                #     arrowhead=3,
+                #     arrowsize=1,
+                #     arrowwidth=edge_widths[i],
+                #     arrowcolor='black'
+                # )
+
+
+
             for i, node in enumerate(G.nodes()):
                 x, y = pos_[node]
 
@@ -598,7 +631,7 @@ class Metrics():
                         x=tuple([x]), y=tuple([y])
                         , name=node
                         , mode='markers'
-                        , marker=dict(size=scaled_node_values[i], color=self.blue, line=dict(color='black'), symbol=1)
+                        , marker=dict(size=scaled_node_values[i], color=self.red, line=dict(color='black'), symbol=1)
                         , text=node
                         , hoverinfo=['name+text']
                         , showlegend=False
@@ -619,43 +652,28 @@ class Metrics():
 
             #TODO: Add a ghost trace to add judge icon to legend icons
 
-            for i, edge in enumerate(G.edges()):
-                n1 = edge[0]
-                n2 = edge[1]
-                x0, y0 = pos_[n1]
-                x1, y1 = pos_[n2]
 
-                fig.add_trace(go.Scatter(
-                    x=tuple((x0, x1)),y=tuple((y0, y1))
-                    , name=G.edges()[edge]['label']
-                    , mode='lines'
-                    , line=dict(width=edge_widths[i])
-                    , hoverinfo=['name']
-                    , showlegend=False
-
-                ))
 
             fig.update_yaxes(showticklabels=False)
             fig.update_xaxes(showticklabels=False)
 
-            # fig.update_layout(legend=dict(
-            #     yanchor="top",
-            #     y=0.99,
-            #     xanchor="right",
-            #     x=0.99,
-            # ))
+            fig.update_layout(legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="right",
+                x=0.99,
+            ))
 
             fig.update_layout(
-                showlegend=False
+                showlegend=True
                 # , title_text=str('Court Data for ' + str(year))
                 , paper_bgcolor=self.transparent
                 , plot_bgcolor=self.transparent
                 , title='Cook County Courts as a Network of Judges, Courts, and Sentencing Types'
                 , xaxis_title=annotation
-
             )
 
-
+            fig.show()
             return fig
 
 
