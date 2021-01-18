@@ -10,6 +10,7 @@ class BondData():
         self.st = st
 
     def run_app(self):
+        st.set_page_config(page_title='Fair Courts')
         self.frame()
         st.markdown("<h2 style='text-align: center; color: black;'> * * * </h2>", unsafe_allow_html=True)
         self.footer()
