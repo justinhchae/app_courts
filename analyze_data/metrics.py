@@ -13,7 +13,9 @@ from clean_data.cleaner import Cleaner
 from do_data.getter import Reader
 from do_data.writer import Writer
 from do_data.config import Columns
+from analyze_data.network import Network
 name = Columns()
+network = Network()
 
 # from pandasgui import show
 from analyze_data.colors import Colors
@@ -506,7 +508,6 @@ class Metrics():
         ))
 
 
-
         a3_date = pd.to_datetime('2020-09-30')
 
         fig.add_shape(type="line",
@@ -543,7 +544,124 @@ class Metrics():
             x=0.99,
         ))
 
-
         return fig
+
+    def dv1_sentencing_network(self, ingest_df=False, generate_graph=True, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+        df = Reader().to_df('ov1_sentencing.pickle', preview=False)
+        # df = df[df['year'] > 2010]
+        # df = df[df['year'] < 2021]
+        # df = df[df[name.bond_electroinic_monitor_flag_current].notnull()]
+
+        if ingest_df:
+            network.ingest_df(df, filename='nx_sentencing')
+
+        if generate_graph:
+            G, pos_, edge_widths, scaled_node_values, hubs, judges, sentence_types = network.graph_network(df, filename='nx_sentencing')
+            edge_trace = []
+
+            fig = go.Figure()
+
+            for i, node in enumerate(G.nodes()):
+                x, y = pos_[node]
+
+                # print(G.nodes(data=True)[node])
+
+                # [x for x in cols if any(i in x for i in bool_types)]
+
+                if node in hubs:
+                    fig.add_trace(go.Scatter(
+                        x=tuple([x]), y=tuple([y])
+                        , name=node
+                        , mode='markers'
+                        , marker=dict(size=scaled_node_values[i])
+                        # , text=node
+                        , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                        , hoverinfo=['name']
+                    ))
+
+                elif node in judges:
+                    fig.add_trace(go.Scatter(
+                        x=tuple([x]), y=tuple([y])
+                        , name=node
+                        , mode='markers'
+                        , marker=dict(size=scaled_node_values[i], color=self.gray)
+                        , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                        , hoverinfo=['name+text']
+                        , showlegend=False
+                    ))
+
+
+                elif node in sentence_types:
+
+                    fig.add_trace(go.Scatter(
+
+                        x=tuple([x]), y=tuple([y])
+                        , name=node
+                        , mode='markers'
+                        , marker=dict(size=scaled_node_values[i], color=self.blue, line=dict(color='black'), symbol=1)
+                        , text=node
+                        , hoverinfo=['name+text']
+                        , showlegend=False
+                        , textposition='top center'
+
+                    ))
+
+                else:
+                    fig.add_trace(go.Scatter(
+                        x=tuple([x]), y=tuple([y])
+                        , name=node
+                        , mode='markers'
+                        , marker=dict(size=scaled_node_values[i])
+                        , text=str('Cases ' + str(G.nodes(data=True)[node]['n_cases']))
+                        , hoverinfo=['name']
+                        , showlegend=False
+                    ))
+
+            #TODO: Add a ghost trace to add judge icon to legend icons
+
+            for i, edge in enumerate(G.edges()):
+                n1 = edge[0]
+                n2 = edge[1]
+                x0, y0 = pos_[n1]
+                x1, y1 = pos_[n2]
+
+                fig.add_trace(go.Scatter(
+                    x=tuple((x0, x1)),y=tuple((y0, y1))
+                    , name=G.edges()[edge]['label']
+                    , mode='lines'
+                    , line=dict(width=edge_widths[i])
+                    , hoverinfo=['name']
+                    , showlegend=False
+
+                ))
+
+            fig.update_yaxes(showticklabels=False)
+            fig.update_xaxes(showticklabels=False)
+
+            # fig.update_layout(legend=dict(
+            #     yanchor="top",
+            #     y=0.99,
+            #     xanchor="right",
+            #     x=0.99,
+            # ))
+
+            fig.update_layout(
+                showlegend=False
+                # , title_text=str('Court Data for ' + str(year))
+                , paper_bgcolor=self.transparent
+                , plot_bgcolor=self.transparent
+                , title='Cook County Courts as a Network of Judges, Courts, and Sentencing Types'
+                , xaxis_title=annotation
+
+            )
+
+
+            return fig
+
+
+
+
+
+
 
 

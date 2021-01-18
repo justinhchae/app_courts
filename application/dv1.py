@@ -12,6 +12,7 @@ class DV_1():
                                      options=['All Time', 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011],
                                 key='bond_treemap_slider'
                                 )
+
         return Metrics().dv1_bond(year)
 
     def bond_tree_overview(self):
@@ -23,14 +24,17 @@ class DV_1():
         st.write('An Interactive Visualization by @justinhchae for Chicago Appleseed Center for Fair Courts')
 
     def bond_tree_header(self):
-        def header_section(key):
+        def expander(key):
             st.subheader('About This Data')
             self.bond_tree_overview()
             # clicked = st.button("Click me " + key)
 
         my_expander = st.beta_expander("About Bond Data Treemap in Cook County (Click to Expand)", expanded=False)
         with my_expander:
-            clicked = header_section("first")
+            clicked = expander("first")
 
     def bond_timeseries(self):
         return Metrics().dv1_bond_timeseries()
+
+    def sentencing_network(self):
+        return Metrics().dv1_sentencing_network()

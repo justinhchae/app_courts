@@ -14,14 +14,14 @@ class BondData():
         self.footer()
 
     def header(self):
-        def header_section(key):
+        def expander(key):
             st.subheader('About This Data')
             self.overview()
             # clicked = st.button("Click me " + key)
 
         my_expander = st.beta_expander("About Bond Data in Cook County (Click to Expand)", expanded=True)
         with my_expander:
-            clicked = header_section("first")
+            clicked = expander("first")
 
     def frame(self):
         self.st.title('A Visual Brief on Bond in Chicagoland')
@@ -32,6 +32,7 @@ class BondData():
                  'Top - a Timeline of bond with recent legislative milestones. Monthly bond volumes are indicated by line height on the y-axis.',
                  'The size of each dot represents a dollar total of bond dollars in a given month.',
                  'Bottom - A Treemap of bond types by race, and hearing type.')
+
         st.markdown('[Chicago Appleseed Center for Fair Courts](http://www.chicagoappleseed.org/)')
 
     # @st.cache(max_entries=10, ttl=3600, hash_funcs={dict: lambda _: None})
@@ -47,7 +48,7 @@ class BondData():
         dv1.bond_tree_header()
 
     def footer(self):
-        def footer_section(key):
+        def expander(key):
             # st.subheader('Disclaimer and Notices')
             # self.data_disclaimer()
             Footer().data_disclaimer()
@@ -55,7 +56,7 @@ class BondData():
 
         my_expander = st.beta_expander("Disclaimer and Notices", expanded=False)
         with my_expander:
-            clicked = footer_section("second")
+            clicked = expander("second")
 
 
 

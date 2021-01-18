@@ -44,7 +44,18 @@ class Utilities():
     def ov1_initiation(self):
         df = Reader().to_df('initiation_modified.bz2', preview=False)
         df = df[df[name.primary_charge_flag]==True].reset_index(drop=True)
-        cols = [name.case_id, name.received_date, name.event_date, name.case_participant_id, name.event, name.primary_charge_flag, name.disposition_date_days_pending, name.bond_type_current]
+
+        cols = [
+            name.case_id
+            , name.received_date
+            , name.event_date
+            , name.case_participant_id
+            , name.event
+            , name.primary_charge_flag
+            , name.disposition_date_days_pending
+            , name.bond_type_current
+        ]
+
         df = df[cols]
 
         df['year'] = df[name.event_date].dt.year.astype('float32').fillna(value=0)
@@ -94,6 +105,8 @@ class Utilities():
             , name.commitment_days
             , name.sentence_type
             , name.charge_disposition_cat
+            , name.sentence_court_name
+            , name.sentence_court_facility
                 ]
         df = df[cols]
 

@@ -4,12 +4,12 @@ from application.bond_data import BondData
 from application.footer import Footer
 from application.featured import Featured
 from application.ov1 import OV_1
-
+from application.dv1 import DV_1
 
 class Application():
     def __init__(self):
         self.st = st
-        self.sidebar_picklist = ['Featured: COVID Cliff','Bond Data']
+        self.sidebar_picklist = ['Sentencing Data', 'Court Volume','Bond Data']
         self.sidebar_selection = self.st.sidebar.selectbox('Select Analysis', self.sidebar_picklist)
 
         """
@@ -52,10 +52,17 @@ class Application():
         self.st.plotly_chart(OV_1().court_counts(year))
 
     def menu_options(self):
+        if self.sidebar_selection == 'Sentencing Data':
+            self.st.write('')
+            self.st.plotly_chart(DV_1().sentencing_network())
+            self.st.markdown('_What does the court system look like? As a network of judges, courts, and sentencing decisions, one way to visualize the courts is as a network graph._')
+            self.st.markdown('_This network graph depicts the path of a case starting with a judge (gray circles), the sentencing type (lines), the associated courts (large nodes) and outcomes (squares)._')
+            self.st.markdown('_Larger icons indicate higher percentage of cases and bolder lines indicate longer sentences as measured by commitment days._')
+
         if self.sidebar_selection == 'Bond Data':
             BondData().frame()
 
-        if self.sidebar_selection == 'Featured: COVID Cliff':
+        if self.sidebar_selection == 'Court Volume':
             self.st.write('')
             Featured().narrative()
 
@@ -64,9 +71,9 @@ class Application():
         #     pass
 
     def footer(self):
-        def footer(key):
+        def expander(key):
             Footer().data_disclaimer()
 
         my_expander = st.beta_expander("Disclaimer and Notices", expanded=False)
         with my_expander:
-            clicked = footer("second")
+            clicked = expander("second")

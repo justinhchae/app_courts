@@ -29,8 +29,189 @@ colors = Colors()
 
 class Network():
     def __init__(self):
-        self.df = None
-        self.ts = None
+        self.G = nx.DiGraph()
+        self.hubs = None
+        self.blue = '#1f77b4'  # muted blue
+        self.orange = '#ff7f0e'  # safety orange
+        self.green = '#2ca02c'  # cooked asparagus green
+        self.red = '#d62728'  # brick red
+        self.purple = '#9467bd'  # muted purple
+        self.brown = '#8c564b'  # chestnut brown
+        self.pink = '#e377c2'  # raspberry yogurt pink
+        self.gray = '#7f7f7f'  # middle gray
+        self.yellow_green = '#bcbd22'  # curry yellow-green
+        self.teal = '#17becf'
+
+        self.sentence_color = {
+              'Prison': self.red
+            , 'Conversion': self.green
+            , 'Probation': self.orange
+            , 'Jail': self.red
+            , 'Conditional Discharge': self.green
+            , 'Supervision': self.green
+            , 'Cook County Boot Camp': self.green
+            , 'Probation Terminated Satisfactorily': self.green
+            , 'Inpatient Mental Health Services': self.orange
+            , 'Death': self.red
+            , 'Conditional Release': self.green
+            , 'Probation Terminated Instanter': self.orange
+            , 'Probation Terminated Unsatisfactorily': self.orange
+            , '2nd Chance Probation': self.orange
+        }
+
+    def ingest_df(self, df, filename):
+        self.G.clear()
+        judge_df = df.groupby(name.sentence_judge)
+        edges = []
+        counter = 0
+        # df['sentence_color'] = df[name.sentence_type].apply(lambda x: self.sentence_color[x])
+        df['sentence_color'] = df[name.sentence_type].cat.codes
+        scaler = preprocessing.MinMaxScaler(feature_range=(.5, 15.))
+
+        # https://towardsdatascience.com/data-normalization-with-pandas-and-scikit-learn-7c1cc6ed6475
+        df['scaled_commitment_days'] = pd.DataFrame(scaler.fit_transform(df[[name.commitment_days]]))
+
+        self.hubs = list(df[name.sentence_court_name].unique())
+        sentence_types = list(df[name.sentence_type].unique())
+        sentence_facs = list(df[name.sentence_court_facility].unique())
+        mean_scaled_commitment_days = []
+        self.hubs.extend(sentence_types)
+        self.hubs.extend(sentence_facs)
+        self.hubs = list(set(self.hubs))
+        self.hubs.remove(np.nan)
+        self.hubs.sort()
+
+        for df1_name, df1 in judge_df:
+            counter +=1
+
+            if len(df1) > 0:
+                n_cases = len(df1)
+                node_record = tuple((df1_name, {'n_cases':n_cases}))
+                self.G.add_nodes_from([node_record])
+                court_df = df1.groupby(name.sentence_court_name)
+
+                for df2_name, df2 in court_df:
+                    df2[name.sentence_court_facility] = df2[name.sentence_court_facility].cat.remove_unused_categories()
+
+                    if len(df2) > 0:
+                        n_cases = len(df2)
+                        node_record = tuple((df2_name, {'n_cases': n_cases}))
+                        self.G.add_nodes_from([node_record])
+                        fac_df = df2.groupby(name.sentence_court_facility)
+
+                        for df3_name, df3 in fac_df:
+                            df3[name.sentence_court_name] = df2[name.sentence_court_name].cat.remove_unused_categories()
+
+                            if len(df3) > 0:
+                                # nx.add_path(self.G, [df1_name, df3_name, df2_name])
+                                sentence_df = df3.groupby(name.sentence_type)
+                                n_cases = len(df3)
+                                node_record = tuple((df3_name, {'n_cases': n_cases}))
+                                self.G.add_nodes_from([node_record])
+
+                                for df4_name, df4 in sentence_df:
+                                    df4[name.sentence_type] = df4[name.sentence_type].cat.remove_unused_categories()
+
+                                    if len(df4) > 0:
+                                        n_cases = len(df4)
+                                        node_record = tuple((df4_name, {'n_cases': n_cases}))
+                                        self.G.add_nodes_from([node_record])
+                                        color = df4['sentence_color'].unique()[0]
+                                        msc_day = df4['scaled_commitment_days'].fillna(0).median()
+                                        n_cases = len(df4)
+                                        nx.add_path(self.G, [df1_name, df3_name, df2_name, df4_name]
+                                                    , color=color
+                                                    , label=df4_name
+                                                    , msc_day=msc_day
+                                                    , judge=df1_name
+                                                    , n_cases=n_cases
+                                                    )
+
+        if filename:
+            saved_name = str('data/'+filename+'.gpickle')
+            nx.write_gpickle(self.G, saved_name)
+
+    def graph_network(self, df=None, filename=None):
+
+        if filename:
+            read_name = str('data/'+filename+'.gpickle')
+            self.G = nx.read_gpickle(read_name)
+
+        if df is not None:
+            self.hubs = list(df[name.sentence_court_name].unique())
+            self.types = list(set(df[name.sentence_type].unique()))
+            sentence_facs = list(df[name.sentence_court_facility].unique())
+            mean_scaled_commitment_days = []
+            # self.hubs.extend(sentence_types)
+            # self.hubs.extend(sentence_facs)
+            self.hubs = list(set(self.hubs))
+            self.hubs.remove(np.nan)
+            self.hubs.sort()
+            self.judges = list(set(df[name.sentence_judge].unique()))
+            self.judges.remove(np.nan)
+
+        d = dict(self.G.degree)
+        pos = nx.spring_layout(self.G, k=5 / math.sqrt(self.G.order()), seed=0)
+
+        node_values = np.array([v for v in d.values()]).reshape(-1, 1)
+        scaler = preprocessing.MinMaxScaler(feature_range=(5, 30))
+        scaled_node_values = scaler.fit_transform(node_values)
+        vmin = min(scaled_node_values)
+        vmax = max(scaled_node_values)
+
+        # colors = [self.G[u][v]['color'] for u, v in self.G.edges()]
+        edge_values = [self.G[n1][n2]['color'] for n1, n2 in self.G.edges()]
+        edge_vmin = min(edge_values)
+        edge_vmax = max(edge_values)
+
+        plt.figure(figsize=(10, 10))
+
+        labels = {}
+        for node in self.G.nodes():
+            if node in self.hubs:
+                labels[node] = node
+
+        nx.draw_networkx_nodes(self.G
+                               , cmap=plt.get_cmap('coolwarm')
+                               , node_color=scaled_node_values
+                               , pos=pos
+                               , vmin=vmin
+                               , vmax=vmax
+                               , node_size=scaled_node_values
+                               , label=False
+                               )
+
+        edge_widths=[self.G[n1][n2]['msc_day'] for n1, n2 in self.G.edges()]
+
+        nx.draw_networkx_edges(self.G
+                               , edge_cmap=plt.get_cmap('tab20')
+                               , pos=pos
+                               , width=edge_widths
+                               , alpha =.8
+                               , edge_vmin=edge_vmin
+                               , edge_vmax=edge_vmax
+                               , edge_color=edge_values
+                               )
+
+        edge_labels = nx.get_edge_attributes(self.G, 'label')
+
+        # nx.draw_networkx_edge_labels(self.G
+        #                              , pos=pos
+        #                              , edge_labels=edge_labels
+        #                              , font_size=4
+        #                              )
+
+        nx.draw_networkx_labels(self.G
+                                , pos=pos
+                                , labels=labels
+                                , font_size=8
+                                , font_color='black'
+                                , font_weight='medium'
+                                )
+        # plt.show()
+
+        return self.G, pos, edge_widths, scaled_node_values, self.hubs, self.judges, self.types
+
 
     def make_network(self):
         # neo 4 j
@@ -133,7 +314,9 @@ class Network():
                 # set the node name as the key and the label as its value
                 labels[node] = node
         # set the argument 'with labels' to False so you have unlabeled graph
-        nx.draw(G, with_labels=False, pos=pos, node_size=scaled_values, edge_color=colors)
+        nx.draw(G, with_labels=False, pos=pos
+                , node_size=scaled_values
+                , edge_color=colors)
         # Now only add labels to the nodes you require (the hubs in my case)
         nx.draw_networkx_labels(G, pos, labels, font_size=10, font_color='black')
         plt.show()
@@ -366,9 +549,6 @@ class Network():
         # G = nx.from_(edges, 'source', 'target', 'weight')
 
 
-
-
-
     def organize(self):
         df = pd.read_csv('data/em_testing.csv')
 
@@ -405,7 +585,6 @@ class Network():
         self.df = df
 
         self.df.to_csv('data/testing.csv')
-
 
     def length_of_stay(self, df):
 
