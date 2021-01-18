@@ -657,11 +657,19 @@ class Metrics():
             fig.update_yaxes(showticklabels=False)
             fig.update_xaxes(showticklabels=False)
 
+            # fig.update_layout(legend=dict(
+            #     yanchor="top",
+            #     y=0.99,
+            #     xanchor="right",
+            #     x=0.99,
+            # ))
+
             fig.update_layout(legend=dict(
-                yanchor="top",
-                y=0.99,
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
                 xanchor="right",
-                x=0.99,
+                x=1
             ))
 
             fig.update_layout(
@@ -673,7 +681,7 @@ class Metrics():
                 , xaxis_title=annotation
             )
 
-            fig.show()
+            # fig.show()
             return fig
 
 
