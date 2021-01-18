@@ -129,7 +129,7 @@ class Network():
 
         if filename:
             saved_name = str('data/'+filename+'.gpickle')
-            nx.write_gpickle(self.G, saved_name)
+            nx.write_gpickle(self.G, saved_name, protocol=2)
 
     def graph_network(self, df=None, filename=None):
 
