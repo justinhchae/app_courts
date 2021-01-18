@@ -677,7 +677,7 @@ class Metrics():
                 # , title_text=str('Court Data for ' + str(year))
                 , paper_bgcolor=self.transparent
                 , plot_bgcolor=self.transparent
-                , title='Cook County Courts as a Network of Judges, Courts, and Sentencing Types'
+                , title='Court System as a Network'
                 , xaxis_title=annotation
             )
 
