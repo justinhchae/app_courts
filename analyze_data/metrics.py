@@ -397,7 +397,7 @@ class Metrics():
             return 'a chart'
 
 
-        def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+    def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
 
             df = Reader().to_df('dv1_bond.pickle', preview=False)
 
