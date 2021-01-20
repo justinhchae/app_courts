@@ -302,7 +302,17 @@ class Metrics():
 
         return fig
 
-    def ov1_regression(self, frequency='M', annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+    def ov1_regression(self
+                       , chart_type='dynamic'
+                       , frequency='M'
+                       , annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'
+                       ):
+        """
+        :param chart_type: One of 'dynamic' for plotly or 'static' for .png seaborn chart
+        :param frequency: One of 'M' for monthly, 'Y' for yearly, or 'D' for daily
+        :param annotation: String for image caption
+        :return: a visual chart of case volumes over time.
+        """
 
 
         df = Reader().to_df('ov1_initiation.pickle', preview=False, classify=False, echo=False)
@@ -349,77 +359,84 @@ class Metrics():
         df = sentencing.append(disposition)
         df = df.append(initiation).reset_index(drop=True)
 
-        g = df.groupby('type')
-        fig = go.Figure()
-
-        for group, df in g:
-            # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
-
-            fig.add_trace(go.Scatter(x=df['date'], y=df['count'], name=group, fill='tozeroy', marker=dict(color=df['color'].iloc[0])))
-
-            help_fig = px.scatter(df, x=df['date'], y=df['count'], trendline="lowess")
-            x_trend = help_fig["data"][1]['x']
-            y_trend = help_fig["data"][1]['y']
-
-            fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name='trend', line = dict(color=df['color'].iloc[0], width=4, dash='dash')))
-
-        # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
+        if chart_type == 'dynamic':
 
 
-        fig.update_yaxes(title='Case Volume')
-        fig.update_xaxes(title=annotation)
+            g = df.groupby('type')
+            fig = go.Figure()
 
-        fig.update_layout(
-            hovermode='x',
-            showlegend=False
-            # , title_text=str('Court Data for ' + str(year))
-            , paper_bgcolor=self.transparent
-            , plot_bgcolor=self.transparent
-            , title='Monthly Court Volume Over Time'
-        )
+            for group, df in g:
+                # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
 
-        return fig
+                fig.add_trace(go.Scatter(x=df['date'], y=df['count'], name=group, fill='tozeroy', marker=dict(color=df['color'].iloc[0])))
 
-    def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+                help_fig = px.scatter(df, x=df['date'], y=df['count'], trendline="lowess")
+                x_trend = help_fig["data"][1]['x']
+                y_trend = help_fig["data"][1]['y']
 
-        df = Reader().to_df('dv1_bond.pickle', preview=False)
+                fig.add_trace(go.Scatter(x=x_trend, y=y_trend, name='trend', line = dict(color=df['color'].iloc[0], width=4, dash='dash')))
 
-        if year !='All Time':
-            df = df[(df['year']==year)]
+            # # https://towardsdatascience.com/line-chart-animation-with-plotly-on-jupyter-e19c738dc882
 
-        df[name.race].cat.add_categories(['None'], inplace=True)
-        df[name.race].fillna('None', inplace=True)
-        df[name.race].cat.remove_categories(np.nan, inplace=True)
+            fig.update_yaxes(title='Case Volume')
+            fig.update_xaxes(title=annotation)
 
-        df[name.bond_type_current].cat.add_categories(['None'], inplace=True)
-        df[name.bond_type_current].fillna('None', inplace=True)
-        df[name.bond_type_current].cat.remove_categories(np.nan, inplace=True)
+            fig.update_layout(
+                hovermode='x',
+                showlegend=False
+                # , title_text=str('Court Data for ' + str(year))
+                , paper_bgcolor=self.transparent
+                , plot_bgcolor=self.transparent
+                , title='Monthly Court Volume Over Time'
+            )
 
-        df[name.event].cat.add_categories(['None'], inplace=True)
-        df[name.event].fillna('None', inplace=True)
-        df[name.event].cat.remove_categories(np.nan, inplace=True)
+            return fig
 
-        df['root'] = 'initiation event'
-        df['weights'] = df[name.event].cat.codes
-        df.rename(columns={name.bond_amount_current:'Bond Amount'}, inplace=True)
+        elif chart_type == 'static':
+            print('make static chart')
+            return 'a chart'
 
 
-        fig = px.treemap(df
-                         , path=['root', name.race, name.event, name.bond_type_current]
-                         , values='Bond Amount'
-                         , hover_data=['race']
-                         , color='Bond Amount'
-                         , color_continuous_scale='RdBu_r'
+        def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
 
-                         , title='Bond Data by Race for ' + str(year)
-                         )
+            df = Reader().to_df('dv1_bond.pickle', preview=False)
 
-        fig.add_annotation(x=.1, y=-.1,
-                           text=annotation,
-                           showarrow=False,
-                           )
+            if year !='All Time':
+                df = df[(df['year']==year)]
 
-        return fig
+            df[name.race].cat.add_categories(['None'], inplace=True)
+            df[name.race].fillna('None', inplace=True)
+            df[name.race].cat.remove_categories(np.nan, inplace=True)
+
+            df[name.bond_type_current].cat.add_categories(['None'], inplace=True)
+            df[name.bond_type_current].fillna('None', inplace=True)
+            df[name.bond_type_current].cat.remove_categories(np.nan, inplace=True)
+
+            df[name.event].cat.add_categories(['None'], inplace=True)
+            df[name.event].fillna('None', inplace=True)
+            df[name.event].cat.remove_categories(np.nan, inplace=True)
+
+            df['root'] = 'initiation event'
+            df['weights'] = df[name.event].cat.codes
+            df.rename(columns={name.bond_amount_current:'Bond Amount'}, inplace=True)
+
+
+            fig = px.treemap(df
+                             , path=['root', name.race, name.event, name.bond_type_current]
+                             , values='Bond Amount'
+                             , hover_data=['race']
+                             , color='Bond Amount'
+                             , color_continuous_scale='RdBu_r'
+
+                             , title='Bond Data by Race for ' + str(year)
+                             )
+
+            fig.add_annotation(x=.1, y=-.1,
+                               text=annotation,
+                               showarrow=False,
+                               )
+
+            return fig
 
     def dv1_bond_timeseries(self, frequency='M', year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
 
@@ -572,6 +589,7 @@ class Metrics():
             network.ingest_df(df, filename='nx_sentencing')
 
         if generate_graph:
+            # np.random.seed(0)
             G, pos_, edge_widths, scaled_node_values, hubs, judges, sentence_types = network.graph_network(df, filename='nx_sentencing')
             edge_trace = []
 
@@ -580,20 +598,33 @@ class Metrics():
             ghost_trace1 = None
             ghost_trace2 = None
 
+            edge_color_values = list(set([edge[2]['label'] for i, edge in enumerate(G.edges(data=True))]))
+            edge_color_values.sort()
+            edge_colors_hexes = Colors().discrete_cmap(N=len(edge_color_values), base_cmap='brg')
+            edge_colors_hexes.sort(reverse=False)
+            edge_color_map = dict(zip(edge_color_values, edge_colors_hexes))
+
+            # print(edge_color_map)
+
             if disp_edges:
 
-                for i, edge in enumerate(G.edges()):
+                # colors=Colors.discrete_cmap()
+
+                for i, edge in enumerate(G.edges(data=True)):
                     n2 = edge[0]
                     n1 = edge[1]
                     x0, y0 = pos_[n1]
                     x1, y1 = pos_[n2]
 
+                    #TODO map color to , color=G.edges()[edge]['color']
+
                     fig.add_trace(go.Scatter(
                         x=tuple((x0, x1)),y=tuple((y0, y1))
-                        , name=G.edges()[edge]['label']
+                        , name=edge[2]['label']
                         , mode='lines'
-                        , line=dict(width=edge_widths[i])
+                        , line=dict(width=edge[2]['msc_day'], color=edge_color_map[edge[2]['label']])
                         , hoverinfo=['name']
+                        # , marker_colorscale=px.colors.sequential.Plasma
                         , showlegend=False))
 
                     # fig.add_annotation(
@@ -617,11 +648,7 @@ class Metrics():
 
                 for i, node in enumerate(G.nodes()):
                     x, y = pos_[node]
-
                     # print(G.nodes(data=True)[node])
-
-                    # [x for x in cols if any(i in x for i in bool_types)]
-
                     if node in hubs:
                         fig.add_trace(go.Scatter(
                             x=tuple([x]), y=tuple([y])
@@ -648,7 +675,7 @@ class Metrics():
 
                     elif node in sentence_types:
 
-                        marker = dict(size=scaled_node_values[i], color=self.red, line=dict(color='black'), symbol=1)
+                        marker = dict(size=scaled_node_values[i], color=edge_color_map[node], line=dict(color='black'), symbol=1)
 
                         fig.add_trace(go.Scatter(
 
@@ -699,13 +726,6 @@ class Metrics():
             fig.update_yaxes(showticklabels=False)
             fig.update_xaxes(showticklabels=False)
 
-            # fig.update_layout(legend=dict(
-            #     yanchor="top",
-            #     y=0.99,
-            #     xanchor="right",
-            #     x=0.99,
-            # ))
-
             fig.update_layout(legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -717,7 +737,6 @@ class Metrics():
 
             fig.update_layout(
                 showlegend=True
-                # , title_text=str('Court Data for ' + str(year))
                 , paper_bgcolor=self.transparent
                 , plot_bgcolor=self.transparent
                 , title='Courts as a Network'

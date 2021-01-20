@@ -35,11 +35,11 @@ tracker = Network()
 
 # utils.misc_tax_data()
 
-# metrics.ov1_regression()
+# metrics.ov1_regression(chart_type='static')
 # metrics.dv1_bond()
 # metrics.dv1_bond_timeseries()
 
-# metrics.dv1_sentencing_network()
+metrics.dv1_sentencing_network()
 
 def parse_em_data():
     cols = ['ir', 'detainee_status', 'detainee_status_date', 'ej_status']

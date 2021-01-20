@@ -44,14 +44,14 @@ class Network():
 
         self.sentence_color = {
               'Prison': self.red
-            , 'Conversion': self.green
-            , 'Probation': self.orange
+            , 'Conversion': self.blue
+            , 'Probation': self.blue
             , 'Jail': self.red
             , 'Conditional Discharge': self.green
-            , 'Supervision': self.green
+            , 'Supervision': self.blue
             , 'Cook County Boot Camp': self.green
             , 'Probation Terminated Satisfactorily': self.green
-            , 'Inpatient Mental Health Services': self.orange
+            , 'Inpatient Mental Health Services': self.blue
             , 'Death': self.red
             , 'Conditional Release': self.green
             , 'Probation Terminated Instanter': self.orange
