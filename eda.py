@@ -37,9 +37,9 @@ tracker = Network()
 
 # metrics.ov1_regression(chart_type='static')
 # metrics.dv1_bond()
-# metrics.dv1_bond_timeseries()
+# metrics.dv1_bond_timeseries(chart_type='dynamic')
 
-metrics.dv1_sentencing_network()
+# metrics.dv1_sentencing_network()
 
 def parse_em_data():
     cols = ['ir', 'detainee_status', 'detainee_status_date', 'ej_status']

@@ -6,8 +6,7 @@ import plotly.graph_objects as go
 import plotly_express as px
 from plotly.subplots import make_subplots
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 from clean_data.cleaner import Cleaner
 from do_data.getter import Reader
@@ -393,8 +392,70 @@ class Metrics():
             return fig
 
         elif chart_type == 'static':
-            print('make static chart')
-            return 'a chart'
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+
+            arrests = Reader().to_df('arrests_analysis_public.pickle', preview=False, classify=False, echo=False)
+            arrests_f = arrests[arrests['charge_1_type']=='F'].copy()
+            arrests_m = arrests[arrests['charge_1_type'] == 'M'].copy()
+
+            arrests_f['date'] = pd.to_datetime(arrests_f['arrest_year'].astype(str) + '-' + arrests_f['arrest_month'].astype(str) + '-15')
+            arrests_f = arrests_f[['date','charge_1_class']].groupby(
+                [pd.Grouper(key='date', freq=frequency)]).agg('count').reset_index()
+            arrests_f = arrests_f.sort_values('date')
+            arrests_f['type'] = 'felony arrest'
+            arrests_f['color'] = self.red
+            arrests_f.rename(columns={'charge_1_class':'count'}, inplace=True)
+
+            ##
+            arrests_m['date'] = pd.to_datetime(
+                arrests_m['arrest_year'].astype(str) + '-' + arrests_m['arrest_month'].astype(str) + '-15')
+            arrests_m = arrests_m[['date', 'charge_1_class']].groupby(
+                [pd.Grouper(key='date', freq=frequency)]).agg('count').reset_index()
+            arrests_m = arrests_m.sort_values('date')
+            arrests_m['type'] = 'misdemeanor arrest'
+            arrests_m['color'] = self.orange
+            arrests_m.rename(columns={'charge_1_class': 'count'}, inplace=True)
+
+            ##
+
+            plt.figure()
+            plt.title('Court Volumes and Arrests in Cook County Over Time')
+            ax = sns.lineplot(data=df
+                              , x='date'
+                              , y='count'
+                            # , hue='type'
+                              , legend='auto'
+                              , label='Average Court Volume'
+                              )
+
+            sns.lineplot(data=arrests_f
+                         , x='date'
+                         , y='count'
+                         # , hue='type'
+                         , legend='auto'
+                         , label='Felony Arrests'
+                         , color=self.red
+                         )
+
+            sns.lineplot(data=arrests_m
+                         , x='date'
+                         , y='count'
+                         # , hue='type'
+                         , legend='auto'
+                         , label='Misdemeanor Arrests'
+                         , color=self.orange
+                         , dashes=True
+                         )
+
+            ax.lines[2].set_linestyle("--")
+
+            ax.collections[0].set_label('95% Confidence Interval')
+            ax.legend()
+            plt.savefig('figures/court_volume.png')
+            plt.show()
+
+            return 'chart created'
 
 
     def dv1_bond(self, year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
@@ -420,7 +481,6 @@ class Metrics():
             df['weights'] = df[name.event].cat.codes
             df.rename(columns={name.bond_amount_current:'Bond Amount'}, inplace=True)
 
-
             fig = px.treemap(df
                              , path=['root', name.race, name.event, name.bond_type_current]
                              , values='Bond Amount'
@@ -438,7 +498,11 @@ class Metrics():
 
             return fig
 
-    def dv1_bond_timeseries(self, frequency='M', year=2020, annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
+    def dv1_bond_timeseries(self
+                            , chart_type='dynamic'
+                            , frequency='M'
+                            , year=2020
+                            , annotation = 'By @justinhchae for Chicago Appleseed Center for Fair Courts'):
 
         tax_df = Reader().to_df('tax_data.pickle', preview=False, classify=False, echo=False)
         # tax_df = tax_df.groupby('date')
@@ -447,134 +511,224 @@ class Metrics():
         df = df[df['year'] > 2010]
         df = df[df['year'] < 2021]
 
-        df = df[[name.bond_date_current, name.bond_type_current, name.bond_amount_current]]
-
-        aggies = ['count', 'sum', 'mean', 'min', 'max']
-        df = df.groupby([name.bond_type_current, pd.Grouper(key=name.bond_date_current, freq=frequency)])[name.bond_amount_current].agg(aggies).reset_index()
-        df[aggies] = df[aggies].fillna(0)
-
-        scaler = preprocessing.MinMaxScaler(feature_range=(5, 35))
-
-        # https://towardsdatascience.com/data-normalization-with-pandas-and-scikit-learn-7c1cc6ed6475
-        df['scaled'] = pd.DataFrame(scaler.fit_transform(df[['mean']]))
-
         key = {
-                'C Bond': self.purple
-              , 'D Bond': self.blue
-              , 'I Bond': self.green
-              , 'No Bond': self.gray
-               }
-        
-        df['color'] = df[name.bond_type_current].map(key, na_action='ignore')
+              'C Bond': self.purple
+            , 'D Bond': self.blue
+            , 'I Bond': self.green
+            , 'No Bond': self.gray
+        }
 
-        grouped = df.groupby(name.bond_type_current)
 
-        fig = go.Figure()
+        if chart_type == 'dynamic':
 
-        annotation_y = []
+            df = df[[name.bond_date_current, name.bond_type_current, name.bond_amount_current]]
 
-        for group, df in grouped:
-            # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
-            # fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum'], name=group))
-            # print(df[''])
+            aggies = ['count', 'sum', 'mean', 'min', 'max']
+            df = df.groupby([name.bond_type_current, pd.Grouper(key=name.bond_date_current, freq=frequency)])[
+                name.bond_amount_current].agg(aggies).reset_index()
+            df[aggies] = df[aggies].fillna(0)
 
-            y_val = np.max(df['sum'])
-            annotation_y.append(y_val)
+            print(df.head())
 
-            fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum']
-                                     , name=group
-                                     , mode='markers'
-                                     , marker=dict(size=df['scaled'], color=df['color'])
-                                     , showlegend=False
-                                     , hoverinfo='skip'
+            scaler = preprocessing.MinMaxScaler(feature_range=(5, 20))
+
+            # https://towardsdatascience.com/data-normalization-with-pandas-and-scikit-learn-7c1cc6ed6475
+
+            scaled = pd.DataFrame(scaler.fit_transform(df[['count']]), columns=['scaled'])
+
+            df['scaled'] = scaled['scaled'].values
+
+
+            df['color'] = df[name.bond_type_current].map(key, na_action='ignore')
+
+            grouped = df.groupby(name.bond_type_current)
+
+            fig = go.Figure()
+
+            annotation_y = []
+
+            for group, df in grouped:
+                # https://stackoverflow.com/questions/60204175/plotly-how-to-add-trendline-to-a-bar-chart
+                # fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum'], name=group))
+                # print(df[''])
+
+                y_val = np.max(df['sum'])
+                annotation_y.append(y_val)
+
+                fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum']
+                                         , name=group
+                                         , mode='markers'
+                                         , marker=dict(size=df['scaled'], color=df['color'])
+                                         , showlegend=False
+                                         # , text=df['sum']
+                                         , hoverinfo='skip'
+
+                                         ))
+
+                fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum']
+                                         , name=group
+                                         , mode='lines'
+                                         , line=dict(color=df['color'].iloc[0])
+                                         ))
+
+            fig.add_trace(go.Scatter(x=tax_df['date'], y=tax_df['muni_public_util_tax']
+                                     , name='Chicago Municipal Public Utility Tax'
+                                     , mode='lines+markers'
+                                     , line=dict(color=self.red)
                                      ))
 
-            fig.add_trace(go.Scatter(x=df[name.bond_date_current], y=df['sum']
-                                     , name=group
-                                     , mode='lines'
-                                     , line=dict(color=df['color'].iloc[0])
-                                     ))
+            a1_date = pd.to_datetime('2017-02-13')
+            a2_date = pd.to_datetime('2021-01-14')
 
-        fig.add_trace(go.Scatter(x=tax_df['date'], y=tax_df['muni_public_util_tax']
-                                 , name='Chicago Municipal Public Utility Tax'
-                                 , mode='lines+markers'
-                                 , line=dict(color=self.red)
-                                 ))
+            maxv = np.max(annotation_y)
+            minv = np.mean(annotation_y)
 
-        a1_date = pd.to_datetime('2017-02-13')
-        a2_date = pd.to_datetime('2021-01-14')
+            # fig.add_shape(x0=[a1_date], y0=[test], text=['poo'], type='line')
 
-        maxv = np.max(annotation_y)
-        minv = np.mean(annotation_y)
+            fig.add_shape(type="line",
+                          x0=a1_date, y0=0, x1=a1_date, y1=maxv * .7,
+                          line=dict(color=self.red, width=2)
+                          )
 
-        # fig.add_shape(x0=[a1_date], y0=[test], text=['poo'], type='line')
+            fig.add_trace(go.Scatter(
+                x=[a1_date], y=[maxv * .7]
+                , text='<b>Bail Reform Act 2017</b>'
+                , mode='text'
+                , showlegend=False
+                , hoverinfo='skip'
+            ))
 
-        fig.add_shape(type="line",
-                      x0=a1_date, y0=0, x1=a1_date, y1=maxv*.7,
-                      line=dict(color=self.red, width=2)
-                      )
+            fig.add_shape(type="line",
+                          x0=a2_date, y0=0, x1=a2_date, y1=minv * 1.3
+                          , line=dict(color=self.red, width=2)
+                          )
 
-        fig.add_trace(go.Scatter(
-            x=[a1_date], y=[maxv*.7]
-            , text='<b>Bail Reform Act 2017</b>'
-            , mode='text'
-            , showlegend=False
-            , hoverinfo='skip'
-        ))
+            fig.add_trace(go.Scatter(
+                x=[a2_date], y=[minv * 1.3]
+                , text='<b>Pre-Trial Fairness Act 2021</b>'
+                , mode='text'
+                , showlegend=False
+                , hoverinfo='skip'
+            ))
 
-        fig.add_shape( type="line",
-                       x0=a2_date, y0=0, x1=a2_date, y1=minv*1.3
-                      , line=dict(color=self.red, width=2)
-                      )
+            a3_date = pd.to_datetime('2020-09-30')
 
-        fig.add_trace(go.Scatter(
-            x=[a2_date], y=[minv*1.3]
-            , text='<b>Pre-Trial Fairness Act 2021</b>'
-            , mode='text'
-            , showlegend=False
-            , hoverinfo='skip'
-        ))
+            fig.add_shape(type="line",
+                          x0=a3_date, y0=0, x1=a3_date, y1=minv * .5
+                          , line=dict(color=self.gray, width=1)
+                          )
+
+            fig.add_trace(go.Scatter(
+                x=[a3_date], y=[minv * .5]
+                , text='Last Data Point'
+                , mode='text'
+                , showlegend=False
+                , hoverinfo='skip'
+            ))
+
+            # fig.update_layout(uniformtext_minsize=20, uniformtext_mode='hide')
+
+            fig.update_traces(textposition='top left')
+
+            fig.update_layout(
+                hovermode='x',
+                showlegend=True
+                # , title_text=str('Court Data for ' + str(year))
+                , paper_bgcolor=self.transparent
+                , plot_bgcolor=self.transparent
+                , title='Cook County Bond History'
+                , xaxis_title=annotation
+            )
+
+            fig.update_layout(legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                font_size=10
+            ))
+
+            fig.show()
+
+            return fig
+
+        elif chart_type == 'static':
+            import matplotlib.pyplot as plt
+            import seaborn as sns
 
 
-        a3_date = pd.to_datetime('2020-09-30')
+            # df['binned_bond_amount'] = pd.qcut(df[name.bond_amount_current], q=4)
+            # df['binned_bond_amount_label'] = pd.qcut(df[name.bond_amount_current], q=4, labels=['1', '2', '3', '4'])
 
-        fig.add_shape(type="line",
-                      x0=a3_date, y0=0, x1=a3_date, y1=minv*.5
-                      , line=dict(color=self.gray, width=1)
-                      )
+            # print(df[['binned_bond_amount', 'binned_bond_amount_label']])
+            df = df[[name.bond_date_current, name.bond_type_current, name.bond_amount_current, name.race]]
 
-        fig.add_trace(go.Scatter(
-            x=[a3_date], y=[minv*.5]
-            , text='Last Data Point'
-            , mode='text'
-            , showlegend=False
-            , hoverinfo='skip'
-        ))
+            aggies = ['count']
+            df1 = df.groupby([name.bond_type_current, pd.Grouper(key=name.bond_date_current, freq=frequency)])[
+                name.bond_amount_current].agg(aggies).reset_index()
 
-        # fig.update_layout(uniformtext_minsize=20, uniformtext_mode='hide')
+            df1 = df1.sort_values(by=[name.bond_date_current])
 
-        fig.update_traces(textposition='top left')
+            df2 = df.groupby([name.race, name.bond_type_current, name.bond_amount_current, pd.Grouper(key=name.bond_date_current, freq=frequency)])[
+                name.race].agg(aggies).reset_index()
 
-        fig.update_layout(
-            hovermode='x',
-            showlegend=True
-            # , title_text=str('Court Data for ' + str(year))
-            , paper_bgcolor=self.transparent
-            , plot_bgcolor=self.transparent
-            , title='Cook County Bond History'
-            , xaxis_title = annotation
-        )
+            # df2 = df2[(df2[name.race] == 'White')| (df2[name.race] == 'Black')]
+            # df2 = df2[(df2[name.race] == 'Black')]
+            df2[name.race] = df2[name.race].cat.remove_unused_categories()
 
-        fig.update_layout(legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            font_size=10
-        ))
+            scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
+            df2[name.bond_amount_current] = df2[name.bond_amount_current].fillna(0)
+            scaled = pd.DataFrame(scaler.fit_transform(df2[[name.bond_amount_current]]), columns=['scaled_bond_amount'])
 
-        return fig
+            df2['scaled_bond_amount'] = scaled['scaled_bond_amount'].values
+
+            df2 = df2[df2['count'] > 0].copy()
+
+            df2['weighted_count'] = df2['scaled_bond_amount'] * df2['count']
+
+            df2 = df2.sort_values(by=[name.bond_date_current])
+
+
+            plt.figure()
+            plt.title('Bond in Cook County by Time, Race\nand Monthly Counts Weighted by Bond Amount')
+
+            def bond_bw():
+                sns.lineplot(data=df2
+                             , x=name.bond_date_current
+                             , y='count'
+                             , hue=name.race
+                             , style=name.bond_type_current
+                             , legend=True
+                             )
+
+            n_features = len(df2[name.race].unique())
+            palette = sns.color_palette("icefire", n_features)
+
+            ax = sns.lineplot(data=df2
+                         , x=name.bond_date_current
+                         , y='weighted_count'
+                         , hue=name.race
+                         # , style=name.bond_type_current
+                         , legend=True
+                         # , ci=None
+                         , palette=palette
+                         )
+            ax.legend(fontsize='xx-small')
+            # sns.lineplot(data=df2
+            #              , x=name.bond_date_current
+            #              , y='count'
+            #              , hue=name.race
+            #              , style=name.bond_type_current
+            #              , legend=True
+            #              , ci=None
+            #              # , marker='o'
+            #              )
+            plt.savefig('figures/bond_time_race_counts.png')
+            plt.show()
+            # print(df.stb.freq(['race']))
+
+
 
     def dv1_sentencing_network(self, disp_nodes=True, disp_edges=True
                                , ingest_df=False, generate_graph=True
@@ -601,7 +755,7 @@ class Metrics():
             edge_color_values = list(set([edge[2]['label'] for i, edge in enumerate(G.edges(data=True))]))
             edge_color_values.sort()
             edge_colors_hexes = Colors().discrete_cmap(N=len(edge_color_values), base_cmap='brg')
-            edge_colors_hexes.sort(reverse=False)
+            edge_colors_hexes.sort(reverse=True)
             edge_color_map = dict(zip(edge_color_values, edge_colors_hexes))
 
             # print(edge_color_map)
