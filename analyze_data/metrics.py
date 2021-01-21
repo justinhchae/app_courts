@@ -649,7 +649,7 @@ class Metrics():
                 font_size=10
             ))
 
-            fig.show()
+            # fig.show()
 
             return fig
 
