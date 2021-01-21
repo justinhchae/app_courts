@@ -32,8 +32,8 @@ class BondData():
 
     def overview(self):
         st.write('Based on Cook County Open Court Data, this page provides a count of bond types and amounts over the years.',
-                 'Top - a Timeline of bond with recent legislative milestones. Total monthly bond amounts are indicated by line height on the y-axis.',
-                 'The size of each dot represents a dollar total of bond dollars in a given month.',
+                 'Top - a Timeline of bond with recent legislative milestones. Total monthly bond amounts are indicated by line height on the y-axis - higher lines mean higher bond amounts.',
+                 'The size of each dot represents a scaled count of the number of people that got a bond at a given dollar amount - larger cirlces at 50,000 means more people got bond at 50,000.',
                  'Bottom - A Treemap of bond types by race, and hearing type.')
 
         st.markdown('[Chicago Appleseed Center for Fair Courts](http://www.chicagoappleseed.org/)')
